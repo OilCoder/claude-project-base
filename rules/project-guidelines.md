@@ -52,6 +52,7 @@ A behavior critical for production correctness should land in the hardest layer 
 | `code-reviewer` | Pre-commit review in fresh context — finds what the author missed |
 | `security-reviewer` | OWASP-style vulnerability audit on uncommitted or recent changes |
 | `architect` | Interview-driven spec writing for non-trivial features → `todo/spec-*.md` |
+| `implementer` | Autonomous code writer for self-contained tasks; preloads code-style, verification, doc-enforcement rules |
 
 ## Hooks index
 
@@ -59,6 +60,7 @@ The base ships with these hooks in `settings.template.json`. `/setup` copies and
 
 | Hook | Event | Purpose |
 |---|---|---|
+| `statusline` | `StatusLine` | Show branch, dirty state, active phase, bitácora flag |
 | `session-start-context` | `SessionStart` | Inject PLAN.md active phase, pending bitácora items, verification commands |
 | `stop-suggest-checkpoint` | `Stop` | Suggest `/checkpoint` when work is unrecorded |
 | Block `rm -rf` | `PreToolUse` / Bash | Prevent destructive deletes without explicit approval |
@@ -67,6 +69,13 @@ The base ships with these hooks in `settings.template.json`. `/setup` copies and
 | Block `--no-verify` | `PreToolUse` / Bash | Prevent skipping pre-commit hooks |
 | `check-debug-isolation` | `PostToolUse` / Edit\|Write | Warn if `src/` imports from `debug/` |
 | Linter/formatter (stack-specific) | `PostToolUse` / Edit\|Write | Auto-fix style on every save |
+
+## Permissions allowlist
+
+`settings.template.json` includes a `permissions.allow` list with safe read-only
+commands pre-approved (git status/log/diff/show/branch, ls, cat, head, tail, wc, pwd,
+date, echo, which, printf, mkdir -p). `/setup` adds stack-specific commands
+(pytest, ruff, npm test, etc.) so Claude doesn't prompt for approval during routine work.
 
 ## Enforcement strategy
 

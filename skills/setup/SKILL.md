@@ -15,6 +15,18 @@ Initialize a new project by copying and customizing the base rules, skills, hook
 
 ## Procedure
 
+### 0. Decide: greenfield or existing project
+
+- **Greenfield** (new repo, no existing CLAUDE.md / AGENTS.md): proceed to step 1.
+- **Existing project**: run the bundled `/init` command **first** so Claude
+  analyzes the codebase and produces a starting CLAUDE.md from observed
+  conventions. Then run `/setup` to layer the base template on top, merging
+  intelligently rather than overwriting.
+
+If the project already has `AGENTS.md` from another tool (Cursor, Aider),
+plan to import it from `CLAUDE.md` via `@AGENTS.md` (see step 11) instead
+of duplicating its content.
+
 ### 1. Gather project information
 
 Ask the user (if not provided):
@@ -23,6 +35,7 @@ Ask the user (if not provided):
 - Main stack — must be one of: `python`, `js`, `ts`, `python+js`, `go`, `rust`, `other`
 - Short description (one sentence)
 - Project folder (path in WSL)
+- Has existing `AGENTS.md`? (yes/no — if yes, will be imported via `@AGENTS.md`)
 
 ### 2. Create the base structure
 
@@ -61,11 +74,12 @@ Copy applicable skills to `.claude/skills/`. Ask the user which to keep:
 
 ### 5. Copy agents
 
-Copy applicable agents to `.claude/agents/`. All three are stack-agnostic and recommended:
+Copy applicable agents to `.claude/agents/`. All four are stack-agnostic and recommended:
 
 - `code-reviewer.md` — pre-commit review in fresh context
 - `security-reviewer.md` — vulnerability audit
 - `architect.md` — interview-driven spec writing for non-trivial features
+- `implementer.md` — autonomous code writer with rules preloaded
 
 ### 6. Copy hooks and settings
 
@@ -74,12 +88,31 @@ cp settings.template.json .claude/settings.json
 cp hooks/check-debug-isolation.sh .claude/hooks/
 cp hooks/session-start-context.sh .claude/hooks/
 cp hooks/stop-suggest-checkpoint.sh .claude/hooks/
+cp hooks/statusline.sh .claude/hooks/
 chmod +x .claude/hooks/*.sh
 ```
 
+The settings file ships with:
+- `statusLine` showing branch + active phase + bitácora flag
+- `permissions.allow` pre-approving safe read-only commands
+- `SessionStart` and `Stop` hooks for context injection and checkpoint suggestion
+- `PreToolUse` blocks for destructive operations
+- `PostToolUse` debug-isolation check
+
 Remove the `_setup_notes` key from `.claude/settings.json` after the customization in the next step.
 
-### 7. Configure stack-specific linter/formatter hooks
+### 7. Configure stack-specific permissions and linter/formatter hooks
+
+**Permissions**: append stack-specific safe commands to `permissions.allow` in `.claude/settings.json`:
+
+| Stack | Commands to allow |
+|---|---|
+| `python` | `Bash(pytest *)`, `Bash(ruff *)`, `Bash(mypy *)`, `Bash(python -m *)`, `Bash(pip *)` |
+| `js` / `ts` | `Bash(npm *)`, `Bash(npx *)`, `Bash(node *)`, `Bash(yarn *)`, `Bash(pnpm *)` |
+| `go` | `Bash(go *)`, `Bash(gofmt *)` |
+| `rust` | `Bash(cargo *)`, `Bash(rustc *)`, `Bash(rustfmt *)` |
+
+**Linter/formatter hook**: append a `PostToolUse` hook to the existing array.
 
 Append a `PostToolUse` hook to `.claude/settings.json` based on the chosen stack. Add the hook **inside** the existing `PostToolUse[0].hooks` array (next to the debug-isolation hook).
 
@@ -161,6 +194,17 @@ Create the root `CLAUDE.md` (under 200 lines, per official Claude Code guidance)
 - Reference to the rules and skills system
 - Language conventions (code, comments, plans, logs)
 - Stack and environment
+
+If the project has an existing `AGENTS.md`, the first non-comment line of
+`CLAUDE.md` should be:
+
+```markdown
+@AGENTS.md
+```
+
+This imports `AGENTS.md` so Cursor/Aider/Claude Code share a single source.
+Add Claude-specific instructions (the rules/skills/hooks references) below
+the import.
 
 ### 12. Create initial plan
 

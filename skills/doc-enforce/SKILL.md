@@ -8,6 +8,10 @@ argument-hint: "[file to review]"
 allowed-tools: Read Edit Grep Glob
 context: fork
 agent: general-purpose
+paths:
+  - "src/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php}"
+  - "lib/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php}"
+  - "app/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php}"
 ---
 
 # Doc Enforce

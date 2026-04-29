@@ -1,6 +1,14 @@
 # claude-project-base
 
-Base template of rules, skills, and hooks for projects using Claude Code.
+Base template of rules, skills, agents, and hooks for projects using Claude Code.
+
+<!--
+  If the project also uses AGENTS.md (Cursor, Aider, etc.), uncomment the
+  next line so both tools share a single source of truth without duplication.
+  Per the official Claude Code docs:
+  https://code.claude.com/docs/en/memory#agentsmd
+-->
+<!-- @AGENTS.md -->
 
 > Keep this file under 200 lines. Per the official Claude Code guidance:
 > *"Files over 200 lines consume more context and may reduce adherence."*
@@ -61,18 +69,20 @@ Pick the hardest layer that can express the behavior. Rules guide. Skills orches
 | `/doc-enforce` | Manual | Review and generate docstrings (runs in forked context) |
 | `/setup` | On project init | Bootstrap new project from base |
 
-## Agents (3)
+## Agents (4)
 
 | Agent | Purpose |
 |---|---|
 | `code-reviewer` | Reviews uncommitted diff in fresh context — invoke before commits |
 | `security-reviewer` | Audits for OWASP-style vulnerabilities |
 | `architect` | Interview-driven feature design; outputs spec to `todo/spec-*.md` |
+| `implementer` | Autonomous code writer with rules preloaded — for delegating self-contained tasks |
 
-## Hooks (default)
+## Hooks and settings
 
 | Hook | Event | Effect |
 |---|---|---|
+| `statusline` | StatusLine | Branch + dirty flag + active phase + bitácora pending |
 | `session-start-context` | SessionStart | Injects PLAN.md active phase, bitácora pending items, verification commands |
 | `stop-suggest-checkpoint` | Stop | Suggests `/checkpoint` if there are uncommitted changes or commits since last bitácora |
 | Block `rm -rf` | PreToolUse / Bash | Exit 2, blocks the call |
@@ -81,6 +91,10 @@ Pick the hardest layer that can express the behavior. Rules guide. Skills orches
 | Block `--no-verify` | PreToolUse / Bash | Exit 2, blocks the call |
 | `check-debug-isolation` | PostToolUse / Edit\|Write | Warns when `src/` imports from `debug/` |
 | Linter/formatter | PostToolUse / Edit\|Write | Stack-specific (added by `/setup`) |
+
+`settings.template.json` also ships a `permissions.allow` allowlist of safe read-only
+commands (git status/log/diff, ls, cat, etc.) so Claude doesn't prompt for approval
+on every routine command. `/setup` extends it with stack-specific commands.
 
 ## Conventions
 

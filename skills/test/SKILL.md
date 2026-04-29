@@ -6,6 +6,12 @@ description: >
   "I need tests for this module".
 argument-hint: "[module or function to test]"
 allowed-tools: Read Write Bash(mkdir:*) Bash(ls:*) Grep Glob
+paths:
+  - "tests/**/*"
+  - "**/test_*.{py,js,ts,jsx,tsx}"
+  - "**/*_test.{py,go,js,ts}"
+  - "**/*.test.{js,ts,jsx,tsx}"
+  - "**/*.spec.{js,ts,jsx,tsx}"
 ---
 
 # Test

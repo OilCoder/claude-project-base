@@ -142,6 +142,19 @@ The rule of thumb from the official Claude Code docs:
 | code-reviewer | Always — pre-commit fresh-context review | Never |
 | security-reviewer | Projects with auth, network, user input, persistence | Pure-internal scripts with no security surface |
 | architect | Projects with non-trivial features | Pure scripts / one-off projects |
+| implementer | Projects where you delegate self-contained tasks autonomously | Small projects where you write everything yourself |
+
+## Greenfield vs existing project
+
+| Scenario | First step |
+|---|---|
+| Greenfield (no CLAUDE.md, no AGENTS.md) | Run `/setup` directly |
+| Existing repo with conventions but no Claude files | Run **`/init` first**, then `/setup` to layer the base on top |
+| Project with existing `AGENTS.md` (Cursor, Aider, etc.) | Run `/setup` and let it import `AGENTS.md` via `@AGENTS.md` in `CLAUDE.md` |
+| Project with existing `CLAUDE.md` | Run `/setup` in merge mode (it will ask before overwriting) |
+
+The official Claude Code docs document `@AGENTS.md` as the way to share a
+single instructions source across multiple AI coding tools without duplication.
 
 ## Example: Python ML project
 
