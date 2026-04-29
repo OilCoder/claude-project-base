@@ -1,6 +1,4 @@
----
-description: Enforce consistent file naming across the project
----
+<!-- description: Enforce consistent file naming across the project -->
 
 # File Naming
 

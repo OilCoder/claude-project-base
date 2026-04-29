@@ -5,7 +5,7 @@ description: >
   Use after each commit or push, or when the user says
   "log the session", "record what we did", "bitacora", "session log".
 argument-hint: "[optional summary message]"
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+allowed-tools: Read Write Edit Bash(git log:*) Bash(git diff:*) Bash(git status:*) Bash(git branch:*) Bash(date:*) Grep Glob
 ---
 
 # Bitacora (Session Log)
@@ -13,43 +13,42 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 Record the work done in the current session as a log entry.
 Target file: `todo/bitacora-YYYY-MM-DD.md` inside the project.
 
+## Pre-rendered session context
+
+The following data is captured at skill invocation time. Use it instead of running
+the commands again.
+
+- **Date**: !`date +%Y-%m-%d`
+- **Time**: !`date +%H:%M`
+- **Branch**: !`git branch --show-current 2>/dev/null || echo "(not a git repo)"`
+- **Today's commits**:
+```!
+git log --since="00:00" --format="%h %s" 2>/dev/null || echo "(no commits today)"
+```
+- **Files changed today**:
+```!
+git diff --stat HEAD~$(git log --oneline --since="00:00" 2>/dev/null | wc -l) HEAD 2>/dev/null || git diff --stat HEAD~1 HEAD 2>/dev/null || echo "(no diff available)"
+```
+- **Working tree status**: !`git status --short 2>/dev/null || echo "(clean)"`
+
 ## When to run
 
 - After each `git commit` or `git push`
 - When the user explicitly requests it
 - At the end of a long work session
+- As part of `/checkpoint` (combined workflow)
 
 ## Procedure
 
-### 1. Gather context
-
-Run these commands to get session information:
-
-```bash
-# Current date
-date +%Y-%m-%d
-
-# Today's commits
-git log --oneline --since="00:00" --format="%h %s"
-
-# Files modified today
-git diff --stat HEAD~$(git log --oneline --since="00:00" | wc -l) HEAD 2>/dev/null || git diff --stat HEAD~1 HEAD
-
-# Current branch
-git branch --show-current
-
-# Current status
-git status --short
-```
-
-### 2. Check if file exists
+### 1. Check if today's bitácora file exists
 
 - If `todo/bitacora-YYYY-MM-DD.md` exists, **append** a new section at the end (do not overwrite).
 - If it does not exist, **create** the file with the full template.
 - If `todo/` does not exist, create it.
 
-### 3. Write the entry
+### 2. Write the entry
 
+Use the pre-rendered context above to fill in commits, files, and branch.
 Each entry follows this structure:
 
 ```markdown
@@ -73,10 +72,10 @@ Each entry follows this structure:
 ## Rules
 
 - **Language**: Spanish for prose, English for code and file names (configurable per project).
-- **Commits**: list short hashes and messages from the day.
+- **Commits**: list short hashes and messages from the day (already pre-rendered above).
 - **No fabrication**: only record what actually happened in the session.
 - **Accumulate**: a single day can have multiple entries (one per session/commit).
-- **Pending items**: mark with `- [ ]` so Cowork can detect them for the daily plan.
+- **Pending items**: mark with `- [ ]` so Cowork and `/plan-writing` can detect them.
 - **Brevity**: each section should be concise, not an essay.
 - If the user passes a message as argument (`$ARGUMENTS`), use it as the entry summary.
 

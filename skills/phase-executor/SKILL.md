@@ -5,7 +5,7 @@ description: >
   Use when the user says "execute the phase", "work on phase N",
   "implement phase N", "run phase", or references a phase by name or number.
 argument-hint: "[phase number or name]"
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+allowed-tools: Read Write Edit Bash Bash(date:*) Bash(git:*) Grep Glob
 ---
 
 # Phase Executor
@@ -13,15 +13,27 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 Read `PLAN.md`, present an execution plan, wait for approval, and execute
 the phase's tasks in order, updating checkboxes as each one is completed.
 
+## Pre-rendered context
+
+- **Date**: !`date +%Y-%m-%d`
+- **Branch**: !`git branch --show-current 2>/dev/null || echo "(not a git repo)"`
+- **PLAN.md**:
+```!
+[ -f todo/PLAN.md ] && cat todo/PLAN.md || echo "(no PLAN.md found — run /plan-writing first)"
+```
+- **Project guidelines (verification commands and tech constraints)**:
+```!
+[ -f .claude/rules/project-guidelines.md ] && sed -n '/## Verification commands/,/^## /p' .claude/rules/project-guidelines.md || echo "(no project-guidelines.md found)"
+```
+
 ## Before writing any code
 
-1. Read `todo/PLAN.md` completely.
-2. Identify the requested phase and extract its task list.
-3. Present a short plan to the user:
+1. The PLAN.md is already pre-rendered above. Identify the requested phase from `$ARGUMENTS` and extract its task list.
+2. Present a short plan to the user:
    - Files to create or modify
    - Order of execution
    - Any ambiguity that needs user input
-4. **Wait for explicit user approval** before proceeding.
+3. **Wait for explicit user approval** before proceeding.
 
 ## Execution rules
 
@@ -48,12 +60,33 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 - Project-specific conventions are respected per `project-guidelines.md`.
 - Do not assume conventions — read them from the guidelines file.
 
+## Before completing the phase — verification gate
+
+Per `verification.md`, a phase must not be marked `(COMPLETED)` until its
+result has been verified. Before declaring the phase done:
+
+1. Read `project-guidelines.md` to find the project's verification commands
+   (under **Tech constraints** or referenced from `package.json` /
+   `pyproject.toml`).
+2. Run the relevant subset for the type of change:
+   - Code changes → test command (`pytest`, `npm test`, etc.)
+   - Type-annotated code → type checker (`mypy`, `tsc --noEmit`)
+   - Always → linter and formatter on the changed files
+3. If any verification fails:
+   - Do **not** mark the phase complete.
+   - Address the root cause, not the symptom.
+   - Re-run the verification.
+4. If no verification command exists for this type of change, say so
+   explicitly in the report instead of claiming verified.
+
 ## After completing the phase
 
-1. Mark the phase title as `(COMPLETED)` in `PLAN.md`.
+1. Mark the phase title as `(COMPLETED)` in `PLAN.md` — only after the
+   verification gate above has passed.
 2. Report to the user:
    - Files created
    - Functions implemented
    - Decisions made during execution
+   - Verification commands run and their outcome
 3. Flag anything that needs user review before starting the next phase.
 4. If the `/bitacora` skill is available, suggest logging the session.

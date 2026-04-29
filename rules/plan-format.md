@@ -1,6 +1,9 @@
 ---
-description: Define format and update rules for project plan files in todo/
+paths:
+  - "todo/**/*.md"
 ---
+
+<!-- description: Define format and update rules for project plan files in todo/ -->
 
 # Plan Format
 

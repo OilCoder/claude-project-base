@@ -1,6 +1,4 @@
----
-description: Control scope and safety of code modifications
----
+<!-- description: Control scope and safety of code modifications -->
 
 # Code Change
 
@@ -60,4 +58,4 @@ description: Control scope and safety of code modifications
 ## Cross-references
 
 - See `test/SKILL.md` for writing tests on changed code.
-- See `debug/SKILL.md` for isolating investigation scripts.
+- See `investigate/SKILL.md` for isolating investigation scripts.

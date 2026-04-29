@@ -1,6 +1,11 @@
 ---
-description: Enforce standardized docstrings and module-level documentation in all source files
+paths:
+  - "src/**/*.{py,js,ts,tsx,jsx,go,rs,java,rb,php,m,cpp,c,h}"
+  - "lib/**/*.{py,js,ts,tsx,jsx,go,rs,java,rb,php,m,cpp,c,h}"
+  - "**/*.{py,js,ts,tsx,jsx,go,rs}"
 ---
+
+<!-- description: Enforce standardized docstrings and module-level documentation. Adjust paths in /setup per stack. -->
 
 # Doc Enforcement
 

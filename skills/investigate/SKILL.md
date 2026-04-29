@@ -1,16 +1,17 @@
 ---
-name: debug
+name: investigate
 description: >
   Create an isolated debug script to investigate a problem.
   Use when the user says "debug this", "investigate this error",
   "I don't understand why X fails", "trace", "exploratory script".
 argument-hint: "[module or problem to investigate]"
-allowed-tools: Read, Write, Bash, Grep, Glob
+allowed-tools: Read Write Bash(mkdir:*) Bash(ls:*) Grep Glob
 ---
 
-# Debug
+# Investigate
 
 Generate an isolated debug script to investigate a specific problem.
+The script lives in `debug/` and never modifies production code.
 
 ## Procedure
 

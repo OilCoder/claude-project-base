@@ -5,7 +5,9 @@ description: >
   Use when the user says "document this file", "generate docs for X",
   "I need documentation for this module".
 argument-hint: "[file or module to document]"
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob
+allowed-tools: Read Write Edit Grep Glob
+context: fork
+agent: Explore
 ---
 
 # Document

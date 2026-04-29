@@ -1,45 +1,86 @@
 # claude-project-base
 
-Base template of rules and skills for projects using Claude Code.
+Base template of rules, skills, and hooks for projects using Claude Code.
+
+> Keep this file under 200 lines. Per the official Claude Code guidance:
+> *"Files over 200 lines consume more context and may reduce adherence."*
+> Move detail into `.claude/rules/`, `.claude/skills/`, or hook scripts.
 
 ## How to use
 
-1. Copy `rules/` → `.claude/rules/` and `skills/` → `.claude/skills/` in the new project.
-2. Rename this file to `CLAUDE.md` and place it at the root of the new project.
-3. Read `PERSONALIZAR.md` for guidance on what to adjust in each file.
-4. Customize `project-guidelines.md` with the project's structure and stack.
-5. Adjust rules for the project language (Python, JS, Octave, etc.).
-6. Remove skills that do not apply.
-7. Add project-specific rules/skills as needed.
+1. Copy `rules/` → `.claude/rules/`, `skills/` → `.claude/skills/`, `agents/` → `.claude/agents/`, and `hooks/` → `.claude/hooks/` in the new project.
+2. Copy `settings.template.json` → `.claude/settings.json`.
+3. Rename this file to `CLAUDE.md` and place it at the project root.
+4. Read `PERSONALIZAR.md` for guidance on what to adjust in each file.
+5. Run `/setup` (or follow its checklist manually) to:
+   - Customize `project-guidelines.md` with the project's structure, stack, and verification commands.
+   - Adjust rules for the project language (Python, JS, Octave, etc.).
+   - Append a stack-specific linter/formatter hook to `.claude/settings.json`.
+   - Remove skills/agents that do not apply.
+6. Add project-specific rules/skills/agents/hooks as needed.
 
-> **Note**: In this repo, `rules/` and `skills/` are at the root for reference.
-> In the target project they should go inside `.claude/`.
+> **Note**: In this base repo, `rules/`, `skills/`, `agents/`, `hooks/`, and `settings.template.json` live at the root for reference.
+> In the target project they go inside `.claude/`.
 
-## Rules (always active — 8)
+## The four layers
 
-| Rule | Purpose |
-|---|---|
-| `code-style` | Layout, naming, spacing, step/substep with emojis |
-| `file-naming` | File naming conventions and execution order |
-| `code-change` | Scope, edit safety, multi-file changes |
-| `logging-policy` | Print and logging control |
-| `doc-enforcement` | Mandatory docstrings and standards |
-| `docs-style` | Markdown documentation format |
-| `plan-format` | Plan file format and update rules |
-| `project-guidelines` | Index, enforcement, and validation modes |
+| Layer | Where | Behavior |
+|---|---|---|
+| **Rules** | `.claude/rules/*.md` | Advisory, loaded into context |
+| **Skills** | `.claude/skills/*/SKILL.md` | On-demand workflows, may pre-render shell context with `` !`...` `` |
+| **Agents** | `.claude/agents/*.md` | Specialized assistants Claude delegates to (fresh context) |
+| **Hooks** | `.claude/settings.json` + `.claude/hooks/*.sh` | Deterministic, fired on tool events |
 
-## Skills (on demand — 8)
+Pick the hardest layer that can express the behavior. Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enforce.
+
+## Rules (9)
+
+| Rule | Scope | Purpose |
+|---|---|---|
+| `code-style` | Always | Layout, naming, spacing, step/substep with emojis |
+| `file-naming` | Always | File naming conventions and execution order |
+| `code-change` | Always | Scope, edit safety, multi-file changes |
+| `logging-policy` | Always | Print and logging control |
+| `verification` | Always | Verification gate before declaring tasks complete |
+| `project-guidelines` | Always | Index, enforcement, validation modes, verification commands |
+| `doc-enforcement` | Source files (`paths:`) | Mandatory docstrings and standards |
+| `docs-style` | Markdown (`paths:`) | Markdown documentation format |
+| `plan-format` | `todo/**/*.md` (`paths:`) | Plan file format and update rules |
+
+## Skills (9)
 
 | Skill | Trigger | Purpose |
 |---|---|---|
+| `/checkpoint` | At milestones | Combined plan + docs + bitácora + commit + (push/PR) |
 | `/bitacora` | Post-commit or manual | Log session in `todo/bitacora-YYYY-MM-DD.md` |
-| `/test` | Manual | Create tests for a module |
-| `/debug` | Manual | Create isolated debug scripts with promotion path |
-| `/document` | Manual | Generate docs for a module |
-| `/doc-enforce` | Manual | Review and generate docstrings |
 | `/plan-writing` | Manual | Write/update plan in `todo/PLAN.md` |
-| `/phase-executor` | Manual | Execute a plan phase in order |
+| `/phase-executor` | Manual | Execute a plan phase, with verification gate |
+| `/test` | Manual | Create tests for a module |
+| `/investigate` | Manual | Create isolated debug scripts with promotion path |
+| `/document` | Manual | Generate docs for a module (runs in forked context) |
+| `/doc-enforce` | Manual | Review and generate docstrings (runs in forked context) |
 | `/setup` | On project init | Bootstrap new project from base |
+
+## Agents (3)
+
+| Agent | Purpose |
+|---|---|
+| `code-reviewer` | Reviews uncommitted diff in fresh context — invoke before commits |
+| `security-reviewer` | Audits for OWASP-style vulnerabilities |
+| `architect` | Interview-driven feature design; outputs spec to `todo/spec-*.md` |
+
+## Hooks (default)
+
+| Hook | Event | Effect |
+|---|---|---|
+| `session-start-context` | SessionStart | Injects PLAN.md active phase, bitácora pending items, verification commands |
+| `stop-suggest-checkpoint` | Stop | Suggests `/checkpoint` if there are uncommitted changes or commits since last bitácora |
+| Block `rm -rf` | PreToolUse / Bash | Exit 2, blocks the call |
+| Block force-push | PreToolUse / Bash | Exit 2, blocks the call |
+| Block `git reset --hard` | PreToolUse / Bash | Exit 2, blocks the call |
+| Block `--no-verify` | PreToolUse / Bash | Exit 2, blocks the call |
+| `check-debug-isolation` | PostToolUse / Edit\|Write | Warns when `src/` imports from `debug/` |
+| Linter/formatter | PostToolUse / Edit\|Write | Stack-specific (added by `/setup`) |
 
 ## Conventions
 

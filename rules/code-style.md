@@ -1,6 +1,4 @@
----
-description: Enforce layout, naming, spacing, and step/substep structure in source files
----
+<!-- description: Enforce layout, naming, spacing, and step/substep structure in source files -->
 
 # Code Style
 
@@ -11,8 +9,9 @@ The goal is maintainable, focused code with no unnecessary complexity.
 
 - Every function must have a single, well-defined responsibility.
 - Avoid mixing unrelated logic inside the same function.
-- Function bodies should be as short as reasonably possible (ideally under 40 lines).
+- Function bodies should be as short as reasonably possible.
 - Use helper functions if a task has multiple logical steps.
+- Concrete length limits should be enforced by a linter (e.g., `ruff` rule `C901`, `eslint` `max-lines-per-function`), not by this rule.
 
 ## Minimalism
 

@@ -1,6 +1,4 @@
----
-description: Control use of print and logging across all code
----
+<!-- description: Control use of print and logging across all code -->
 
 # Logging Policy
 

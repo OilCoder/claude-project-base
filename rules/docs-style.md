@@ -1,6 +1,10 @@
 ---
-description: Define standards for documentation files
+paths:
+  - "**/*.md"
+  - "docs/**/*"
 ---
+
+<!-- description: Define standards for documentation files -->
 
 # Docs Style
 

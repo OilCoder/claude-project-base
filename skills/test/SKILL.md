@@ -5,7 +5,7 @@ description: >
   Use when the user says "test this", "create a test for X",
   "I need tests for this module".
 argument-hint: "[module or function to test]"
-allowed-tools: Read, Write, Bash, Grep, Glob
+allowed-tools: Read Write Bash(mkdir:*) Bash(ls:*) Grep Glob
 ---
 
 # Test

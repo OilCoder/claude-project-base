@@ -5,7 +5,9 @@ description: >
   Use when the user says "review the docstrings", "add inline documentation",
   "enforce docs on this file", "missing docstrings".
 argument-hint: "[file to review]"
-allowed-tools: Read, Edit, Bash, Grep, Glob
+allowed-tools: Read Edit Grep Glob
+context: fork
+agent: general-purpose
 ---
 
 # Doc Enforce
