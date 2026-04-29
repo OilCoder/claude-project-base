@@ -53,6 +53,7 @@ Copy all rules from the base to `.claude/rules/`:
 - `logging-policy.md`
 - `project-guidelines.md`
 - `verification.md`
+- `delegation.md`
 - `doc-enforcement.md` *(loads only when editing source files — has `paths:` frontmatter)*
 - `docs-style.md` *(loads only when editing markdown — has `paths:` frontmatter)*
 - `plan-format.md` *(loads only when editing `todo/` — has `paths:` frontmatter)*

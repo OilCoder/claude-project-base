@@ -27,6 +27,7 @@ A behavior critical for production correctness should land in the hardest layer 
 | `code-change.md` | Always loaded | Scope and safety of edits |
 | `logging-policy.md` | Always loaded | Print and logging control |
 | `verification.md` | Always loaded | Verification gate before declaring tasks complete |
+| `delegation.md` | Always loaded | Decide between main session, subagent, or agent team |
 | `doc-enforcement.md` | Source files (`paths:`) | Docstring requirements and standards |
 | `docs-style.md` | Markdown files (`paths:`) | Markdown documentation format |
 | `plan-format.md` | `todo/**/*.md` (`paths:`) | Plan file format and update rules |

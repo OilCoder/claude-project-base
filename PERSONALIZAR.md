@@ -110,6 +110,15 @@ The rule of thumb from the official Claude Code docs:
 | When verification fails | Treat failure as part of the task, address root cause | — |
 | Forbidden | No `--no-verify`, no `@skip` to make suite green | Add project-specific bypasses to forbid |
 
+### delegation.md
+
+| Section | Generic (do not touch) | Customize |
+|---|---|---|
+| Decision matrix | Where each task type runs | — |
+| Heuristic | "Do workers need to talk to each other?" → team | — |
+| Cost awareness | Token cost ladder: main → subagent → team | — |
+| Agent Teams are experimental | Opt-in via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | Add stack-specific delegation patterns if any |
+
 ### project-guidelines.md
 
 | Section | Action |

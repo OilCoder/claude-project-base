@@ -41,7 +41,7 @@ Base template of rules, skills, agents, and hooks for projects using Claude Code
 
 Pick the hardest layer that can express the behavior. Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enforce.
 
-## Rules (9)
+## Rules (10)
 
 | Rule | Scope | Purpose |
 |---|---|---|
@@ -50,6 +50,7 @@ Pick the hardest layer that can express the behavior. Rules guide. Skills orches
 | `code-change` | Always | Scope, edit safety, multi-file changes |
 | `logging-policy` | Always | Print and logging control |
 | `verification` | Always | Verification gate before declaring tasks complete |
+| `delegation` | Always | Decide between main session, subagent, or agent team |
 | `project-guidelines` | Always | Index, enforcement, validation modes, verification commands |
 | `doc-enforcement` | Source files (`paths:`) | Mandatory docstrings and standards |
 | `docs-style` | Markdown (`paths:`) | Markdown documentation format |
