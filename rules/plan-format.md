@@ -38,6 +38,7 @@ Folder tree showing key paths and their purpose.
 - [ ] Task description (file or module it targets)
 - [ ] Task description
 - [x] Task completed (YYYY-MM-DD)
+- ~~Discarded task description~~ (discarded YYYY-MM-DD: short reason)
 
 ### Phase N+1 — <Name>
 - [ ] ...
@@ -58,12 +59,29 @@ Short bullet list of naming rules or constraints relevant to this plan.
 
 ## Update rules
 
+Three task states:
+
+| State | Marker | Format |
+|---|---|---|
+| Pending | `- [ ]` | `- [ ] Task description` |
+| Completed | `- [x]` | `- [x] Task description (YYYY-MM-DD)` |
+| Discarded | `~~strikethrough~~`, no checkbox | `- ~~Task description~~ (discarded YYYY-MM-DD: reason)` |
+
 - Mark completed tasks as `- [x]` immediately after finishing them.
-- Add the completion date: `- [x] Task description (YYYY-MM-DD)`.
-- Do not delete tasks, even completed ones.
+- **Discarded tasks**: when a task becomes obsolete (project pivoted, scope cut,
+  approach abandoned, replaced by another task), do **not** delete it. Convert
+  it to the discarded form: drop the checkbox, wrap the description in `~~...~~`
+  strikethrough, and append `(discarded YYYY-MM-DD: reason)` in plain text.
+- Reasons for discarding must be specific. Examples:
+  - `(discarded 2026-04-25: scope creep, moved to Phase 5)`
+  - `(discarded 2026-04-30: pivoted from JWT to Auth0 SDK)`
+  - `(discarded 2026-05-02: experiment failed, see bitacora-2026-05-02.md)`
+- The bitácora's `Errors` section captures the **detail** of the discard. The
+  PLAN.md preserves the **public record** that the option was considered and dropped.
+- Do not delete tasks, ever — completed, discarded, or pending.
 - Do not add new tasks to a phase without user approval.
-- If a phase is fully completed, add `(COMPLETED)` to the phase title.
-- Never rewrite or reformat existing content — only update checkboxes and phase titles.
+- If a phase is fully completed (all tasks `[x]` or discarded), add `(COMPLETED)` to the phase title.
+- Never rewrite or reformat existing content — only update task states and phase titles.
 
 ## Cross-references
 

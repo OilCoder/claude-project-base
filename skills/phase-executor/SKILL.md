@@ -46,8 +46,13 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 ### Order
 
 - Execute tasks in the order they appear in `PLAN.md`.
+- **Skip discarded tasks** (those in `~~strikethrough~~` form) — they are part of
+  the historical record but are not active work.
 - Complete each task fully before moving to the next.
 - Mark each task as `- [x]` in `PLAN.md` immediately after completing it.
+- If a task becomes obsolete during execution (e.g., a previous task made it
+  redundant), do **not** silently skip — instead, propose discarding it to the
+  user and mark it per `plan-format.md` (`~~task~~ (discarded YYYY-MM-DD: reason)`).
 
 ### Code
 

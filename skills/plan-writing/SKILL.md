@@ -61,10 +61,32 @@ those commands.
 - **Flat checkboxes**: no nesting, one level of depth maximum.
 - **Independent phases**: each phase is understandable without reading the others.
 - **Mark immediately**: when a task is completed, mark `[x]` with today's date.
-- **Never delete tasks**: completed ones are marked, not removed.
-- **Completed phases**: add `(COMPLETED)` to the phase title.
+- **Never delete tasks**: completed and discarded tasks remain visible.
+- **Three states** (per `plan-format.md`):
+  - Pending: `- [ ] task`
+  - Completed: `- [x] task (YYYY-MM-DD)`
+  - Discarded: `- ~~task~~ (discarded YYYY-MM-DD: reason)` — no checkbox, strikethrough, reason required
+- **Discard, don't delete**: when a task becomes obsolete (pivot, scope cut, replaced),
+  convert it to the discarded form. Always include the date and a specific reason.
+  This preserves the record of what was considered and why it was dropped — part of
+  the user's learning history.
+- **Completed phases**: add `(COMPLETED)` to the phase title when all tasks are
+  either `[x]` or discarded.
 - **Brevity**: one line per task, no long explanations.
 - If the user passes `$ARGUMENTS`, use it as context for creating/updating the relevant phase.
+
+## Discarding tasks (procedure)
+
+When pending items from the latest bitácora indicate a task is no longer relevant,
+or the user signals a pivot:
+
+1. Identify the affected task(s) in `PLAN.md`.
+2. Convert each from `- [ ] ...` to `- ~~...~~ (discarded YYYY-MM-DD: <reason>)`.
+3. Use today's pre-rendered date.
+4. The reason must be specific (1 line). If the discard requires longer
+   explanation, add an Errors entry to the bitácora and reference it from the
+   reason: `(discarded 2026-04-29: see bitacora-2026-04-29.md)`.
+5. Never delete the task line. The strikethrough preserves it as a record.
 
 ## Relationship with bitácora
 
