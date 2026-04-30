@@ -13,6 +13,8 @@ The wrong layer wastes context (too local) or tokens (too distributed).
 | Side-research that reads many files | **Subagent** (`Explore` or `general-purpose`) | Keeps your main context clean |
 | Specialized review (correctness, security, architecture) | **Subagent** — `code-reviewer`, `security-reviewer`, `architect` | Fresh-context bias matters; one specialist suffices |
 | Implementation of a clearly specified function/module | **Subagent** — `implementer` | Rules preloaded, returns verified code |
+| Bug fix with regression preserved | **Skill** — `/bug-fix` | TDD workflow: reproduce, fail, fix, confirm |
+| Refactor without behavior change | **Skill** — `/simplify` (bundled) | Already provided by Claude Code, no need to recreate |
 | **Multiple specialists must discuss findings before answer is final** | **Agent Team** (opt-in, experimental) | Inter-agent messaging adds value |
 | **Adversarial investigation (hypotheses competing to disprove each other)** | **Agent Team** | Debate beats sequential exploration |
 | **Parallel work on independent files with handoffs between owners** | **Agent Team** | Shared task list + self-claim |

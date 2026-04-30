@@ -28,6 +28,8 @@ A behavior critical for production correctness should land in the hardest layer 
 | `logging-policy.md` | Always loaded | Print and logging control |
 | `verification.md` | Always loaded | Verification gate before declaring tasks complete |
 | `delegation.md` | Always loaded | Decide between main session, subagent, or agent team |
+| `memory-policy.md` | Always loaded | Differentiate bitácora (human) from MEMORY.md (Claude) |
+| `commit-style.md` | Always loaded | Conventional Commits subset (7 prefixes) for git history |
 | `doc-enforcement.md` | Source files (`paths:`) | Docstring requirements and standards |
 | `docs-style.md` | Markdown files (`paths:`) | Markdown documentation format |
 | `plan-format.md` | `todo/**/*.md` (`paths:`) | Plan file format and update rules |
@@ -77,6 +79,35 @@ The base ships with these hooks in `settings.template.json`. `/setup` copies and
 commands pre-approved (git status/log/diff/show/branch, ls, cat, head, tail, wc, pwd,
 date, echo, which, printf, mkdir -p). `/setup` adds stack-specific commands
 (pytest, ruff, npm test, etc.) so Claude doesn't prompt for approval during routine work.
+
+## Auto memory
+
+Claude Code provides automatic memory at `~/.claude/projects/<project>/memory/MEMORY.md`.
+The first 200 lines load at every session start. Per `memory-policy.md`:
+
+- **MEMORY.md** is Claude's operational manual — build commands, gotchas, factual patterns.
+- **Bitácora** (`todo/bitacora-YYYY-MM-DD.md`) is the user's narrative journal — actions, decisions, failures, learnings.
+
+These are **not interchangeable**. Narrative goes to bitácora, factual operational
+notes go to MEMORY.md. See `memory-policy.md` for the full boundary.
+
+Maintenance: run the bundled `/consolidate-memory` skill monthly or when MEMORY.md
+exceeds 200 lines.
+
+## Folder convention (minimum)
+
+After `/setup`, only 4 folders exist. The base does not prescribe more:
+
+```
+.claude/         rules, skills, agents, hooks
+todo/            plans, bitácoras
+documentation/   code docs (target of /document)
+docs/            reserved for GitHub Pages landing
+```
+
+Other folders (`src/`, `pipeline/`, `tests/`, `data/`, `models/`, `experiments/`)
+emerge as the project actually demands them. Path-scoped rules (`doc-enforcement.md`,
+`docs-style.md`) already support `src/`, `lib/`, `app/`, and `pipeline/` shapes.
 
 ## Enforcement strategy
 

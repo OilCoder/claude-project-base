@@ -104,10 +104,24 @@ Apply the `/bitacora` rules:
 
 ### 6. Commit
 
+Per `commit-style.md`, choose the prefix from the 7-prefix subset:
+
+| Dominant nature of changes | Prefix |
+|---|---|
+| New functionality (came from `/phase-executor` or implementation) | `feat:` |
+| Bug fix (came from `/bug-fix`, or fixes incorrect behavior) | `fix:` |
+| Only `documentation/` (or `docs/`) changed | `docs:` |
+| Only code restructure with no behavior change | `refactor:` |
+| Only `tests/` changed | `test:` |
+| Performance improvement with benchmark | `perf:` |
+| Tooling / `.claude/` / configs / deps | `chore:` |
+
+When changes span categories, pick the **dominant** one. When in doubt: `chore:`.
+
 - Stage **specific files** (not `git add -A`). Choose only files relevant to this checkpoint.
 - Compose a commit message:
-  - Subject: ≤72 chars, imperative, derived from headline.
-  - Body: 2-4 lines summarizing what changed and why.
+  - Subject: `<type>(<scope>): <imperative>` ≤72 chars, no period.
+  - Body: 2-4 lines on the **why**.
 - Do **not** add Claude / "co-authored by" footers unless the project conventions require them.
 - Do **not** use `--no-verify`. If pre-commit hooks fail, fix and re-stage.
 
@@ -115,7 +129,7 @@ Example structure:
 ```
 git add <files>
 git commit -m "$(cat <<'EOF'
-<subject>
+<type>(<scope>): <subject>
 
 <body line 1>
 <body line 2>
