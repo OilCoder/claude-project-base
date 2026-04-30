@@ -2,6 +2,8 @@
 paths:
   - "src/**/*.{py,js,ts,tsx,jsx,go,rs,java,rb,php,m,cpp,c,h}"
   - "lib/**/*.{py,js,ts,tsx,jsx,go,rs,java,rb,php,m,cpp,c,h}"
+  - "pipeline/**/*.{py,js,ts,tsx,jsx,go,rs,java,rb,php,m,cpp,c,h}"
+  - "app/**/*.{py,js,ts,tsx,jsx,go,rs,java,rb,php,m,cpp,c,h}"
   - "**/*.{py,js,ts,tsx,jsx,go,rs}"
 ---
 

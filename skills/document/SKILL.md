@@ -24,7 +24,7 @@ Follow the standards defined in `docs-style.md` rule.
 
 ### 2. Create the document
 
-- Location: defined by the project (`docs/`, `obsidian-vault/`, etc.)
+- Location: **`documentation/`** (per `docs-style.md` — `docs/` is reserved for GitHub Pages)
 - Name: `NN_<slug>.md` following `file-naming.md`
 
 ### 3. Required sections
@@ -58,3 +58,4 @@ Source: <path to source file>
 - Each document must reflect the actual behavior of the code.
 - Avoid TODOs and speculative notes.
 - If the module has dependencies, list them.
+- **Output goes to `documentation/`, never to `docs/`** (which is reserved for the GitHub Pages landing site).
