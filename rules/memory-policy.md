@@ -41,13 +41,26 @@ the **journey**, not the operational state.
 - Mantengo pandas: polars no soporta MultiIndex (depth+well) que necesito
 - Alternativa polars con structs requiere reescribir filtrado entero — no vale la pena ahora
 
+### Errores
+- Asumí que polars soportaba MultiIndex y empecé a portar el load antes de validar.
+  Perdí 1h. Lo descubrí al primer `groupby([depth, well])` que tiró TypeError.
+- Pasé el datatype `pl.Categorical` para `well_id` antes de revisar si el filtro
+  posterior lo aceptaba — no lo acepta, tuve que revertir.
+
 ### Pendientes
 - [ ] Evaluar polars en Phase 4 cuando el dataset crezca
 
 ### Aprendizajes
 - polars usa structs en vez de MultiIndex — distinto modelo mental
 - Para series temporales paralelas (pozos) MultiIndex sigue siendo más natural
+- Antes de portar a una lib nueva: validar primero los 2-3 patrones más usados,
+  no porter completo y descubrir incompatibilidades a mitad
 ```
+
+**The `Errors` section is not optional venting** — it is structured input for the
+user's knowledge management. Each error must include (1) what was wrong,
+(2) how it was noticed, (3) what the actual right answer was. That's what makes
+it useful when re-read months later in Obsidian.
 
 ## What goes in MEMORY.md
 

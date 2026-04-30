@@ -61,6 +61,9 @@ Each entry follows this structure:
 ### Design decisions
 - [Decision made] — [reason / alternatives discarded]
 
+### Errors
+- [What I tried / assumed that was wrong] — [how I noticed, what the actual right answer was]
+
 ### Pending
 - [ ] Task left undone
 - [ ] Something to review later
@@ -68,6 +71,23 @@ Each entry follows this structure:
 ### Learnings
 - [Something new discovered during the session]
 ```
+
+### Errors vs Learnings — the boundary
+
+These two sections are different and complementary:
+
+- **Errors** are **specific incidents in this session**. First person, factual:
+  *"Asumí que polars soportaba MultiIndex; perdí 1h adaptando el load. No lo soporta — usa structs. Volví a pandas."*
+
+- **Learnings** are the **generalized insight**, transferable to future work:
+  *"Para series temporales paralelas (pozos), MultiIndex sigue siendo más natural que structs."*
+
+A single error often produces a learning. The error is the **what happened**;
+the learning is the **what to remember next time**. Both go in the bitácora —
+the error is the proof, the learning is the lesson.
+
+Empty sections are OK. If no error occurred this session, omit the section. If
+nothing generalizable came out, omit Learnings. Don't fabricate.
 
 ## Rules
 
@@ -96,6 +116,9 @@ Each entry follows this structure:
 
 ### Design decisions
 - {decision} — {reason}
+
+### Errors
+- {what was wrong} — {how it was noticed and corrected}
 
 ### Pending
 - [ ] {task}
