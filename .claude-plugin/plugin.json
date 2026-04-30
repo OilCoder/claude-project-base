@@ -1,6 +1,6 @@
 {
   "name": "claude-project-base",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Generic base of rules, skills, agents, and hooks for Python/ML/research/LLM projects with Claude Code. Four-layer enforcement model + minimum folder convention + organic growth.",
   "author": {
     "name": "OilCoder",

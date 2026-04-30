@@ -5,6 +5,36 @@ All notable changes to claude-project-base.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-04-29
+
+### Added
+
+- **Bitácora `Errors` section**: explicit slot for what went wrong this session,
+  separate from `Learnings` (specific incidents vs. generalized insight). Both
+  required to capture the full learning process.
+- **`site:` 8th commit prefix**: dedicated to GitHub Pages landing site (`docs/`)
+  changes, separate from `docs:` (code documentation in `documentation/`).
+  Solves the ambiguity introduced by the `documentation/` vs `docs/` split.
+- **Discarded task convention** in plans: tasks that become obsolete are now
+  marked `- ~~task~~ (discarded YYYY-MM-DD: reason)` instead of being deleted.
+  Preserves the record of what was considered and why it was dropped — part of
+  the user's learning history.
+
+### Changed
+
+- `bitacora/SKILL.md`: template now includes `Errors` section with clear
+  Errors-vs-Learnings boundary.
+- `memory-policy.md`: example bitácora updated to show the `Errors` section
+  and how it pairs with `Learnings`.
+- `commit-style.md`: 7 prefixes → 8 prefixes (added `site:`). Decision tree
+  updated. Examples added for `site:`.
+- `checkpoint/SKILL.md`: prefix-selection table updated to include `site:`
+  and clarify `docs:` is now strictly for `documentation/`.
+- `plan-format.md`: three task states formalized (pending, completed, discarded).
+  Discarded form requires a date and a specific reason.
+- `plan-writing/SKILL.md`: new "Discarding tasks" procedure section.
+- `phase-executor/SKILL.md`: now skips strikethrough tasks during execution.
+
 ## [0.1.0] — 2026-04-29
 
 First versioned release. The base now ships as a Claude Code plugin.
