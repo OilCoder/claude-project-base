@@ -104,13 +104,14 @@ Apply the `/bitacora` rules:
 
 ### 6. Commit
 
-Per `commit-style.md`, choose the prefix from the 7-prefix subset:
+Per `commit-style.md`, choose the prefix from the 8-prefix set:
 
 | Dominant nature of changes | Prefix |
 |---|---|
 | New functionality (came from `/phase-executor` or implementation) | `feat:` |
 | Bug fix (came from `/bug-fix`, or fixes incorrect behavior) | `fix:` |
-| Only `documentation/` (or `docs/`) changed | `docs:` |
+| Only `documentation/` changed (code docs) | `docs:` |
+| Only `docs/` changed (GitHub Pages landing site) | `site:` |
 | Only code restructure with no behavior change | `refactor:` |
 | Only `tests/` changed | `test:` |
 | Performance improvement with benchmark | `perf:` |

@@ -19,19 +19,29 @@ that compose commits (`/checkpoint`, `/bug-fix`) apply it automatically.
 - **subject**: imperative mood, ≤72 chars, no period at end.
 - **body**: blank line then 2-4 lines on the **why**. The diff itself shows the what.
 
-## The 7 prefixes
+## The 8 prefixes
 
 | Prefix | When to use | Maps to |
 |---|---|---|
 | `feat:` | New functionality (function, module, feature, capability) | `/phase-executor`, implementation tasks |
 | `fix:` | Bug fix that corrects incorrect behavior | `/bug-fix` (always) |
-| `docs:` | Documentation only (no code change) | `/document`, `/doc-enforce` |
+| `docs:` | Code documentation in `documentation/` (not the website) | `/document`, `/doc-enforce` |
+| `site:` | GitHub Pages landing site in `docs/` (HTML/CSS/JS, content) | Manual edits in WSL+VSCode usually |
 | `refactor:` | Code restructure with no behavior change | `/simplify` (bundled) |
 | `test:` | Adding or modifying tests | `/test` |
 | `chore:` | Tooling, configs, dependencies, plugin/hooks/settings | `.claude/` changes, gitignore, version bumps |
 | `perf:` | Performance improvement (verifiable benchmark) | when applicable |
 
 That's it. No `style:`, no `ci:`, no `build:`. If unsure, default to `chore:`.
+
+**Why two doc-related prefixes?** This base separates `documentation/` (code docs) from `docs/` (GitHub Pages landing site) by convention. They live in distinct folders, target distinct audiences, and often live in distinct dev environments. Using `docs:` and `site:` for each makes git log filtering trivial:
+
+```bash
+git log --oneline --grep "^docs:"   # only code documentation work
+git log --oneline --grep "^site:"   # only landing-page work
+```
+
+`site:` is non-standard Conventional Commits but solves a real workflow concern.
 
 ## How to choose
 
@@ -40,10 +50,11 @@ Decision tree:
 1. Did the change fix incorrect behavior? → `fix:`
 2. Did the change add new functionality? → `feat:`
 3. Did the change touch only `tests/`? → `test:`
-4. Did the change touch only `documentation/` (or `docs/`)? → `docs:`
-5. Did the change restructure code without changing behavior? → `refactor:`
-6. Did the change measure faster after with a benchmark? → `perf:`
-7. Anything else (configs, deps, tooling, .claude/) → `chore:`
+4. Did the change touch only `documentation/` (code docs)? → `docs:`
+5. Did the change touch only `docs/` (GitHub Pages landing site)? → `site:`
+6. Did the change restructure code without changing behavior? → `refactor:`
+7. Did the change measure faster after with a benchmark? → `perf:`
+8. Anything else (configs, deps, tooling, .claude/) → `chore:`
 
 When a single commit spans categories, pick the **dominant** one. Or split into
 two commits if the categories are independent.
@@ -83,6 +94,13 @@ re-ordering before parse. Regression test in tests/test_loader_malformed.py.
 docs(api): document predict_curves contract
 
 Adds Args/Returns/Raises and a usage example. Source: src/api/predict.py.
+```
+
+```
+site: add hero section with project demo gif
+
+New landing page hero section in docs/index.html with the demo GIF
+and a one-line pitch. Tailwind for layout, no JS.
 ```
 
 ```
