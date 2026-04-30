@@ -1,16 +1,44 @@
 # Customization Guide
 
-How to adapt the base rules, skills, and hooks to a new project.
+How to adapt the base rules, skills, agents, and hooks to a new project.
 
-## Quick flow
+## Recommended path: install as plugin
 
-1. Copy `.claude/` to the new project and rename `CLAUDE-TEMPLATE.md` → `CLAUDE.md` at the project root.
-2. Run the `/setup` skill if available, or follow the manual steps below.
-3. Customize `project-guidelines.md` (mandatory).
-4. Adjust rules for the project language and stack.
-5. Choose which skills to keep.
-6. Configure stack-specific linter/formatter hook in `.claude/settings.json`.
-7. Add project-specific rules/skills if needed.
+```
+/plugin marketplace add OilCoder/claude-project-base
+/plugin install claude-project-base
+/setup     # answers 2 questions, creates the minimum
+```
+
+Updates: `/plugin update claude-project-base` pulls newer versions across all your projects.
+
+## Manual path (fallback)
+
+1. Copy `.claude/` contents to the new project and rename `CLAUDE-TEMPLATE.md` → `CLAUDE.md` at the project root.
+2. Run `/setup` (or follow its checklist manually).
+3. `/setup` already customizes `project-guidelines.md`, `code-style.md` naming, `doc-enforcement.md` paths, and the linter hook per stack. You only fill in the project-specific parts (verification commands, tech constraints).
+
+## Folder philosophy: minimum + organic growth
+
+`/setup` creates only 4 folders:
+
+```
+.claude/         ← rules, skills, agents, hooks
+todo/            ← plans, bitácoras
+documentation/   ← code docs (target of /document)
+docs/            ← reserved for GitHub Pages
+```
+
+Everything else (`src/`, `pipeline/`, `tests/`, `data/`, `models/`, `experiments/`) is created by you, when the project genuinely needs it. The base supports any of those layouts via path-scoped rules — `doc-enforcement.md` already covers `src/`, `lib/`, `app/`, `pipeline/`.
+
+## Greenfield vs existing project
+
+| Scenario | First step |
+|---|---|
+| Greenfield (no CLAUDE.md, no AGENTS.md) | Run `/setup` directly |
+| Existing repo with conventions but no Claude files | Run **`/init` first**, then `/setup` to layer the base on top |
+| Project with existing `AGENTS.md` (Cursor, Aider, etc.) | Run `/setup` and let it import `AGENTS.md` via `@AGENTS.md` in `CLAUDE.md` |
+| Project with existing `CLAUDE.md` | Run `/setup` in merge mode (it will ask before overwriting) |
 
 ## When to use a rule, a skill, an agent, or a hook
 
@@ -53,7 +81,7 @@ The rule of thumb from the official Claude Code docs:
 | Execution order | `NN_` numeric prefix or `sNN[x]_` | Choose project pattern |
 | Output files | Dedicated output folder concept | Exact pattern (`{id}_{type}.png`, etc.) |
 | Test/Debug files | `test_<module>_<case>`, `dbg_<slug>` | — |
-| Documentation | `NN_<slug>.md` | Location (`docs/`, `obsidian-vault/`) |
+| Documentation | `NN_<slug>.md` in `documentation/` | — (always `documentation/`, never `docs/`) |
 
 ### code-change.md
 
@@ -90,7 +118,8 @@ The rule of thumb from the official Claude Code docs:
 |---|---|---|
 | Required sections | Title, Workflow, I/O, Math, Code Ref | Add/remove sections |
 | Style | Concise, current code, no TODOs | — |
-| Docs root folder | Dedicated folder concept | Location and bilingual structure |
+| `documentation/` vs `docs/` | Fixed split: code docs in `documentation/`, GH Pages in `docs/` | — |
+| Bilingual structure | Subfolders by language under `documentation/` | Languages used |
 
 ### plan-format.md
 
@@ -119,6 +148,24 @@ The rule of thumb from the official Claude Code docs:
 | Cost awareness | Token cost ladder: main → subagent → team | — |
 | Agent Teams are experimental | Opt-in via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` | Add stack-specific delegation patterns if any |
 
+### memory-policy.md
+
+| Section | Generic (do not touch) | Customize |
+|---|---|---|
+| Two systems | Bitácora (human, narrative) vs MEMORY.md (Claude, factual) | — |
+| What goes where | Clear boundary, examples per system | Bitácora language (Spanish default) |
+| Forbidden | No narrative in MEMORY.md | — |
+| Maintenance | `/consolidate-memory` for MEMORY.md, Cowork for bitácora | — |
+
+### commit-style.md
+
+| Section | Generic (do not touch) | Customize |
+|---|---|---|
+| 7 prefixes | `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf` | — |
+| Format | `<type>(<scope>): <subject>` + body | — |
+| Subject rules | Imperative, ≤72 chars, lowercase, no period | — |
+| Decision tree | Pick prefix based on dominant change | — |
+
 ### project-guidelines.md
 
 | Section | Action |
@@ -135,6 +182,7 @@ The rule of thumb from the official Claude Code docs:
 | Skill | When to keep | When to remove |
 |---|---|---|
 | checkpoint | Always — closes the milestone loop | Never |
+| bug-fix | Always — TDD bug fix workflow | Never |
 | bitacora | Always — bridge with Cowork/Obsidian | Never |
 | plan-writing | Always — any project needs a plan | Never |
 | phase-executor | Projects with defined phases | Very small or exploratory projects |
