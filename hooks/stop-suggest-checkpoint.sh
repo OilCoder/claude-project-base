@@ -20,6 +20,14 @@ log_err() {
 
 trap 'log_err "unexpected error at line $LINENO"; exit 0' ERR
 
+# Prevent infinite loop: if this Stop fired because Claude was already
+# continuing as a result of a previous stop hook, do not re-suggest.
+# (Per Claude Code hook spec: check stop_hook_active.)
+INPUT=$(timeout 1 cat 2>/dev/null || true)
+if printf '%s' "$INPUT" | grep -q '"stop_hook_active"[[:space:]]*:[[:space:]]*true'; then
+  exit 0
+fi
+
 # Skip if not a git repo
 git rev-parse --git-dir >/dev/null 2>&1 || exit 0
 
