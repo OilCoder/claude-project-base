@@ -205,7 +205,7 @@ After `/setup`, the project looks like this:
 ```
 my-project/
 ├── .claude/
-│   ├── rules/         (11 rules)
+│   ├── rules/         (12 rules)
 │   ├── skills/        (9 skills)
 │   ├── agents/        (4 agents)
 │   ├── hooks/         (5 hook scripts)

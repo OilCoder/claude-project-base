@@ -87,8 +87,8 @@ Apply the `/document` rules only where they apply:
 
 - New public function/class with a non-trivial contract → ensure docstring is present.
 - New module → ensure module docstring is present.
-- Modified public API → update the corresponding `docs/NN_*.md` file if it exists.
-- If a substantive new module deserves a fresh doc, create it under `docs/`.
+- Modified public API → update the corresponding `documentation/NN_*.md` file if it exists.
+- If a substantive new module deserves a fresh doc, create it under `documentation/`.
 - Skip docs entirely if the changes are tests, refactors with no API surface change, or trivial fixes.
 
 State briefly which docs were updated (or "no docs needed for this checkpoint").

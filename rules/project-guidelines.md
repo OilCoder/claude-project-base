@@ -29,7 +29,8 @@ A behavior critical for production correctness should land in the hardest layer 
 | `verification.md` | Always loaded | Verification gate before declaring tasks complete |
 | `delegation.md` | Always loaded | Decide between main session, subagent, or agent team |
 | `memory-policy.md` | Always loaded | Differentiate bitácora (human) from MEMORY.md (Claude) |
-| `commit-style.md` | Always loaded | Conventional Commits subset (7 prefixes) for git history |
+| `commit-style.md` | Always loaded | Conventional Commits subset (8 prefixes) for git history |
+| `project-guidelines.md` | Always loaded | Index of rules/skills/agents, enforcement model, validation modes |
 | `doc-enforcement.md` | Source files (`paths:`) | Docstring requirements and standards |
 | `docs-style.md` | Markdown files (`paths:`) | Markdown documentation format |
 | `plan-format.md` | `todo/**/*.md` (`paths:`) | Plan file format and update rules |
@@ -91,8 +92,8 @@ The first 200 lines load at every session start. Per `memory-policy.md`:
 These are **not interchangeable**. Narrative goes to bitácora, factual operational
 notes go to MEMORY.md. See `memory-policy.md` for the full boundary.
 
-Maintenance: run the bundled `/consolidate-memory` skill monthly or when MEMORY.md
-exceeds 200 lines.
+Maintenance: review MEMORY.md manually (via the `/memory` command) monthly or when it
+exceeds 200 lines — merge duplicates and prune stale entries.
 
 ## Folder convention (minimum)
 

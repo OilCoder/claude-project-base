@@ -155,13 +155,13 @@ The rule of thumb from the official Claude Code docs:
 | Two systems | Bitácora (human, narrative) vs MEMORY.md (Claude, factual) | — |
 | What goes where | Clear boundary, examples per system | Bitácora language (Spanish default) |
 | Forbidden | No narrative in MEMORY.md | — |
-| Maintenance | `/consolidate-memory` for MEMORY.md, Cowork for bitácora | — |
+| Maintenance | manual review via `/memory` for MEMORY.md, Cowork for bitácora | — |
 
 ### commit-style.md
 
 | Section | Generic (do not touch) | Customize |
 |---|---|---|
-| 7 prefixes | `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf` | — |
+| 8 prefixes | `feat`, `fix`, `docs`, `site`, `refactor`, `test`, `chore`, `perf` | — |
 | Format | `<type>(<scope>): <subject>` + body | — |
 | Subject rules | Imperative, ≤72 chars, lowercase, no period | — |
 | Decision tree | Pick prefix based on dominant change | — |
@@ -219,7 +219,7 @@ single instructions source across multiple AI coding tools without duplication.
 2. **file-naming**: `NN_` pattern, outputs = `outputs/{experiment}_{metric}.png`
 3. **logging-policy**: progress = `tqdm`, language = English
 4. **doc-enforcement**: format = Google Style, scope = `src/`
-5. **docs-style**: location = `docs/`, no bilingual
+5. **docs-style**: code docs in `documentation/`, no bilingual
 6. **project-guidelines**: mode = `warn`, actual structure, GPU/CUDA constraints
 7. **Skills**: all except setup
 
@@ -229,6 +229,6 @@ single instructions source across multiple AI coding tools without duplication.
 2. **file-naming**: no numeric prefix, fixed names (`index.html`, `style.css`)
 3. **logging-policy**: only `console.log` allowed in dev
 4. **doc-enforcement**: format = JSDoc, scope = `js/`
-5. **docs-style**: location = `docs/`, simplified sections (no Math)
+5. **docs-style**: code docs in `documentation/`, simplified sections (no Math)
 6. **project-guidelines**: mode = `suggest`, browser compatibility constraints
 7. **Skills**: bitacora, plan-writing, document. No test/investigate/doc-enforce.

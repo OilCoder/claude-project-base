@@ -97,9 +97,10 @@ goes to the bitácora, not to MEMORY.md.
 
 ## Maintenance
 
-The bundled `/consolidate-memory` skill (provided by Claude Code) periodically reviews
-MEMORY.md, merges duplicates, and prunes stale entries. Run it monthly or whenever
-MEMORY.md grows beyond 200 lines.
+Review MEMORY.md periodically to merge duplicates and prune stale entries — do this
+monthly or whenever MEMORY.md grows beyond 200 lines. Open and edit it with the
+`/memory` command. (Claude Code ships no bundled auto-consolidation skill; this is a
+manual pass.)
 
 The bitácora has its own maintenance via Cowork: each `bitacora-YYYY-MM-DD.md` is
 exported to the Obsidian vault as `log-YYYY-MM-DD.md` with frontmatter and wikilinks.

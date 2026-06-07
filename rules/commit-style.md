@@ -3,7 +3,7 @@
 # Commit Style
 
 All commits follow [Conventional Commits](https://www.conventionalcommits.org/)
-(subset of 7 prefixes). The convention is **advisory**, not enforced — but skills
+(subset of 8 prefixes). The convention is **advisory**, not enforced — but skills
 that compose commits (`/checkpoint`, `/bug-fix`) apply it automatically.
 
 ## Format
@@ -14,7 +14,7 @@ that compose commits (`/checkpoint`, `/bug-fix`) apply it automatically.
 <body: 2-4 lines explaining the why, not the what>
 ```
 
-- **type**: one of the 7 prefixes below — required.
+- **type**: one of the 8 prefixes below — required.
 - **scope**: optional, in parentheses, names the affected module (`loader`, `api`, `pipeline`).
 - **subject**: imperative mood, ≤72 chars, no period at end.
 - **body**: blank line then 2-4 lines on the **why**. The diff itself shows the what.

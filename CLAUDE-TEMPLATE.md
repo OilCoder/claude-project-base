@@ -71,7 +71,7 @@ Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enf
 | `verification` | Always | Verification gate before declaring tasks complete |
 | `delegation` | Always | Decide between main session, subagent, or agent team |
 | `memory-policy` | Always | Differentiate bitácora (human) from MEMORY.md (Claude) |
-| `commit-style` | Always | Conventional Commits subset (7 prefixes) |
+| `commit-style` | Always | Conventional Commits subset (8 prefixes) |
 | `project-guidelines` | Always | Index, enforcement, validation modes |
 | `doc-enforcement` | Source files (`paths:`) | Mandatory docstrings |
 | `docs-style` | Markdown (`paths:`) | Documentation format; `documentation/` vs `docs/` |

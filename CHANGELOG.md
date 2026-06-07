@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   session, which triggered another Stop — looping indefinitely. The hook now reads
   stdin and exits early when `stop_hook_active` is `true`, per the Claude Code hook
   spec. First real Stop still suggests a checkpoint; continuations no longer loop.
+- **Doc drift after the 0.2.0 `site:` prefix and folder split**:
+  - `commit-style.md`, `project-guidelines.md`, `CLAUDE-TEMPLATE.md`, `PERSONALIZAR.md`
+    still said "7 prefixes" — corrected to 8 (the `site:` prefix is included).
+  - `checkpoint/SKILL.md` step 4 wrote code docs to `docs/` (reserved for GitHub Pages);
+    now targets `documentation/`, matching `docs-style.md` and `/document`.
+  - `PERSONALIZAR.md` stack examples pointed code docs to `docs/`; now `documentation/`.
+  - Rules count corrected to 12: `project-guidelines.md` was missing from its own Rules
+    index, and `setup/SKILL.md` final-state said "(11 rules)".
+- **Removed references to a non-existent bundled skill**: `/consolidate-memory` is not
+  shipped by Claude Code. `memory-policy.md`, `project-guidelines.md`, and `PERSONALIZAR.md`
+  now describe manual MEMORY.md review via the `/memory` command instead.
 
 ## [0.2.0] — 2026-04-29
 
