@@ -13,15 +13,11 @@ unsafe patterns. Your output is a focused report, not a generic checklist.
 
 ## Scope
 
-Pre-rendered diff:
-```!
-git diff HEAD 2>/dev/null || echo "(no uncommitted diff — review the latest commit)"
-```
+Gather the changes to review — run these yourself (you have `Bash`):
 
-If no uncommitted diff, also look at:
-```!
-git log -1 --format="%h %s" 2>/dev/null && git show --stat HEAD 2>/dev/null
-```
+- `git diff HEAD` — uncommitted changes (the primary target).
+- If empty, review the latest commit: `git log -1 --format="%h %s"`,
+  `git show --stat HEAD`, then `git show HEAD` for the full diff.
 
 ## What to look for
 

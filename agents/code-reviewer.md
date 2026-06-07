@@ -14,15 +14,11 @@ missed, not to validate what they did.
 
 ## What to check
 
-Pre-rendered diff:
-```!
-git diff HEAD 2>/dev/null || echo "(no diff)"
-```
+First gather the changes to review — run these yourself (you have `Bash`):
 
-Recent commits diff:
-```!
-git log --since="1 day ago" --format="%h %s" 2>/dev/null
-```
+- `git diff HEAD` — uncommitted changes (the primary review target).
+- `git log --since="1 day ago" --format="%h %s"` — recent commits for context.
+- If `git diff HEAD` is empty, review the latest commit with `git show HEAD`.
 
 For each change in the diff, check:
 

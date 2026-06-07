@@ -21,16 +21,12 @@ Use `AskUserQuestion` to ask focused questions one cluster at a time. Don't ask
 obvious questions. Dig into the parts the user probably hasn't considered:
 edge cases, failure modes, scope boundaries, integration points, tradeoffs.
 
-## Pre-rendered repo context
+## Gather repo context
 
-- **Project structure** (top 2 levels):
-```!
-ls -F 2>/dev/null && echo "---" && ls -F src/ lib/ app/ 2>/dev/null
-```
-- **Existing CLAUDE.md / rules**:
-```!
-[ -f CLAUDE.md ] && head -n50 CLAUDE.md || echo "(no CLAUDE.md)"
-```
+Run these yourself (you have `Bash`) to orient before interviewing:
+
+- `ls -F` and `ls -F src/ lib/ app/` — project structure (top levels).
+- `head -n 50 CLAUDE.md` — existing project instructions, if present.
 
 ## Workflow
 
