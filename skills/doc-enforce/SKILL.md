@@ -9,10 +9,10 @@ allowed-tools: Read Edit Grep Glob
 context: fork
 agent: general-purpose
 paths:
-  - "src/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php}"
-  - "lib/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php}"
-  - "app/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php}"
-  - "pipeline/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php}"
+  - "src/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php,m,cpp,c,h}"
+  - "lib/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php,m,cpp,c,h}"
+  - "app/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php,m,cpp,c,h}"
+  - "pipeline/**/*.{py,js,ts,jsx,tsx,go,rs,java,rb,php,m,cpp,c,h}"
 ---
 
 # Doc Enforce

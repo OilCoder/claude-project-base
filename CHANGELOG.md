@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Removed references to a non-existent bundled skill**: `/consolidate-memory` is not
   shipped by Claude Code. `memory-policy.md`, `project-guidelines.md`, and `PERSONALIZAR.md`
   now describe manual MEMORY.md review via the `/memory` command instead.
+- **`doc-enforce` skill path coverage**: added `.m`, `.cpp`, `.c`, `.h` so the skill's
+  `paths:` matches the `doc-enforcement.md` rule (relevant for Octave/petrophysics).
+- **`bug-fix` test runners**: `allowed-tools` now also permits `cargo test` and
+  `go test`, so the skill runs verification without prompting on Go/Rust projects.
 
 ## [0.2.0] — 2026-04-29
 

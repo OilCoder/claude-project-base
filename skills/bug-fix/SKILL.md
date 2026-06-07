@@ -5,7 +5,7 @@ description: >
   log learning. Use when the user says "fix this bug", "this is broken",
   "X doesn't work as expected", "regression in Y".
 argument-hint: "[bug description or issue number]"
-allowed-tools: Read Write Edit Bash(git log:*) Bash(git diff:*) Bash(git status:*) Bash(pytest:*) Bash(npm test:*) Bash(date:*) Grep Glob
+allowed-tools: Read Write Edit Bash(git log:*) Bash(git diff:*) Bash(git status:*) Bash(pytest:*) Bash(npm test:*) Bash(cargo test:*) Bash(go test:*) Bash(date:*) Grep Glob
 ---
 
 # Bug Fix
