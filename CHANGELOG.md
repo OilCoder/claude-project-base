@@ -5,6 +5,17 @@ All notable changes to claude-project-base.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **`stop-suggest-checkpoint` infinite loop**: the Stop hook never read its stdin
+  and so ignored the `stop_hook_active` flag. While a working tree had uncommitted
+  changes, every Stop re-injected the checkpoint suggestion, which continued the
+  session, which triggered another Stop — looping indefinitely. The hook now reads
+  stdin and exits early when `stop_hook_active` is `true`, per the Claude Code hook
+  spec. First real Stop still suggests a checkpoint; continuations no longer loop.
+
 ## [0.2.0] — 2026-04-29
 
 ### Added
