@@ -79,3 +79,5 @@ The base does not enforce a structure inside it — that depends on the chosen s
 - See `doc-enforcement.md` for inline docstring standards.
 - See `document/SKILL.md` for the on-demand documentation generation workflow.
 - See `file-naming.md` for the `NN_<slug>.md` pattern.
+- See `learning-style.md` for study material (`aprendizaje/`) — the Explanation layer,
+  distinct from these reference docs (it teaches concepts; this describes code).

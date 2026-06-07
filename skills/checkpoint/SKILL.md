@@ -16,12 +16,13 @@ Run the full end-of-milestone sequence in one shot:
 
 1. Update `todo/PLAN.md` (mark completed tasks).
 2. Document substantive changes (new public APIs, modified contracts).
-3. Write a bitácora entry for today.
-4. Commit with a descriptive message.
-5. Ask the user about pushing and opening a PR.
+3. Capture study material for new concepts (`aprendizaje/`).
+4. Write a bitácora entry for today.
+5. Commit with a descriptive message.
+6. Ask the user about pushing and opening a PR.
 
-This skill orchestrates `/plan-writing`, `/document`, `/bitacora`, and git/gh,
-so you don't have to invoke them one by one.
+This skill orchestrates `/plan-writing`, `/document`, `/study`, `/bitacora`, and
+git/gh, so you don't have to invoke them one by one.
 
 ## Pre-rendered context
 
@@ -93,7 +94,22 @@ Apply the `/document` rules only where they apply:
 
 State briefly which docs were updated (or "no docs needed for this checkpoint").
 
-### 5. Write bitácora entry
+### 5. Capture study material (`aprendizaje/`)
+
+Apply the `/study` rules to capture the **new concepts** this milestone introduced —
+software *and* domain (petroleum, geology, ML, data-eng, math):
+
+- Identify concepts new to this checkpoint (from the diff and the active phase).
+- For each, create or update an atomic note in `aprendizaje/NN_<slug>.md` per
+  `learning-style.md` (intuición → LaTeX → Mermaid → contexto de dominio → cómo se
+  aplica + link a `src/` → autoevaluación → referencias).
+- **Verify any bibliographic reference is real before citing it** (web search);
+  mark the unverifiable as "por confirmar". Never fabricate a citation.
+- Skip if the milestone introduced no new concept worth studying — say so.
+
+State which study notes were created/updated (or "no new concepts this checkpoint").
+
+### 6. Write bitácora entry
 
 Apply the `/bitacora` rules:
 
@@ -102,9 +118,9 @@ Apply the `/bitacora` rules:
 - Structure: technical changes / design decisions / pending / learnings.
 - Use `$ARGUMENTS` (or the inferred headline) as the entry summary.
 
-### 6. Commit
+### 7. Commit
 
-Per `commit-style.md`, choose the prefix from the 8-prefix set:
+Per `commit-style.md`, choose the prefix from the 9-prefix set:
 
 | Dominant nature of changes | Prefix |
 |---|---|
@@ -112,6 +128,7 @@ Per `commit-style.md`, choose the prefix from the 8-prefix set:
 | Bug fix (came from `/bug-fix`, or fixes incorrect behavior) | `fix:` |
 | Only `documentation/` changed (code docs) | `docs:` |
 | Only `docs/` changed (GitHub Pages landing site) | `site:` |
+| Only `aprendizaje/` changed (study material) | `learn:` |
 | Only code restructure with no behavior change | `refactor:` |
 | Only `tests/` changed | `test:` |
 | Performance improvement with benchmark | `perf:` |
@@ -138,7 +155,7 @@ EOF
 )"
 ```
 
-### 7. Push and PR (ask the user)
+### 8. Push and PR (ask the user)
 
 After the commit succeeds, ask the user:
 
@@ -156,7 +173,7 @@ If **yes**:
 
 If **no**: stop here. Report status to the user.
 
-### 8. Final report
+### 9. Final report
 
 Summarize to the user:
 
@@ -165,6 +182,7 @@ Summarize to the user:
 - Commit hash
 - PLAN.md tasks marked complete
 - Docs touched (or "none needed")
+- Study notes created/updated in `aprendizaje/` (or "none")
 - Bitácora entry path
 - Push/PR status
 

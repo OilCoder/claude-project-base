@@ -29,10 +29,11 @@ A behavior critical for production correctness should land in the hardest layer 
 | `verification.md` | Always loaded | Verification gate before declaring tasks complete |
 | `delegation.md` | Always loaded | Decide between main session, subagent, or agent team |
 | `memory-policy.md` | Always loaded | Differentiate bitácora (human) from MEMORY.md (Claude) |
-| `commit-style.md` | Always loaded | Conventional Commits subset (8 prefixes) for git history |
+| `commit-style.md` | Always loaded | Conventional Commits subset (9 prefixes) for git history |
 | `project-guidelines.md` | Always loaded | Index of rules/skills/agents, enforcement model, validation modes |
 | `doc-enforcement.md` | Source files (`paths:`) | Docstring requirements and standards |
 | `docs-style.md` | Markdown files (`paths:`) | Markdown documentation format |
+| `learning-style.md` | `aprendizaje/**/*.md` (`paths:`) | Study material standard (Explanation layer) |
 | `plan-format.md` | `todo/**/*.md` (`paths:`) | Plan file format and update rules |
 
 ## Skills index
@@ -47,6 +48,7 @@ A behavior critical for production correctness should land in the hardest layer 
 | `/investigate` | Create isolated debug scripts for investigation |
 | `/document` | Generate documentation for a module (forked context) |
 | `/doc-enforce` | Review and enforce docstrings on existing code (forked context) |
+| `/study` | Capture project knowledge as atomic study notes in `aprendizaje/` (forked context) |
 | `/setup` | Bootstrap a new project from the base template (base only) |
 
 ## Agents index
@@ -97,12 +99,13 @@ exceeds 200 lines — merge duplicates and prune stale entries.
 
 ## Folder convention (minimum)
 
-After `/setup`, only 4 folders exist. The base does not prescribe more:
+After `/setup`, only 5 folders exist. The base does not prescribe more:
 
 ```
 .claude/         rules, skills, agents, hooks
 todo/            plans, bitácoras
 documentation/   code docs (target of /document)
+aprendizaje/     study material (target of /study)
 docs/            reserved for GitHub Pages landing
 ```
 

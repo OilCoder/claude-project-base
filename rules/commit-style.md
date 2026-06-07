@@ -3,7 +3,7 @@
 # Commit Style
 
 All commits follow [Conventional Commits](https://www.conventionalcommits.org/)
-(subset of 8 prefixes). The convention is **advisory**, not enforced — but skills
+(subset of 9 prefixes). The convention is **advisory**, not enforced — but skills
 that compose commits (`/checkpoint`, `/bug-fix`) apply it automatically.
 
 ## Format
@@ -14,12 +14,12 @@ that compose commits (`/checkpoint`, `/bug-fix`) apply it automatically.
 <body: 2-4 lines explaining the why, not the what>
 ```
 
-- **type**: one of the 8 prefixes below — required.
+- **type**: one of the 9 prefixes below — required.
 - **scope**: optional, in parentheses, names the affected module (`loader`, `api`, `pipeline`).
 - **subject**: imperative mood, ≤72 chars, no period at end.
 - **body**: blank line then 2-4 lines on the **why**. The diff itself shows the what.
 
-## The 8 prefixes
+## The 9 prefixes
 
 | Prefix | When to use | Maps to |
 |---|---|---|
@@ -27,6 +27,7 @@ that compose commits (`/checkpoint`, `/bug-fix`) apply it automatically.
 | `fix:` | Bug fix that corrects incorrect behavior | `/bug-fix` (always) |
 | `docs:` | Code documentation in `documentation/` (not the website) | `/document`, `/doc-enforce` |
 | `site:` | GitHub Pages landing site in `docs/` (HTML/CSS/JS, content) | Manual edits in WSL+VSCode usually |
+| `learn:` | Study material in `aprendizaje/` (concepts, theory, domain knowledge) | `/study`, `/checkpoint` |
 | `refactor:` | Code restructure with no behavior change | `/simplify` (bundled) |
 | `test:` | Adding or modifying tests | `/test` |
 | `chore:` | Tooling, configs, dependencies, plugin/hooks/settings | `.claude/` changes, gitignore, version bumps |
@@ -34,14 +35,15 @@ that compose commits (`/checkpoint`, `/bug-fix`) apply it automatically.
 
 That's it. No `style:`, no `ci:`, no `build:`. If unsure, default to `chore:`.
 
-**Why two doc-related prefixes?** This base separates `documentation/` (code docs) from `docs/` (GitHub Pages landing site) by convention. They live in distinct folders, target distinct audiences, and often live in distinct dev environments. Using `docs:` and `site:` for each makes git log filtering trivial:
+**Why three doc-related prefixes?** This base separates three kinds of writing by folder: `documentation/` (code reference docs), `docs/` (GitHub Pages landing site), and `aprendizaje/` (study material — concepts and domain knowledge). Each targets a distinct audience and often a distinct dev environment. Using `docs:`, `site:`, and `learn:` makes git log filtering trivial:
 
 ```bash
-git log --oneline --grep "^docs:"   # only code documentation work
-git log --oneline --grep "^site:"   # only landing-page work
+git log --oneline --grep "^docs:"    # only code documentation work
+git log --oneline --grep "^site:"    # only landing-page work
+git log --oneline --grep "^learn:"   # only study material
 ```
 
-`site:` is non-standard Conventional Commits but solves a real workflow concern.
+`site:` and `learn:` are non-standard Conventional Commits but solve a real workflow concern.
 
 ## How to choose
 
@@ -52,9 +54,10 @@ Decision tree:
 3. Did the change touch only `tests/`? → `test:`
 4. Did the change touch only `documentation/` (code docs)? → `docs:`
 5. Did the change touch only `docs/` (GitHub Pages landing site)? → `site:`
-6. Did the change restructure code without changing behavior? → `refactor:`
-7. Did the change measure faster after with a benchmark? → `perf:`
-8. Anything else (configs, deps, tooling, .claude/) → `chore:`
+6. Did the change touch only `aprendizaje/` (study material)? → `learn:`
+7. Did the change restructure code without changing behavior? → `refactor:`
+8. Did the change measure faster after with a benchmark? → `perf:`
+9. Anything else (configs, deps, tooling, .claude/) → `chore:`
 
 When a single commit spans categories, pick the **dominant** one. Or split into
 two commits if the categories are independent.
@@ -101,6 +104,14 @@ site: add hero section with project demo gif
 
 New landing page hero section in docs/index.html with the demo GIF
 and a one-line pitch. Tailwind for layout, no JS.
+```
+
+```
+learn(petrofísica): nota de estudio del formato LAS
+
+Concepto atómico en aprendizaje/02_formato_las.md: estructura de
+secciones del LAS y el gotcha de ~Other antes de ~Curve. Referencia
+CWLS LAS 2.0 verificada.
 ```
 
 ```

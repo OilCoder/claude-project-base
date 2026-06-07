@@ -18,7 +18,7 @@ Then bootstrap a new project:
 /setup
 ```
 
-`/setup` asks 2 questions (project name, stack), creates 4 folders (`.claude/`, `todo/`, `documentation/`, `docs/`), copies all the rules/skills/agents/hooks, and customizes the linter hook + permissions for your stack.
+`/setup` asks 2 questions (project name, stack), creates 5 folders (`.claude/`, `todo/`, `documentation/`, `aprendizaje/`, `docs/`), copies all the rules/skills/agents/hooks, and customizes the linter hook + permissions for your stack.
 
 Updates:
 
@@ -28,15 +28,16 @@ Updates:
 
 ## What you get
 
-### 12 rules
-9 always loaded (code style, code change, file naming, logging, verification, delegation, memory policy, commit style, project guidelines) + 3 path-scoped (doc enforcement, docs style, plan format).
+### 13 rules
+9 always loaded (code style, code change, file naming, logging, verification, delegation, memory policy, commit style, project guidelines) + 4 path-scoped (doc enforcement, docs style, learning style, plan format).
 
-### 9 skills
-- `/checkpoint` — plan + docs + bitácora + commit + (push/PR) in one
+### 10 skills
+- `/checkpoint` — plan + docs + study + bitácora + commit + (push/PR) in one
 - `/bug-fix` — TDD bug fix workflow
 - `/bitacora` — session log
 - `/plan-writing` — write/update PLAN.md
 - `/phase-executor` — execute a plan phase with verification gate
+- `/study` — capture project knowledge as didactic study notes in `aprendizaje/`
 - `/test`, `/investigate`, `/document`, `/doc-enforce`
 
 ### 4 agents
@@ -59,9 +60,11 @@ Pre-approved safe read-only commands so Claude doesn't prompt on every git/ls/ca
 
 **Four layers:** Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enforce. Pick the hardest layer that can express the behavior.
 
-**Folder minimum:** Only 4 folders are created at bootstrap. Everything else (`src/`, `pipeline/`, `tests/`, `data/`, etc.) is created when the project demands it.
+**Folder minimum:** Only 5 folders are created at bootstrap. Everything else (`src/`, `pipeline/`, `tests/`, `data/`, etc.) is created when the project demands it.
 
 **`documentation/` vs `docs/`:** Code docs go to `documentation/`. `docs/` is reserved for GitHub Pages.
+
+**`aprendizaje/` (study material):** A distinct layer from `documentation/`. Code docs are *reference* (what the code does); study notes are *explanation* (the concepts and domain knowledge behind it — petroleum, geology, ML, data-eng), written as didactic material with formulas, flowcharts, and verified references, exported to Obsidian to accumulate across projects.
 
 **Verification first:** Per official Claude Code guidance, no task is complete until verification (tests + lint + type-check) passes.
 

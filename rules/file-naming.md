@@ -51,3 +51,10 @@ for discoverability, clarity, and traceability across the codebase.
 - Pattern: `NN_<slug>.md` for ordered docs.
 - Location defined per project (`docs/`, `obsidian-vault/`, etc.).
 - See `docs-style.md` for content standards.
+
+## Study material
+
+- Pattern: `NN_<slug>.md`, **one note per concept** (atomic).
+- Location: `aprendizaje/` (exported to Obsidian).
+- Slug uses the concept's domain term (`isolation_forest`, `formato_las`, `variograma`).
+- See `learning-style.md` for content standards.

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Study material layer (`aprendizaje/`)** — a 5th project folder and the Explanation
+  layer (per Diátaxis), distinct from `documentation/` (reference). Captures *all* the
+  knowledge applied in the project — software *and* domain (petroleum, geology, ML,
+  data engineering, math) — as atomic, didactic concept notes.
+  - **`learning-style.md`** rule (path-scoped to `aprendizaje/**/*.md`): one note per
+    concept; required structure (intuición → LaTeX formalism → Mermaid flow → domain
+    context → applied-in-project with `src/` link → self-test → references); Spanish
+    prose + English terms; exported to Obsidian to accumulate cross-project.
+  - **`/study`** skill: generates/updates atomic study notes, with **web verification
+    of bibliographic references** (never fabricates a citation; marks unverifiable
+    sources "por confirmar").
+  - **`learn:`** 9th commit prefix for `aprendizaje/` changes (mirrors `site:` for `docs/`).
+  - `/checkpoint` now captures study material for new concepts at each milestone.
+  - `/setup` creates `aprendizaje/` (now 5 folders) and copies the rule + skill.
+
 ### Fixed
 
 - **`stop-suggest-checkpoint` infinite loop**: the Stop hook never read its stdin
@@ -30,6 +47,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `paths:` matches the `doc-enforcement.md` rule (relevant for Octave/petrophysics).
 - **`bug-fix` test runners**: `allowed-tools` now also permits `cargo test` and
   `go test`, so the skill runs verification without prompting on Go/Rust projects.
+- **Agents no longer rely on skill-only shell injection**: `code-reviewer`,
+  `security-reviewer`, and `architect` used `` !`cmd` `` blocks to pre-render git
+  context, but that injection runs only in skills — in agent files the literal text
+  was passed through unexecuted. They now instruct the agent to run the commands via
+  its `Bash` tool instead.
 
 ## [0.2.0] — 2026-04-29
 

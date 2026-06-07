@@ -43,12 +43,13 @@ That's it. No other questions.
 
 ### 2. Create the minimum folder structure
 
-Always create these 4 folders, no more:
+Always create these 5 folders, no more:
 
 ```bash
 mkdir -p .claude/rules .claude/skills .claude/agents .claude/hooks
 mkdir -p todo
 mkdir -p documentation    # code docs (target of /document)
+mkdir -p aprendizaje      # study material (target of /study)
 mkdir -p docs             # GitHub Pages landing site (always reserved)
 ```
 
@@ -62,14 +63,14 @@ Copy all rules from the base to `.claude/rules/`:
 - Always-loaded: `code-style.md`, `code-change.md`, `file-naming.md`,
   `logging-policy.md`, `verification.md`, `delegation.md`, `memory-policy.md`,
   `commit-style.md`, `project-guidelines.md`
-- Path-scoped: `doc-enforcement.md`, `docs-style.md`, `plan-format.md`
+- Path-scoped: `doc-enforcement.md`, `docs-style.md`, `learning-style.md`, `plan-format.md`
 
 ### 4. Copy skills
 
 Copy applicable skills to `.claude/skills/`. Recommended set for any project:
 
 - `bitacora/`, `plan-writing/`, `phase-executor/`, `checkpoint/`, `bug-fix/`
-- `test/`, `investigate/`, `document/`, `doc-enforce/`
+- `test/`, `investigate/`, `document/`, `doc-enforce/`, `study/`
 
 `setup/` is **not** copied — it lives only in the base.
 
@@ -205,13 +206,14 @@ After `/setup`, the project looks like this:
 ```
 my-project/
 ├── .claude/
-│   ├── rules/         (12 rules)
-│   ├── skills/        (9 skills)
+│   ├── rules/         (13 rules)
+│   ├── skills/        (10 skills)
 │   ├── agents/        (4 agents)
 │   ├── hooks/         (5 hook scripts)
 │   └── settings.json
 ├── todo/              (empty, ready for plans/bitácora)
 ├── documentation/     (empty, target of /document)
+├── aprendizaje/       (empty, target of /study)
 ├── docs/              (empty, reserved for GitHub Pages)
 ├── CLAUDE.md
 └── .gitignore
@@ -222,7 +224,7 @@ The user starts coding from here. Folders like `src/`, `pipeline/`, `tests/`,
 
 ## Rules
 
-- Do not create folders the user did not request beyond the 4-folder minimum.
+- Do not create folders the user did not request beyond the 5-folder minimum.
 - Ask before adding or removing rules/skills/agents.
 - Respect the structure that emerges from the user's work, do not impose your own.
 - If the project already has `.claude/`, ask before overwriting.

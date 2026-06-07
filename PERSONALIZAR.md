@@ -20,12 +20,13 @@ Updates: `/plugin update claude-project-base` pulls newer versions across all yo
 
 ## Folder philosophy: minimum + organic growth
 
-`/setup` creates only 4 folders:
+`/setup` creates only 5 folders:
 
 ```
 .claude/         ← rules, skills, agents, hooks
 todo/            ← plans, bitácoras
 documentation/   ← code docs (target of /document)
+aprendizaje/     ← study material (target of /study)
 docs/            ← reserved for GitHub Pages
 ```
 
@@ -121,6 +122,16 @@ The rule of thumb from the official Claude Code docs:
 | `documentation/` vs `docs/` | Fixed split: code docs in `documentation/`, GH Pages in `docs/` | — |
 | Bilingual structure | Subfolders by language under `documentation/` | Languages used |
 
+### learning-style.md
+
+| Section | Generic (do not touch) | Customize |
+|---|---|---|
+| Explanation layer | Study material in `aprendizaje/`, separate from `documentation/` | — |
+| Note structure | Intuición → Formalismo (LaTeX) → Flujo (Mermaid) → Dominio → Aplicación → Autoevaluación → Referencias | Add/remove sections |
+| Atomic per concept | One note = one concept, `NN_<slug>.md` | — |
+| References policy | Verify real before citing; never fabricate | — |
+| Language | Spanish prose + English technical terms | Change per project / vault |
+
 ### plan-format.md
 
 | Section | Generic (do not touch) | Customize |
@@ -161,7 +172,7 @@ The rule of thumb from the official Claude Code docs:
 
 | Section | Generic (do not touch) | Customize |
 |---|---|---|
-| 8 prefixes | `feat`, `fix`, `docs`, `site`, `refactor`, `test`, `chore`, `perf` | — |
+| 9 prefixes | `feat`, `fix`, `docs`, `site`, `learn`, `refactor`, `test`, `chore`, `perf` | — |
 | Format | `<type>(<scope>): <subject>` + body | — |
 | Subject rules | Imperative, ≤72 chars, lowercase, no period | — |
 | Decision tree | Pick prefix based on dominant change | — |
@@ -190,6 +201,7 @@ The rule of thumb from the official Claude Code docs:
 | investigate | Projects with code | Documentation-only projects |
 | document | Projects needing technical docs | Simple projects |
 | doc-enforce | Projects with many functions | Short scripts |
+| study | Always — captures cross-domain knowledge as study material | Throwaway one-off scripts |
 | setup | Only in the base — do not copy to projects | — |
 
 ## Agents: which to keep

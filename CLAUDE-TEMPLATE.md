@@ -26,13 +26,14 @@ Alternative manual install: copy `rules/`, `skills/`, `agents/`, `hooks/`, and `
 
 ## Initial folder structure (after `/setup`)
 
-`/setup` creates only these 4 folders. Everything else is grown organically as the project demands it.
+`/setup` creates only these 5 folders. Everything else is grown organically as the project demands it.
 
 ```
 my-project/
 ├── .claude/             ← rules, skills, agents, hooks
 ├── todo/                ← plans, bitácora
 ├── documentation/       ← code docs (target of /document)
+├── aprendizaje/         ← study material (target of /study)
 ├── docs/                ← reserved for GitHub Pages landing site
 ├── CLAUDE.md
 └── .gitignore
@@ -60,7 +61,7 @@ These never overlap. `/document` always writes to `documentation/`. GitHub Pages
 
 Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enforce.
 
-## Rules (12)
+## Rules (13)
 
 | Rule | Scope | Purpose |
 |---|---|---|
@@ -71,17 +72,18 @@ Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enf
 | `verification` | Always | Verification gate before declaring tasks complete |
 | `delegation` | Always | Decide between main session, subagent, or agent team |
 | `memory-policy` | Always | Differentiate bitácora (human) from MEMORY.md (Claude) |
-| `commit-style` | Always | Conventional Commits subset (8 prefixes) |
+| `commit-style` | Always | Conventional Commits subset (9 prefixes) |
 | `project-guidelines` | Always | Index, enforcement, validation modes |
 | `doc-enforcement` | Source files (`paths:`) | Mandatory docstrings |
 | `docs-style` | Markdown (`paths:`) | Documentation format; `documentation/` vs `docs/` |
+| `learning-style` | `aprendizaje/` (`paths:`) | Study material standard (Explanation layer) |
 | `plan-format` | `todo/**/*.md` (`paths:`) | Plan file format |
 
-## Skills (9)
+## Skills (10)
 
 | Skill | Trigger | Purpose |
 |---|---|---|
-| `/checkpoint` | At milestones | Plan + docs + bitácora + commit + (push/PR) |
+| `/checkpoint` | At milestones | Plan + docs + study + bitácora + commit + (push/PR) |
 | `/bug-fix` | Bug fix | TDD: reproduce → failing test → fix → confirm |
 | `/bitacora` | Post-commit / manual | Session log in `todo/bitacora-YYYY-MM-DD.md` |
 | `/plan-writing` | Manual | Write/update `todo/PLAN.md` |
@@ -90,6 +92,7 @@ Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enf
 | `/investigate` | Manual | Create isolated debug script in `debug/` |
 | `/document` | Manual | Generate docs in `documentation/` (forked context) |
 | `/doc-enforce` | Auto on source files | Review/generate docstrings (forked context) |
+| `/study` | Manual / auto on checkpoint | Capture knowledge as study notes in `aprendizaje/` (forked context) |
 
 (`/setup` lives only in the base — not copied to projects.)
 
@@ -124,6 +127,7 @@ Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enf
 - Bitácora language: Spanish (configurable)
 - `todo/` — plans and bitácora
 - `documentation/` — code docs (always)
+- `aprendizaje/` — study material, exported to Obsidian (always)
 - `docs/` — GitHub Pages (always reserved)
 - `tests/` — tests (created when needed)
 - `debug/` — debug scripts, gitignored (created when needed)
