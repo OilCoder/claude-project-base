@@ -202,7 +202,31 @@ they create the corresponding folders.
 If the user provided phases or tasks, create `planning/PLAN.md` per `planning-format.md`.
 Otherwise leave `planning/` empty — the user runs `/plan-writing` when ready.
 
-### 14. (Optional) GitHub publishing — Pages + Wiki
+### 14. Install the autonomous loop script
+
+Copy the Ralph-style phase-execution loop so the project can run `PLAN.md` autonomously:
+
+```bash
+mkdir -p .claude/scripts
+cp templates/promptloop.sh .claude/scripts/promptloop.sh
+chmod +x .claude/scripts/promptloop.sh
+```
+
+Tell the user how to use it (it runs from their shell, not from inside a Claude session,
+and only on a dedicated feature branch):
+
+```bash
+git switch -c loop/<phase-or-feature>
+bash .claude/scripts/promptloop.sh 5      # start small; 5 = max iterations
+```
+
+It drives `/phase-executor` in non-interactive loop mode (fresh context per phase),
+committing one phase per iteration and stopping on: all phases COMPLETED · any BLOCKED
+task · max iterations · no progress. It uses `--dangerously-skip-permissions`, so the
+branch guard, the PreToolUse blocking hooks, and commit-per-phase are the safety net —
+recommend running it in a container/sandbox or a throwaway branch.
+
+### 15. (Optional) GitHub publishing — Pages + Wiki
 
 The base reserves two publishing targets (see `docs-style.md`):
 
@@ -243,6 +267,7 @@ my-project/
 │   ├── skills/        (11 skills)
 │   ├── agents/        (5 agents)
 │   ├── hooks/         (5 hook scripts)
+│   ├── scripts/       (promptloop.sh — autonomous loop)
 │   └── settings.json
 ├── planning/              (empty, ready for plans/bitácora)
 ├── documentation/     (empty, target of /document)

@@ -105,6 +105,8 @@ Document markers:
 | In progress | `[>]` | Currently being drafted/interviewed |
 | Approved | `[x]` | User-approved — append `(approved YYYY-MM-DD)` |
 | Blocked | `[!]` | Hard stop — append `(BLOCKED YYYY-MM-DD: reason)`; do not skip ahead |
+| Discarded | `~~strikethrough~~` | Document dropped (rare — e.g. a kind change removed it); append `(discarded YYYY-MM-DD: reason)` |
+
 
 ---
 
@@ -139,6 +141,7 @@ Folder tree showing key paths and their purpose.
 ### Phase N — <Name>
 Done when: <one-line, verifiable acceptance criterion for the whole phase>
 - [ ] Task description (file or module it targets)
+- [>] Task in progress (being worked on right now)
 - [x] Task completed (YYYY-MM-DD)
 - [!] Task blocked (BLOCKED YYYY-MM-DD: reason)
 - ~~Discarded task description~~ (discarded YYYY-MM-DD: short reason)
@@ -170,12 +173,21 @@ Short bullet list of naming rules or constraints relevant to this plan.
 | State | Marker | Format |
 |---|---|---|
 | Pending | `- [ ]` | `- [ ] Task description` |
+| In progress | `- [>]` | `- [>] Task description` (being worked on right now) |
 | Completed | `- [x]` | `- [x] Task description (YYYY-MM-DD)` |
 | Blocked | `- [!]` | `- [!] Task description (BLOCKED YYYY-MM-DD: reason)` |
 | Discarded | `~~strikethrough~~`, no checkbox | `- ~~Task description~~ (discarded YYYY-MM-DD: reason)` |
 
+These markers match the blueprint manifest's (§A) so the whole `planning/` hub speaks one
+language: `[ ]` pending · `[>]` in progress · `[x]` done/approved · `[!]` blocked. (`~~…~~`
+discarded applies to plan tasks; the manifest rarely drops a document.)
+
 ### Update rules
 
+- **In-progress tasks**: mark the task you are actively working on `- [>]`, and flip it to
+  `- [x]` the moment it's done. Keep at most one `[>]` task per phase — it shows, at a glance
+  and in git history, what is being worked on right now. (In the autonomous loop, phases are
+  atomic, so `[>]` may be brief or skipped; it matters most for human-paced work.)
 - Mark completed tasks as `- [x]` immediately after finishing them.
 - **Blocked tasks**: when a task cannot proceed (missing dependency, unresolved decision,
   failing precondition), mark it `- [!] ... (BLOCKED YYYY-MM-DD: reason)` and surface it to
@@ -196,6 +208,32 @@ Short bullet list of naming rules or constraints relevant to this plan.
   drift anchor; silently altering them defeats the whole point).
 - If a phase is fully completed (all tasks `[x]` or discarded), add `(COMPLETED)` to the title.
 - Never rewrite or reformat existing content — only update task states and phase titles.
+
+## Foundation gap report (the return signal)
+
+When the foundation is insufficient — caught by the §A step-5 coherence check, or by a
+Loop 2 `BLOCKED` that traces to a weak plan rather than a code bug — the return to planning
+is **not** a bare "blocked, your turn". It carries a structured report so the decision is
+informed. The agent **diagnoses and proposes; the user decides** (never auto-applied — the
+choice defines the project and is the anti-drift gate).
+
+Report format (present to the user; log a one-line pointer in the manifest Decisions):
+
+```markdown
+### Foundation gap — <short title>
+- **Where**: phase N / doc 0X / Invariant "<…>"
+- **Gap**: what is missing, undefined, or contradictory (concrete, not vague).
+- **Why it blocks**: the consequence of proceeding as-is.
+- **Options**:
+  1. <recommended> — tradeoff / cost
+  2. <alternative> — tradeoff / cost
+  3. <alternative> — tradeoff / cost
+- **Decision needed**: the one question only you can answer.
+```
+
+Rules: always give at least two options with the recommended one first; never pick for the
+user; never proceed past the gap until the user chooses. If the agent genuinely sees no
+viable option, say so explicitly rather than inventing one.
 
 ## Cross-references
 

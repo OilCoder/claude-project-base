@@ -38,6 +38,25 @@ for explicit approval. Progress lives in `planning/blueprint/MANIFEST.md`, not i
 conversation — so the loop is resumable and cannot silently drift. This directly answers
 the risk that an uncontrolled loop turns the project into something it wasn't meant to be.
 
+## The 5-step planning cycle
+
+This skill is **Loop 1** of the project. It is a 5-step cycle, not a straight line — code
+(Loop 2) does not start until step 5 closes, and an insufficient foundation **returns** here
+rather than being patched downstream.
+
+| Step | Name | Fixes | Blueprint doc(s) |
+|---|---|---|---|
+| 1 | **Charter** | Why + what + Non-goals + Invariants + measurable success | `00_charter` |
+| 2 | **Context & Interfaces** | Inputs, outputs, integrations, constraints | `01_context_interfaces` |
+| 3 | **Design** | The technical "how" for the kind (method / architecture / data model) | `02–04` (pack) |
+| 4 | **Implementation Plan** | Phases + `Done when:` | `09_implementation_plan` |
+| 5 | **Validation & Seed** | Coherence check → seed `PLAN.md` → confirm the anchor holds | `PLAN.md` |
+
+Steps 1–4 are the document loop below (§4). Step 5 is the coherence gate (§6). At step 5,
+if any phase lacks a solid foundation (unanswered Open question, missing Non-goal/Invariant,
+a phase with no verifiable `Done when:`, or a contradiction between docs), **return to the
+weak step and re-interview that document** — do not proceed to code on a shaky anchor.
+
 ## Procedure
 
 ### 1. Determine the project kind
@@ -94,13 +113,32 @@ Never draft the next document before the current one is approved. Never auto-app
 - **Invariant change**: amend an already-approved Invariant only via a logged manifest
   decision **and** a fresh approval gate on the affected document.
 
-### 6. On completion
+### 6. Step 5 — Validation & Seed (close the planning loop)
 
-When `09_implementation_plan.md` is approved, **stop — do not auto-chain**. Report the
-suite is complete and suggest the next human-gated step:
+This is the final step of the 5-step cycle. The planning loop does not end at the last
+document — it ends at a **validated, seeded `PLAN.md`**. Code (Loop 2) cannot start before this.
 
-> Foundation suite complete. Run `/plan-writing` to seed `planning/PLAN.md` from
-> `09_implementation_plan.md` (it will carry the Non-goals and Invariants verbatim).
+When `09_implementation_plan.md` is approved:
+
+1. **Coherence check** — before seeding anything, verify the foundation actually holds:
+   - Every phase has a verifiable `Done when:` criterion.
+   - `## Non-goals` and `## Invariants` exist and are specific (not "TBD").
+   - No phase depends on an unanswered `## Open questions` item.
+   - No contradiction between documents (e.g. a phase that violates a stated Non-goal).
+   - **If any check fails → produce a Foundation gap report** (format in `planning-format.md`:
+     where · gap · why it blocks · 2-3 options with a recommendation · the decision needed),
+     present it, and **RETURN to the weak step** once the user chooses. Diagnose and propose
+     options — never pick for the user. Log the return in the manifest's Decisions section.
+     Do **not** proceed; a shaky anchor is exactly what makes Loop 2 drift later.
+2. **Seed the plan**: run `/plan-writing` to create `planning/PLAN.md` from
+   `09_implementation_plan.md` (carrying `## Non-goals` and `## Invariants` **verbatim**,
+   and each phase's `Done when:`).
+3. **Present the seeded `PLAN.md` and STOP for approval** — the final gate of the planning loop.
+4. On approval, report that the anchor is ready and Loop 2 can now run:
+
+   > Planning loop complete (5/5). The anchor (`PLAN.md` with Non-goals/Invariants/Done-when)
+   > is ready. The autonomous coding loop can now run on a feature branch:
+   > `bash .claude/scripts/promptloop.sh 5`
 
 ## Rules
 

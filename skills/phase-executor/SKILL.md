@@ -58,7 +58,9 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 - **Skip discarded tasks** (those in `~~strikethrough~~` form) — they are part of
   the historical record but are not active work.
 - Complete each task fully before moving to the next.
-- Mark each task as `- [x]` in `PLAN.md` immediately after completing it.
+- Mark the task you start as `- [>]` (in progress), and flip it to `- [x]` immediately after
+  completing it. This keeps `PLAN.md` showing live progress. (In the autonomous loop the
+  step is atomic, so `[>]` may be momentary.)
 - If a task becomes obsolete during execution (e.g., a previous task made it
   redundant), do **not** silently skip — instead, propose discarding it to the
   user and mark it per `planning-format.md` (`~~task~~ (discarded YYYY-MM-DD: reason)`).
@@ -106,3 +108,34 @@ result has been verified. Before declaring the phase done:
    - Verification commands run and their outcome
 3. Flag anything that needs user review before starting the next phase.
 4. If the `/bitacora` skill is available, suggest logging the session.
+
+## Loop mode (non-interactive)
+
+When invoked by the autonomous loop (`.claude/scripts/promptloop.sh`) — signalled by a
+prompt that says **"NON-INTERACTIVE LOOP MODE"** — behave exactly as above with these
+differences. The loop runs one fresh `claude -p` per phase, so there is no human in the
+turn to approve.
+
+- **Skip the human approval gate only.** Do not wait for "Before writing any code → wait
+  for approval"; proceed on the **first** non-completed phase. Every other gate stays:
+  the drift check, the verification gate, and the `Done when:` criterion are all mandatory.
+- **The automated gates replace the human.** They are the only thing standing in for your
+  judgment now — never weaken or skip them to "make progress".
+- **On success**: mark the phase `(COMPLETED)` and create exactly **one** conventional
+  commit for the phase. One phase = one commit (the loop relies on HEAD advancing).
+- **On any block** — ambiguity, a missing dependency, a Non-goal/Invariant conflict, or a
+  failing verification you cannot fix at the root — **stop**: mark the affected task
+  `- [!] ... (BLOCKED YYYY-MM-DD: reason)` and do **not** commit partial or unverified work.
+  The loop detects the BLOCKED marker and halts for human review.
+- **Never guess, never improvise, never partial-commit.** A clean BLOCKED stop is always
+  preferable to drifting. The loop's safety depends on you failing loudly, not quietly.
+- **Foundation gaps return to Loop 1 — with a diagnosis, not a shrug.** If a task is blocked
+  because the *plan itself* is insufficient (a phase whose `Done when:` can't be met as
+  specified, a missing decision the blueprint never settled, a requirement that contradicts an
+  Invariant), do not code around it. Emit a **Foundation gap report** (format in
+  `planning-format.md`: where · gap · why it blocks · 2-3 remediation options with a
+  recommendation · the decision needed), set the BLOCKED reason to point at it, and stop so
+  the user can decide and return to the planning loop (`/blueprint` step 5 or `/plan-writing`).
+  Diagnose and propose alternatives; never choose for the user. This is the feedback edge that
+  keeps execution from drifting off a weak plan.
+

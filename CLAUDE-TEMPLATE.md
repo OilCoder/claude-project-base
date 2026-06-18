@@ -63,6 +63,36 @@ These never overlap. `/document` always writes to `documentation/`. GitHub Pages
 
 Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enforce.
 
+## The two loops (project lifecycle)
+
+A project runs as two sequential loops. The second cannot start until the first finishes.
+
+| | Loop 1 — Planning | Loop 2 — Code |
+|---|---|---|
+| **Tool** | `/blueprint` (skill) | `.claude/scripts/promptloop.sh` |
+| **Nature** | Interactive — interviews you | Autonomous — headless `claude -p` per phase |
+| **Produces** | Blueprint suite → seeded `PLAN.md` (Non-goals, Invariants, Done-when) | Code, one committed phase per iteration |
+| **Why this shape** | A PRD/charter comes from *your* answers — it can't be headless | The work is already defined in `PLAN.md` — it runs unattended |
+| **Ends when** | `PLAN.md` anchor is approved | All phases `(COMPLETED)` / BLOCKED / max-iter |
+
+Loop 1 is the anchor builder; Loop 2 executes against that anchor. `promptloop.sh`
+**refuses to run** until Loop 1 has produced an anchored `PLAN.md` (and any started
+blueprint is fully approved) — so code never gets written before the foundation exists.
+
+**Loop 1 is a 5-step cycle, not a line:** (1) Charter → (2) Context & Interfaces →
+(3) Design → (4) Implementation Plan → (5) Validation & Seed. Step 5 is a coherence gate; a
+weak foundation **returns** to the failing step instead of advancing.
+
+**Feedback edge:** if Loop 2 blocks because the *plan* is insufficient (not just a code
+bug), it doesn't patch around it — it returns to Loop 1 to strengthen the anchor, then
+resumes. Drift is prevented by going back to planning, never by improvising in code.
+
+```
+1 → 2 → 3 → 4 → 5 ──(anchor ok)──▶ Loop 2: code  ──phase ok──▶ next phase
+        ▲           ▲                   │
+        └──(gap)────┘                   └──(BLOCKED: plan gap)──▶ back to Loop 1
+```
+
 ## Rules (13)
 
 | Rule | Scope | Purpose |

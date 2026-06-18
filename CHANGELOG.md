@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Autonomous phase-execution loop** (`templates/promptloop.sh` → `.claude/scripts/`) —
+  Ralph-style: a shell `while` loop runs a fresh `claude -p` per iteration against
+  `planning/PLAN.md`, driving `/phase-executor` in non-interactive **loop mode**, one
+  commit per phase. Fresh context each tick (progress on disk, not in conversation).
+  Branch-guarded (refuses main/master and a dirty tree); hard stops on all-COMPLETED,
+  any BLOCKED task, max-iterations, or no-progress. Uses `--dangerously-skip-permissions`,
+  with the branch guard + still-active PreToolUse blocking hooks + commit-per-phase as the
+  safety net. `/phase-executor` gained a **Loop mode (non-interactive)** section: it skips
+  only the human approval gate and keeps every automated gate (drift check, verification,
+  `Done when:`), failing loudly into a BLOCKED stop rather than guessing.
+- **Two-loop project lifecycle.** Loop 1 (planning, `/blueprint`) is now an explicit
+  **5-step cycle** — Charter → Context & Interfaces → Design → Implementation Plan →
+  Validation & Seed — whose step 5 is a coherence gate that **returns** to a weak step
+  instead of advancing, and which closes by seeding `PLAN.md`. Loop 2 (`promptloop.sh`) is
+  **gated** on Loop 1: it refuses to run until `PLAN.md` is anchored (Non-goals + Invariants
+  + a `Done when:`) and any started blueprint is fully approved. **Feedback edge:** a Loop 2
+  block caused by an insufficient plan returns to Loop 1 rather than being patched in code.
+  The return carries a **Foundation gap report** (where · gap · why it blocks · 2-3 options
+  with a recommendation · the decision needed): the agent diagnoses and proposes alternatives,
+  the user decides — never auto-applied.
 - **`/blueprint` scaffolding loop** — a human-gated "first loop" that generates a project's
   foundation document suite *before* coding, so the project has a stable, drift-proof anchor.
   One document per iteration, each approved before the next; state lives on disk in

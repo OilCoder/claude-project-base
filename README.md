@@ -48,6 +48,9 @@ Updates:
 - `blueprinter` — drafts one project-inception foundation doc (driven by `/blueprint`)
 - `implementer` — autonomous code writer with rules preloaded
 
+### Autonomous loop
+- `.claude/scripts/promptloop.sh` — Ralph-style loop: runs a fresh `claude -p` per phase against `planning/PLAN.md`, driving `/phase-executor` in non-interactive mode, one commit per phase. Branch-guarded; stops on all-done / BLOCKED / max-iterations / no-progress.
+
 ### 5 hooks
 - Statusline (branch + active phase + bitácora flag)
 - SessionStart (inject PLAN active phase, pending bitácora, verification commands)

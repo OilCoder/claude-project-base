@@ -80,8 +80,9 @@ If `planning/blueprint/09_implementation_plan.md` exists (pre-rendered above), *
 - **Independent phases**: each phase is understandable without reading the others.
 - **Mark immediately**: when a task is completed, mark `[x]` with today's date.
 - **Never delete tasks**: completed, blocked, and discarded tasks remain visible.
-- **Four states** (per `planning-format.md`):
+- **Five states** (per `planning-format.md`, same markers as the blueprint manifest):
   - Pending: `- [ ] task`
+  - In progress: `- [>] task` — being worked on right now (at most one per phase)
   - Completed: `- [x] task (YYYY-MM-DD)`
   - Blocked: `- [!] task (BLOCKED YYYY-MM-DD: reason)` — hard stop, surface to user, never skip
   - Discarded: `- ~~task~~ (discarded YYYY-MM-DD: reason)` — no checkbox, strikethrough, reason required
