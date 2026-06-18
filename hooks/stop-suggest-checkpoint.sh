@@ -34,7 +34,7 @@ git rev-parse --git-dir >/dev/null 2>&1 || exit 0
 RESULT=$(
   timeout 5 bash -c '
     DIRTY=$(git status --porcelain 2>/dev/null || true)
-    LATEST=$(ls -1t todo/bitacora-*.md 2>/dev/null | head -n1 || true)
+    LATEST=$(ls -1t planning/bitacora/*.md 2>/dev/null | head -n1 || true)
 
     NEEDS=0
     REASONS=""

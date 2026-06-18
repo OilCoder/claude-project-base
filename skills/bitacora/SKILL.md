@@ -11,7 +11,7 @@ allowed-tools: Read Write Edit Bash(git log:*) Bash(git diff:*) Bash(git status:
 # Bitacora (Session Log)
 
 Record the work done in the current session as a log entry.
-Target file: `todo/bitacora-YYYY-MM-DD.md` inside the project.
+Target file: `planning/bitacora/YYYY-MM-DD.md` inside the project.
 
 ## Pre-rendered session context
 
@@ -42,9 +42,9 @@ git diff --stat HEAD~$(git log --oneline --since="00:00" 2>/dev/null | wc -l) HE
 
 ### 1. Check if today's bitácora file exists
 
-- If `todo/bitacora-YYYY-MM-DD.md` exists, **append** a new section at the end (do not overwrite).
+- If `planning/bitacora/YYYY-MM-DD.md` exists, **append** a new section at the end (do not overwrite).
 - If it does not exist, **create** the file with the full template.
-- If `todo/` does not exist, create it.
+- If `planning/bitacora/` does not exist, create it (`mkdir -p planning/bitacora`).
 
 ### 2. Write the entry
 

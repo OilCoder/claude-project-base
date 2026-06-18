@@ -52,7 +52,7 @@ Ask in clusters using `AskUserQuestion`. Cover:
 Stop interviewing when the spec can be written without further guesses.
 
 ### 4. Write the spec
-Save to `todo/spec-<feature-slug>.md`. Structure:
+Save to `planning/specs/<feature-slug>.md`. Structure:
 
 ```markdown
 # Spec — <Feature name>

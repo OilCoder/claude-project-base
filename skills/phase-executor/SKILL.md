@@ -19,7 +19,7 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 - **Branch**: !`git branch --show-current 2>/dev/null || echo "(not a git repo)"`
 - **PLAN.md**:
 ```!
-[ -f todo/PLAN.md ] && cat todo/PLAN.md || echo "(no PLAN.md found — run /plan-writing first)"
+[ -f planning/PLAN.md ] && cat planning/PLAN.md || echo "(no PLAN.md found — run /plan-writing first)"
 ```
 - **Project guidelines (verification commands and tech constraints)**:
 ```!
@@ -28,12 +28,18 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 
 ## Before writing any code
 
-1. The PLAN.md is already pre-rendered above. Identify the requested phase from `$ARGUMENTS` and extract its task list.
-2. Present a short plan to the user:
+1. The PLAN.md is already pre-rendered above. Identify the requested phase from `$ARGUMENTS` and extract its task list **and its `Done when:` line**.
+2. **Drift check (anti-drift gate)**: read the `## Non-goals` and `## Invariants` sections
+   of `PLAN.md`. If any task in this phase would violate a Non-goal or an Invariant, **stop
+   and ask the user** — do not code around it, do not silently re-interpret the task. The
+   Non-goals/Invariants are the project's anchor; honoring them is what keeps execution from
+   drifting into a different project.
+3. Present a short plan to the user:
    - Files to create or modify
    - Order of execution
+   - The phase's `Done when:` acceptance criterion
    - Any ambiguity that needs user input
-3. **Wait for explicit user approval** before proceeding.
+4. **Wait for explicit user approval** before proceeding.
 
 ## Execution rules
 
@@ -41,7 +47,10 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 
 - Only create or modify files listed in the phase tasks.
 - Never touch files from other phases.
-- If a required file from a previous phase is missing, stop and inform the user before continuing.
+- If a required file from a previous phase is missing, or a task cannot proceed (unresolved
+  dependency, failing precondition), **do not improvise around it**: mark the task
+  `- [!] ... (BLOCKED YYYY-MM-DD: reason)` per `planning-format.md`, stop, and surface it to
+  the user. A blocked task is a hard stop, never a silent skip.
 
 ### Order
 
@@ -52,7 +61,7 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 - Mark each task as `- [x]` in `PLAN.md` immediately after completing it.
 - If a task becomes obsolete during execution (e.g., a previous task made it
   redundant), do **not** silently skip — instead, propose discarding it to the
-  user and mark it per `plan-format.md` (`~~task~~ (discarded YYYY-MM-DD: reason)`).
+  user and mark it per `planning-format.md` (`~~task~~ (discarded YYYY-MM-DD: reason)`).
 
 ### Code
 
@@ -70,18 +79,20 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 Per `verification.md`, a phase must not be marked `(COMPLETED)` until its
 result has been verified. Before declaring the phase done:
 
-1. Read `project-guidelines.md` to find the project's verification commands
+1. **Check the phase's `Done when:` criterion** — it is the phase's acceptance target.
+   The phase is not complete until that criterion is demonstrably met.
+2. Read `project-guidelines.md` to find the project's verification commands
    (under **Tech constraints** or referenced from `package.json` /
    `pyproject.toml`).
-2. Run the relevant subset for the type of change:
+3. Run the relevant subset for the type of change:
    - Code changes → test command (`pytest`, `npm test`, etc.)
    - Type-annotated code → type checker (`mypy`, `tsc --noEmit`)
    - Always → linter and formatter on the changed files
-3. If any verification fails:
+4. If the `Done when:` criterion is unmet or any verification fails:
    - Do **not** mark the phase complete.
    - Address the root cause, not the symptom.
    - Re-run the verification.
-4. If no verification command exists for this type of change, say so
+5. If no verification command exists for this type of change, say so
    explicitly in the report instead of claiming verified.
 
 ## After completing the phase

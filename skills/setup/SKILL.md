@@ -47,11 +47,14 @@ Always create these 5 folders, no more:
 
 ```bash
 mkdir -p .claude/rules .claude/skills .claude/agents .claude/hooks
-mkdir -p todo
+mkdir -p planning         # planning hub: PLAN.md, blueprint/, specs/, bitacora/
 mkdir -p documentation    # code docs (target of /document)
 mkdir -p aprendizaje      # study material (target of /study)
 mkdir -p docs             # GitHub Pages landing site (always reserved)
 ```
+
+The `planning/` subfolders (`blueprint/`, `specs/`, `bitacora/`) are created on demand
+by the skills that write them (`/blueprint`, `architect`, `/bitacora`) — not at bootstrap.
 
 Do **not** create `src/`, `pipeline/`, `tests/`, `data/`, `models/`, `experiments/`,
 or any other domain-specific folder. The user creates those when they start coding.
@@ -63,22 +66,22 @@ Copy all rules from the base to `.claude/rules/`:
 - Always-loaded: `code-style.md`, `code-change.md`, `file-naming.md`,
   `logging-policy.md`, `verification.md`, `delegation.md`, `memory-policy.md`,
   `commit-style.md`, `project-guidelines.md`
-- Path-scoped: `doc-enforcement.md`, `docs-style.md`, `learning-style.md`, `plan-format.md`
+- Path-scoped: `doc-enforcement.md`, `docs-style.md`, `learning-style.md`, `planning-format.md`
 
 ### 4. Copy skills
 
 Copy applicable skills to `.claude/skills/`. Recommended set for any project:
 
-- `bitacora/`, `plan-writing/`, `phase-executor/`, `checkpoint/`, `bug-fix/`
+- `blueprint/`, `bitacora/`, `plan-writing/`, `phase-executor/`, `checkpoint/`, `bug-fix/`
 - `test/`, `investigate/`, `document/`, `doc-enforce/`, `study/`
 
 `setup/` is **not** copied — it lives only in the base.
 
 ### 5. Copy agents
 
-Copy all 4 agents to `.claude/agents/` — they are stack-agnostic:
+Copy all 5 agents to `.claude/agents/` — they are stack-agnostic:
 
-- `code-reviewer.md`, `security-reviewer.md`, `architect.md`, `implementer.md`
+- `code-reviewer.md`, `security-reviewer.md`, `architect.md`, `blueprinter.md`, `implementer.md`
 
 ### 6. Copy hooks and settings
 
@@ -196,8 +199,8 @@ they create the corresponding folders.
 
 ### 13. (Optional) Create initial plan
 
-If the user provided phases or tasks, create `todo/PLAN.md` per `plan-format.md`.
-Otherwise leave `todo/` empty — the user runs `/plan-writing` when ready.
+If the user provided phases or tasks, create `planning/PLAN.md` per `planning-format.md`.
+Otherwise leave `planning/` empty — the user runs `/plan-writing` when ready.
 
 ### 14. (Optional) GitHub publishing — Pages + Wiki
 
@@ -237,11 +240,11 @@ After `/setup`, the project looks like this:
 my-project/
 ├── .claude/
 │   ├── rules/         (13 rules)
-│   ├── skills/        (10 skills)
-│   ├── agents/        (4 agents)
+│   ├── skills/        (11 skills)
+│   ├── agents/        (5 agents)
 │   ├── hooks/         (5 hook scripts)
 │   └── settings.json
-├── todo/              (empty, ready for plans/bitácora)
+├── planning/              (empty, ready for plans/bitácora)
 ├── documentation/     (empty, target of /document)
 ├── aprendizaje/       (empty, target of /study)
 ├── docs/              (empty, reserved for GitHub Pages)

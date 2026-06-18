@@ -37,7 +37,7 @@ git diff --stat HEAD~3 HEAD 2>/dev/null | tail -n20 || echo "(no recent diff)"
 ```
 - **Active phase from PLAN.md**:
 ```!
-[ -f todo/PLAN.md ] && grep -E "^### Phase " todo/PLAN.md | grep -v "(COMPLETED)" | head -n1 || echo "(no PLAN.md)"
+[ -f planning/PLAN.md ] && grep -E "^### Phase " planning/PLAN.md | grep -v "(COMPLETED)" | head -n1 || echo "(no PLAN.md)"
 ```
 
 ## Procedure

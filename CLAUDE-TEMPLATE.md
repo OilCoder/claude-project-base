@@ -31,7 +31,9 @@ Alternative manual install: copy `rules/`, `skills/`, `agents/`, `hooks/`, and `
 ```
 my-project/
 ├── .claude/             ← rules, skills, agents, hooks
-├── todo/                ← plans, bitácora
+├── planning/            ← planning hub (subfolders grow on demand):
+│                          blueprint/ (/blueprint), specs/ (architect),
+│                          bitacora/ (/bitacora), PLAN.md
 ├── documentation/       ← code docs (target of /document)
 ├── aprendizaje/         ← study material (target of /study)
 ├── docs/                ← reserved for GitHub Pages landing site
@@ -77,16 +79,17 @@ Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enf
 | `doc-enforcement` | Source files (`paths:`) | Mandatory docstrings |
 | `docs-style` | Markdown (`paths:`) | Documentation format; `documentation/` vs `docs/` |
 | `learning-style` | `aprendizaje/` (`paths:`) | Study material standard (Explanation layer) |
-| `plan-format` | `todo/**/*.md` (`paths:`) | Plan file format |
+| `planning-format` | `planning/**/*.md` (`paths:`) | `planning/` authority: blueprint suite + PLAN.md format (Non-goals/Invariants/Done-when/BLOCKED) |
 
-## Skills (10)
+## Skills (11)
 
 | Skill | Trigger | Purpose |
 |---|---|---|
+| `/blueprint` | Project start | Scaffolding loop: foundation doc suite in `planning/blueprint/`, gated per document |
 | `/checkpoint` | At milestones | Plan + docs + study + bitácora + commit + (push/PR) |
 | `/bug-fix` | Bug fix | TDD: reproduce → failing test → fix → confirm |
-| `/bitacora` | Post-commit / manual | Session log in `todo/bitacora-YYYY-MM-DD.md` |
-| `/plan-writing` | Manual | Write/update `todo/PLAN.md` |
+| `/bitacora` | Post-commit / manual | Session log in `planning/bitacora/YYYY-MM-DD.md` |
+| `/plan-writing` | Manual | Write/update `planning/PLAN.md` |
 | `/phase-executor` | Manual | Execute a plan phase with verification gate |
 | `/test` | Manual / auto on tests/ | Create tests for a module |
 | `/investigate` | Manual | Create isolated debug script in `debug/` |
@@ -96,13 +99,14 @@ Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enf
 
 (`/setup` lives only in the base — not copied to projects.)
 
-## Agents (4)
+## Agents (5)
 
 | Agent | Purpose |
 |---|---|
 | `code-reviewer` | Reviews uncommitted diff in fresh context |
 | `security-reviewer` | OWASP-style vulnerability audit |
 | `architect` | Interview-driven feature design → spec file |
+| `blueprinter` | Drafts one project-inception foundation doc → `planning/blueprint/` (driven by `/blueprint`) |
 | `implementer` | Autonomous code writer with rules preloaded |
 
 ## Hooks and settings
@@ -125,7 +129,7 @@ Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enf
 
 - Code and comments language: configurable per project (English by default)
 - Bitácora language: Spanish (configurable)
-- `todo/` — plans and bitácora
+- `planning/` — plans and bitácora
 - `documentation/` — code docs (always)
 - `aprendizaje/` — study material, exported to Obsidian (always)
 - `docs/` — GitHub Pages (always reserved)

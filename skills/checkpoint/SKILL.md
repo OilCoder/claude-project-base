@@ -14,7 +14,7 @@ allowed-tools: Read Write Edit Bash(git:*) Bash(gh:*) Bash(date:*) Bash(ls:*) Gr
 
 Run the full end-of-milestone sequence in one shot:
 
-1. Update `todo/PLAN.md` (mark completed tasks).
+1. Update `planning/PLAN.md` (mark completed tasks).
 2. Document substantive changes (new public APIs, modified contracts).
 3. Capture study material for new concepts (`aprendizaje/`).
 4. Write a bitácora entry for today.
@@ -36,7 +36,7 @@ git status --short 2>/dev/null || echo "(not a git repo)"
 ```
 - **Commits since last bitácora**:
 ```!
-LATEST=$(ls -1t todo/bitacora-*.md 2>/dev/null | head -n1)
+LATEST=$(ls -1t planning/bitacora/*.md 2>/dev/null | head -n1)
 if [ -n "$LATEST" ]; then
   SINCE=$(date -r "$LATEST" "+%Y-%m-%d %H:%M:%S" 2>/dev/null || stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$LATEST" 2>/dev/null)
   git log --since="$SINCE" --format="%h %s" 2>/dev/null
@@ -51,7 +51,7 @@ git diff --stat "origin/$DEFAULT...HEAD" 2>/dev/null | tail -n40
 ```
 - **Current PLAN.md (active phase)**:
 ```!
-[ -f todo/PLAN.md ] && grep -B0 -A20 "^### Phase " todo/PLAN.md | head -n40 || echo "(no PLAN.md)"
+[ -f planning/PLAN.md ] && grep -B0 -A20 "^### Phase " planning/PLAN.md | head -n40 || echo "(no PLAN.md)"
 ```
 
 ## Procedure
@@ -73,7 +73,7 @@ Per `verification.md`, do **not** create a checkpoint while verification is fail
 - If anything fails: stop, report, and let the user fix before continuing.
 - If no verification commands are configured, say so and continue.
 
-### 3. Update `todo/PLAN.md`
+### 3. Update `planning/PLAN.md`
 
 Apply the `/plan-writing` rules to update the plan:
 
@@ -113,7 +113,7 @@ State which study notes were created/updated (or "no new concepts this checkpoin
 
 Apply the `/bitacora` rules:
 
-- Target file: `todo/bitacora-YYYY-MM-DD.md` (use pre-rendered date).
+- Target file: `planning/bitacora/YYYY-MM-DD.md` (use pre-rendered date).
 - Append a new entry with HH:MM (use pre-rendered time).
 - Structure: technical changes / design decisions / pending / learnings.
 - Use `$ARGUMENTS` (or the inferred headline) as the entry summary.

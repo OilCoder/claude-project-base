@@ -31,14 +31,14 @@ OUT=$(
     fi
 
     PHASE=""
-    if [[ -f todo/PLAN.md ]]; then
-      PHASE=$(grep -E "^### Phase " todo/PLAN.md 2>/dev/null | grep -v "(COMPLETED)" | head -n1 | sed "s/^### //; s/ —.*//" | tr -d "\n")
+    if [[ -f planning/PLAN.md ]]; then
+      PHASE=$(grep -E "^### Phase " planning/PLAN.md 2>/dev/null | grep -v "(COMPLETED)" | head -n1 | sed "s/^### //; s/ —.*//" | tr -d "\n")
     fi
 
     BITACORA_FLAG=""
     TODAY=$(date +%Y-%m-%d 2>/dev/null)
     if [[ -n "$BRANCH" && -n "$TODAY" ]]; then
-      if [[ ! -f "todo/bitacora-${TODAY}.md" && -n "$PORCELAIN" ]]; then
+      if [[ ! -f "planning/bitacora/${TODAY}.md" && -n "$PORCELAIN" ]]; then
         BITACORA_FLAG=" | bitácora pendiente"
       fi
     fi

@@ -31,13 +31,13 @@ CTX=$(
     CTX=""
 
     # Active phase from PLAN.md
-    if [[ -f todo/PLAN.md ]]; then
-      ACTIVE_PHASE=$(grep -E "^### Phase " todo/PLAN.md 2>/dev/null | grep -v "(COMPLETED)" | head -n1 || true)
-      [[ -n "$ACTIVE_PHASE" ]] && CTX="${CTX}Active phase from todo/PLAN.md: ${ACTIVE_PHASE}"$'"'"'\n\n'"'"'
+    if [[ -f planning/PLAN.md ]]; then
+      ACTIVE_PHASE=$(grep -E "^### Phase " planning/PLAN.md 2>/dev/null | grep -v "(COMPLETED)" | head -n1 || true)
+      [[ -n "$ACTIVE_PHASE" ]] && CTX="${CTX}Active phase from planning/PLAN.md: ${ACTIVE_PHASE}"$'"'"'\n\n'"'"'
     fi
 
     # Pending items from latest bitácora
-    LATEST=$(ls -1t todo/bitacora-*.md 2>/dev/null | head -n1 || true)
+    LATEST=$(ls -1t planning/bitacora/*.md 2>/dev/null | head -n1 || true)
     if [[ -n "$LATEST" ]]; then
       PENDING=$(grep -E "^- \[ \]" "$LATEST" 2>/dev/null | head -n5 || true)
       if [[ -n "$PENDING" ]]; then

@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`/blueprint` scaffolding loop** — a human-gated "first loop" that generates a project's
+  foundation document suite *before* coding, so the project has a stable, drift-proof anchor.
+  One document per iteration, each approved before the next; state lives on disk in
+  `planning/blueprint/MANIFEST.md` (resumable), not in the conversation.
+  - **`blueprinter`** agent (5th agent): drafts one inception document per invocation in
+    fresh context, honoring prior docs' Non-goals/Invariants.
+  - Suite adapts by **project kind**: core docs (charter, context/interfaces, implementation
+    plan) for every kind, plus packs for `ml-research` and `data-pipeline`; `other`/`--core`
+    → core only.
+  - The implementation-plan document seeds `PLAN.md` via `/plan-writing` (carrying Non-goals
+    and Invariants verbatim).
+- **Drift-proof `PLAN.md`** — `planning-format.md` now mandates `## Non-goals` and
+  `## Invariants`, a per-phase `Done when:` acceptance criterion, and a 4th task state
+  **BLOCKED** (`- [!] … (BLOCKED date: reason)`) as a hard stop. `/phase-executor` checks
+  Non-goals/Invariants before writing code and emits BLOCKED instead of skipping silently.
+
+### Changed
+
+- **`todo/` → `planning/`** — the folder outgrew its original "to-do list" meaning; it is now
+  the project's planning/design/record hub, reorganized into subfolders: `planning/blueprint/`,
+  `planning/specs/` (was `todo/spec-*.md`), `planning/bitacora/` (was `todo/bitacora-*.md`),
+  plus `PLAN.md`. The 3 hooks' globs and all references were updated.
+- **`plan-format.md` → `planning-format.md`** — renamed and unified into the single authority
+  for the whole `planning/` hub (blueprint suite catalog + manifest + PLAN.md format),
+  replacing what would have been a separate `blueprint-suite.md` rule.
+
 - **Study material layer (`aprendizaje/`)** — a 5th project folder and the Explanation
   layer (per Diátaxis), distinct from `documentation/` (reference). Captures *all* the
   knowledge applied in the project — software *and* domain (petroleum, geology, ML,

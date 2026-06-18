@@ -10,7 +10,7 @@ Confusing them dilutes both. This rule defines the boundary.
 | Eje | **Bitácora** | **MEMORY.md** |
 |---|---|---|
 | Owner | The user | Claude |
-| Location | `todo/bitacora-YYYY-MM-DD.md` | `~/.claude/projects/<project>/memory/MEMORY.md` |
+| Location | `planning/bitacora/YYYY-MM-DD.md` | `~/.claude/projects/<project>/memory/MEMORY.md` |
 | Voice | First-person, narrative | Imperative, factual |
 | Purpose | User's learning process and project history | Make Claude effective in future sessions |
 | Lifetime | Forever (exported to Obsidian for knowledge management) | Per machine, per project |
@@ -104,10 +104,10 @@ manual pass.)
 
 The bitácora has its own maintenance via Cowork: each `bitacora-YYYY-MM-DD.md` is
 exported to the Obsidian vault as `log-YYYY-MM-DD.md` with frontmatter and wikilinks.
-The source file in `todo/` stays as the canonical record.
+The source file in `planning/` stays as the canonical record.
 
 ## Cross-references
 
 - See `bitacora/SKILL.md` for the bitácora write procedure.
-- See `plan-format.md` for how pending items from bitácora flow into PLAN.md.
+- See `planning-format.md` for how pending items from bitácora flow into PLAN.md.
 - Official docs: <https://code.claude.com/docs/en/memory> for the auto memory system.

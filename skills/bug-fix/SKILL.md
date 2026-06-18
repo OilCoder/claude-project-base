@@ -106,7 +106,7 @@ claim done while verification is failing.
 
 ### 7. Bitácora entry
 
-Append a bitácora entry to `todo/bitacora-YYYY-MM-DD.md` per `bitacora/SKILL.md`:
+Append a bitácora entry to `planning/bitacora/YYYY-MM-DD.md` per `bitacora/SKILL.md`:
 
 - Technical changes: file:line of the fix, file of the regression test
 - Design decisions: why this fix vs alternatives considered

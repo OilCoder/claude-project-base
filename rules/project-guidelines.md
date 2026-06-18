@@ -34,15 +34,16 @@ A behavior critical for production correctness should land in the hardest layer 
 | `doc-enforcement.md` | Source files (`paths:`) | Docstring requirements and standards |
 | `docs-style.md` | Markdown files (`paths:`) | Markdown documentation format |
 | `learning-style.md` | `aprendizaje/**/*.md` (`paths:`) | Study material standard (Explanation layer) |
-| `plan-format.md` | `todo/**/*.md` (`paths:`) | Plan file format and update rules |
+| `planning-format.md` | `planning/**/*.md` (`paths:`) | Single authority for `planning/`: blueprint suite catalog, manifest, and PLAN.md format (Non-goals/Invariants/Done-when/BLOCKED) |
 
 ## Skills index
 
 | Skill | Purpose |
 |---|---|
+| `/blueprint` | Scaffolding loop: generate the foundation document suite in `planning/blueprint/` before coding (base + new projects) |
 | `/checkpoint` | Combined milestone workflow: plan + docs + bitácora + commit + (push/PR) |
-| `/bitacora` | Register work session in `todo/bitacora-YYYY-MM-DD.md` |
-| `/plan-writing` | Write and update project plans in `todo/` |
+| `/bitacora` | Register work session in `planning/bitacora/YYYY-MM-DD.md` |
+| `/plan-writing` | Write and update project plans in `planning/` (seeds from blueprint if present) |
 | `/phase-executor` | Read and execute a phase from `PLAN.md` in order, with verification gate |
 | `/test` | Create test scripts for modules |
 | `/investigate` | Create isolated debug scripts for investigation |
@@ -57,7 +58,8 @@ A behavior critical for production correctness should land in the hardest layer 
 |---|---|
 | `code-reviewer` | Pre-commit review in fresh context — finds what the author missed |
 | `security-reviewer` | OWASP-style vulnerability audit on uncommitted or recent changes |
-| `architect` | Interview-driven spec writing for non-trivial features → `todo/spec-*.md` |
+| `architect` | Interview-driven spec writing for non-trivial features → `planning/specs/*.md` |
+| `blueprinter` | Drafts one project-inception foundation document → `planning/blueprint/*.md` (driven by `/blueprint`) |
 | `implementer` | Autonomous code writer for self-contained tasks; preloads code-style, verification, doc-enforcement rules |
 
 ## Hooks index
@@ -89,7 +91,7 @@ Claude Code provides automatic memory at `~/.claude/projects/<project>/memory/ME
 The first 200 lines load at every session start. Per `memory-policy.md`:
 
 - **MEMORY.md** is Claude's operational manual — build commands, gotchas, factual patterns.
-- **Bitácora** (`todo/bitacora-YYYY-MM-DD.md`) is the user's narrative journal — actions, decisions, failures, learnings.
+- **Bitácora** (`planning/bitacora/YYYY-MM-DD.md`) is the user's narrative journal — actions, decisions, failures, learnings.
 
 These are **not interchangeable**. Narrative goes to bitácora, factual operational
 notes go to MEMORY.md. See `memory-policy.md` for the full boundary.
@@ -103,7 +105,11 @@ After `/setup`, only 5 folders exist. The base does not prescribe more:
 
 ```
 .claude/         rules, skills, agents, hooks
-todo/            plans, bitácoras
+planning/        planning hub (grows on demand):
+  ├── blueprint/   foundation suite (/blueprint)
+  ├── specs/       single-feature specs (architect)
+  ├── bitacora/    session journals (/bitacora)
+  └── PLAN.md      active execution plan
 documentation/   code docs (target of /document)
 aprendizaje/     study material (target of /study)
 docs/            reserved for GitHub Pages landing
@@ -144,7 +150,7 @@ Defined per project. Replace this section with the actual folder tree:
 src/          → Source code
 tests/        → Test scripts (may be gitignored)
 debug/        → Debug scripts (always gitignored)
-todo/         → Plans and session logs
+planning/         → Plans and session logs
 docs/         → Technical documentation
 data/         → Input data
 outputs/      → Generated outputs (may be gitignored)

@@ -10,7 +10,7 @@ This rule operationalizes the official Claude Code guidance:
 
 ## Verification is mandatory
 
-Before declaring any task as completed (or marking a phase as `(COMPLETED)` per `plan-format.md`),
+Before declaring any task as completed (or marking a phase as `(COMPLETED)` per `planning-format.md`),
 the change must be verified through at least one of the following channels:
 
 | Type of change | Required verification |
@@ -71,7 +71,7 @@ and run them before reporting a task as complete.
 
 ## Cross-references
 
-- See `plan-format.md` for how to mark tasks complete.
+- See `planning-format.md` for how to mark tasks complete.
 - See `phase-executor/SKILL.md` for verification at end of phase.
 - See `test/SKILL.md` for writing verification tests.
 - See `code-change.md` for behavior on multi-file changes.

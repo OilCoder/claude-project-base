@@ -18,7 +18,7 @@ Then bootstrap a new project:
 /setup
 ```
 
-`/setup` asks 2 questions (project name, stack), creates 5 folders (`.claude/`, `todo/`, `documentation/`, `aprendizaje/`, `docs/`), copies all the rules/skills/agents/hooks, and customizes the linter hook + permissions for your stack.
+`/setup` asks 2 questions (project name, stack), creates 5 folders (`.claude/`, `planning/`, `documentation/`, `aprendizaje/`, `docs/`), copies all the rules/skills/agents/hooks, and customizes the linter hook + permissions for your stack.
 
 Updates:
 
@@ -29,21 +29,23 @@ Updates:
 ## What you get
 
 ### 13 rules
-9 always loaded (code style, code change, file naming, logging, verification, delegation, memory policy, commit style, project guidelines) + 4 path-scoped (doc enforcement, docs style, learning style, plan format).
+9 always loaded (code style, code change, file naming, logging, verification, delegation, memory policy, commit style, project guidelines) + 4 path-scoped (doc enforcement, docs style, learning style, planning format).
 
-### 10 skills
+### 11 skills
+- `/blueprint` — scaffolding loop: foundation doc suite in `planning/blueprint/`, gated per document, before coding
 - `/checkpoint` — plan + docs + study + bitácora + commit + (push/PR) in one
 - `/bug-fix` — TDD bug fix workflow
 - `/bitacora` — session log
-- `/plan-writing` — write/update PLAN.md
+- `/plan-writing` — write/update PLAN.md (seeds from blueprint if present)
 - `/phase-executor` — execute a plan phase with verification gate
 - `/study` — capture project knowledge as didactic study notes in `aprendizaje/`
 - `/test`, `/investigate`, `/document`, `/doc-enforce`
 
-### 4 agents
+### 5 agents
 - `code-reviewer` — fresh-context diff review
 - `security-reviewer` — OWASP-style audit
 - `architect` — interview-driven feature design
+- `blueprinter` — drafts one project-inception foundation doc (driven by `/blueprint`)
 - `implementer` — autonomous code writer with rules preloaded
 
 ### 5 hooks

@@ -21,7 +21,7 @@ this work, and what is the underlying concept?"* — distinct from the other lay
 |---|---|---|---|
 | **`aprendizaje/`** (this) | "What is the concept and *why* does it work?" | The user, learning | `aprendizaje/NN_<slug>.md` |
 | `documentation/` | "What does this module do? Its I/O?" | Maintainers | `documentation/` |
-| Bitácora | "What did I do today and why?" | The user, narrating | `todo/bitacora-*.md` |
+| Bitácora | "What did I do today and why?" | The user, narrating | `planning/bitacora/*.md` |
 | MEMORY.md | "What operational facts must Claude recall?" | Claude | auto memory |
 | `docs/` | Public landing page | External visitors | GitHub Pages |
 

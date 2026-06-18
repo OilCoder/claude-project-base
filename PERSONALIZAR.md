@@ -24,7 +24,8 @@ Updates: `/plugin update claude-project-base` pulls newer versions across all yo
 
 ```
 .claude/         ← rules, skills, agents, hooks
-todo/            ← plans, bitácoras
+planning/        ← planning hub; subfolders grow on demand:
+                   blueprint/ (/blueprint), specs/ (architect), bitacora/ (/bitacora), PLAN.md
 documentation/   ← code docs (target of /document)
 aprendizaje/     ← study material (target of /study)
 docs/            ← reserved for GitHub Pages
@@ -132,7 +133,7 @@ The rule of thumb from the official Claude Code docs:
 | References policy | Verify real before citing; never fabricate | — |
 | Language | Spanish prose + English technical terms | Change per project / vault |
 
-### plan-format.md
+### planning-format.md
 
 | Section | Generic (do not touch) | Customize |
 |---|---|---|
