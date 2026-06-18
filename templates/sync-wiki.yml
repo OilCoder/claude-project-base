@@ -1,0 +1,50 @@
+# Syncs the `documentation/` folder to the project's GitHub Wiki on every push.
+#
+# This is the wiki counterpart to GitHub Pages:
+#   - docs/          → GitHub Pages (native: Settings → Pages → /docs folder)
+#   - documentation/ → GitHub Wiki  (this workflow, because the wiki is a
+#                                    separate `*.wiki.git` repo with no native
+#                                    "publish from folder" toggle)
+#
+# SETUP (one time, before this workflow can run):
+#   1. Open the repo's **Wiki** tab on GitHub and create any first page
+#      (e.g. "Home"). This initializes the `<repo>.wiki.git` repository —
+#      without it the push target does not exist and the action fails.
+#   2. Commit this file to `.github/workflows/sync-wiki.yml`.
+#
+# CONVENTIONS for `documentation/` so it renders well as a wiki:
+#   - `Home.md`      → the wiki landing page (create one).
+#   - `_Sidebar.md`  → optional navigation menu.
+#   - Each `*.md` becomes a wiki page named after the file (without extension).
+
+name: Sync documentation to Wiki
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "documentation/**"
+      - ".github/workflows/sync-wiki.yml"
+  # Allow manual runs from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Avoid overlapping wiki pushes if commits land quickly.
+concurrency:
+  group: sync-wiki
+  cancel-in-progress: true
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Push documentation/ to the wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          path: documentation/
+          token: ${{ secrets.GITHUB_TOKEN }}

@@ -63,7 +63,17 @@ documentation/
 
 GitHub Pages bilingual sites have a different convention (Jekyll multilang plugin, language switcher in `docs/`).
 
-## GitHub Pages site (`docs/`)
+## Publishing model — two GitHub surfaces
+
+The two doc folders map to the two public surfaces GitHub offers. They are
+published differently:
+
+| Source folder | GitHub surface | How it publishes |
+|---|---|---|
+| `docs/` | **GitHub Pages** | **Native** — *Settings → Pages → Deploy from branch → `/docs` folder*. No automation. |
+| `documentation/` | **GitHub Wiki** | **Not native** — the wiki is a separate `<repo>.wiki.git` repo. A workflow syncs it. |
+
+### GitHub Pages site (`docs/`)
 
 The base does not prescribe how to build the landing page. Common stacks:
 
@@ -71,8 +81,33 @@ The base does not prescribe how to build the landing page. Common stacks:
 - Jekyll (default for GitHub Pages) — `docs/_config.yml` + Markdown
 - A static site generator's build output (Astro, Hugo, MkDocs)
 
-`docs/` should be configured in GitHub Pages settings as the source folder.
-The base does not enforce a structure inside it — that depends on the chosen stack.
+`docs/` is configured in GitHub Pages settings as the source folder. The base does
+not enforce a structure inside it — that depends on the chosen stack.
+
+### GitHub Wiki (`documentation/`)
+
+Unlike Pages, the wiki has no "publish from folder" toggle — it lives in a separate
+`<repo>.wiki.git` repository. To mirror the Pages experience (edit a folder, see it
+published), the base ships a workflow: `templates/sync-wiki.yml`, copied by `/setup`
+to `.github/workflows/sync-wiki.yml`. On every push that touches `documentation/`,
+it pushes the folder's contents to the wiki.
+
+One-time prerequisite: create the wiki manually (Wiki tab → first page) so
+`<repo>.wiki.git` exists. For good rendering, keep a `Home.md` (landing page) and an
+optional `_Sidebar.md` (navigation) in `documentation/`. Each `*.md` becomes a wiki
+page named after the file.
+
+### About section (repo homepage)
+
+When the project is published, the repo's **About** panel must expose **both**
+surfaces so a visitor can reach either:
+
+- **Website** field → the GitHub Pages URL (`https://<user>.github.io/<repo>/`).
+- A link to the **Wiki** (`https://github.com/<user>/<repo>/wiki`) — in the
+  description and/or the README, since About has only one Website slot.
+
+This is a publishing convention, not an optional nicety: Pages and Wiki are the two
+faces of the project and both must be discoverable from the repo landing.
 
 ## Cross-references
 

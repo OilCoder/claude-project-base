@@ -199,6 +199,36 @@ they create the corresponding folders.
 If the user provided phases or tasks, create `todo/PLAN.md` per `plan-format.md`.
 Otherwise leave `todo/` empty — the user runs `/plan-writing` when ready.
 
+### 14. (Optional) GitHub publishing — Pages + Wiki
+
+The base reserves two publishing targets (see `docs-style.md`):
+
+- **`docs/` → GitHub Pages** — native. The user enables it in *Settings → Pages →
+  Deploy from branch → `/docs` folder*. No automation needed.
+- **`documentation/` → GitHub Wiki** — not native (the wiki is a separate
+  `*.wiki.git` repo). A workflow keeps it in sync.
+
+If the user wants the wiki synced, copy the template:
+
+```bash
+mkdir -p .github/workflows
+cp templates/sync-wiki.yml .github/workflows/sync-wiki.yml
+```
+
+Then tell the user to do the one-time wiki init: open the repo's **Wiki** tab and
+create any first page, otherwise `<repo>.wiki.git` does not exist and the workflow
+fails on first run.
+
+**About section (repo homepage):** when the project is published, the GitHub repo's
+**About** panel must link both surfaces so visitors can reach either:
+
+- **Website** field → the GitHub Pages URL (`https://<user>.github.io/<repo>/`).
+- **Description / README** → an explicit link to the Wiki
+  (`https://github.com/<user>/<repo>/wiki`).
+
+Remind the user to set these after the first publish. Do not invent the URLs —
+derive them from the actual `<user>/<repo>`.
+
 ## Final state
 
 After `/setup`, the project looks like this:
