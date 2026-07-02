@@ -3,7 +3,7 @@ paths:
   - "planning/**/*.md"
 ---
 
-<!-- description: Single authority for the planning/ hub — folder map, blueprint suite catalog, manifest format, and PLAN.md format (incl. Non-goals/Invariants/Done-when/BLOCKED) -->
+<!-- description: Single authority for the planning/ hub — folder map, blueprint suite catalog (identity Invariants vs revisable Architecture decisions, Pillars), manifest format, PLAN.md floor format (Non-goals/Invariants/Pillars/Done-when/BLOCKED), and post-floor cycles -->
 
 # Planning Format
 
@@ -19,13 +19,14 @@ planning/
 ├── blueprint/      foundation document suite (project inception) — see §A
 │   └── MANIFEST.md
 ├── specs/          single-feature specs written mid-project by the architect agent
+├── cycles/         post-floor work cycles (NN_<slug>.md) — see §C
 ├── bitacora/       session journals (YYYY-MM-DD.md) — format owned by bitacora/SKILL.md
 ├── PLAN.md         the active execution plan — see §B
 └── phase_NN_<name>.md   phase-specific plans (optional)
 ```
 
 `specs/` format is owned by the `architect` agent; `bitacora/` by `bitacora/SKILL.md`.
-This rule governs **§A blueprint** and **§B PLAN.md**.
+This rule governs **§A blueprint**, **§B PLAN.md**, and **§C cycles**.
 
 ---
 
@@ -41,9 +42,9 @@ filename order; `09_implementation_plan.md` is always last and seeds `PLAN.md`.
 
 | File | Required sections |
 |---|---|
-| `00_charter.md` | Goal · Stakeholders · Success criteria (measurable) · **Non-goals** · **Invariants** · Constraints (time/compute/data/budget) · Open questions |
+| `00_charter.md` | Goal (measurable, goal-run ready) · Stakeholders · Success criteria (measurable) · **Non-goals** · **Invariants** (identity, 2–4 max) · **Architecture decisions** (revisable) · **Pillars** · Constraints (time/compute/data/budget · external-data classification) · Open questions |
 | `01_context_interfaces.md` | External inputs (shape + source) · Outputs/artifacts · Integration points · Environment assumptions · Out-of-scope interfaces |
-| `09_implementation_plan.md` | Goal · Phases (each with a **Done when:** line) · **Non-goals** (verbatim from Charter) · **Invariants** (verbatim from Charter) · Sequencing/dependencies · Risks |
+| `09_implementation_plan.md` | Goal · Phases (each with a **Done when:** line) · **Non-goals** (verbatim from Charter) · **Invariants** (verbatim from Charter) · **Pillars** (verbatim from Charter) · Sequencing/dependencies · Risks |
 
 **KIND PACK — `ml-research` (documents `02`–`04`):**
 
@@ -51,7 +52,7 @@ filename order; `09_implementation_plan.md` is always last and seeds `PLAN.md`.
 |---|---|
 | `02_problem_data.md` | Task definition · Dataset(s) (source, size) · Splits · Labels · Leakage risks |
 | `03_method_experiments.md` | Approach/model · Baselines · Ablations · Hypotheses to test |
-| `04_evaluation_protocol.md` | Metrics · Validation scheme · Success thresholds · Reproducibility (seeds, environment) |
+| `04_evaluation_protocol.md` | Metrics (headline metric must be class-balanced) · Leakage check · Paired control (a λ=0-style run that must reproduce the baseline) · Validation scheme · Success thresholds · Reproducibility (seeds, environment) |
 
 **KIND PACK — `data-pipeline` (documents `02`–`04`):**
 
@@ -63,17 +64,40 @@ filename order; `09_implementation_plan.md` is always last and seeds `PLAN.md`.
 
 **Kind `other` (or the `--core` flag on any kind)** → CORE documents only (`00`, `01`, `09`).
 
-### Mandatory anti-drift sections
+### Mandatory anchor sections (anti-drift)
 
-- `00_charter.md` and `09_implementation_plan.md` **must** contain `## Non-goals` and
-  `## Invariants`, and they must be specific (not "TBD").
+- **`## Goal` is outcome-shaped and goal-run ready.** A measurable result over the
+  artifact — a number the product can fail ("the agent reproduces ≥75% of the report
+  spec"), phrased as a verifiable condition so it can be lifted verbatim into a `/goal`
+  run. Never a description of activity ("build a system that...").
+- `00_charter.md` and `09_implementation_plan.md` **must** contain `## Non-goals`,
+  `## Invariants`, `## Architecture decisions`, and `## Pillars` — all specific (not "TBD").
   - **Non-goals**: things the project will explicitly NOT do (prevents feature invention).
-  - **Invariants**: things that must always hold — the core goal, the chosen architecture,
-    inviolable constraints (prevents the project becoming something else).
-- The Implementation Plan copies both **verbatim** from the Charter so it is self-contained
-  for `/plan-writing` to lift into `PLAN.md`.
-- An approved Invariant may be amended only via a logged manifest decision **and** a fresh
-  approval gate — never silently.
+  - **Invariants (identity)**: what the project IS — 2–4 maximum. **Litmus test: if it
+    names a tool, library, or topology, it is NOT an Invariant — it is an Architecture
+    decision.** Identity survives pivots; architecture rarely survives contact with
+    real data. Enshrining the "how" at constitutional level turns the blueprint into
+    a straitjacket.
+  - **Architecture decisions (revisable)**: the current "how" — frameworks, topologies,
+    model choices, pipeline shapes. Changing one costs **one line in the decisions
+    log**, no ceremony, no fresh approval gate. This is what keeps the blueprint a
+    guide instead of a straitjacket.
+  - **Pillars**: the decision rails for autonomous work — (1) what Claude never
+    decides (interpretation, scope, contract splits), (2) what Claude builds freely
+    (mechanical work, exposing tools), (3) ambiguous/design/interpretive →
+    **record it, do NOT guess**.
+- The Implementation Plan copies Non-goals, Invariants, and Pillars **verbatim** from the
+  Charter so it is self-contained for `/plan-writing` to lift into `PLAN.md`.
+- An approved **Invariant** may be amended only via a logged manifest decision **and** a
+  fresh approval gate — never silently. An **Architecture decision** needs only the
+  logged line.
+- **External data is classified on day zero** (Charter Constraints): every external
+  dataset is tagged public-no-friction / login-gated / to-digitize. **No floor phase may
+  depend on data not yet verified in hand** — acquisition friction has derailed real
+  phases before; it is a day-zero risk, not an execution surprise.
+- **Design docs (`02`–`04`) are hypotheses.** Each opens with the banner
+  `> Hypothesis — revisit after first contact with real data.` Half of real design
+  churn is only discoverable by building; the revisit is scheduled work, not a failure.
 
 ### Manifest format (`planning/blueprint/MANIFEST.md`)
 
@@ -112,9 +136,12 @@ Document markers:
 
 ## §B — PLAN.md format (project execution)
 
-`PLAN.md` is the execution projection of the blueprint. When
-`planning/blueprint/09_implementation_plan.md` exists, `/plan-writing` seeds `PLAN.md`
-from it (carrying Non-goals and Invariants verbatim).
+`PLAN.md` is the execution projection of the blueprint — it covers the **floor**: the
+enumerable phases that build the minimal end-to-end skeleton which makes the Goal
+safely measurable. When `planning/blueprint/09_implementation_plan.md` exists,
+`/plan-writing` seeds `PLAN.md` from it (carrying Non-goals, Invariants, and Pillars
+verbatim). Once the floor is complete, new work opens **cycles** (§C) — phases are
+never appended to the master plan.
 
 ### File format
 
@@ -134,7 +161,12 @@ Folder tree showing key paths and their purpose.
 - Explicitly NOT doing X (carried verbatim from the blueprint Charter).
 
 ## Invariants
-- Must always hold: <core goal / architecture constraint that must never be violated>.
+- Must always hold: <what the project IS — identity, never a tool/library/topology>.
+
+## Pillars
+- Claude never decides: <interpretation, scope, contract splits — the user's calls>.
+- Claude builds freely: <mechanical work, exposing tools, verification plumbing>.
+- Ambiguous / design / interpretive → record it, do NOT guess.
 
 ## Phases
 
@@ -149,6 +181,11 @@ Done when: <one-line, verifiable acceptance criterion for the whole phase>
 ### Phase N+1 — <Name>
 Done when: ...
 - [ ] ...
+
+## Cycles index
+(Added when the floor is complete — one line per cycle, see §C.)
+- [x] 01_honest_metrics — closed 2026-06-08 (goal check: balanced acc 0.61 → 0.64)
+- [>] 02_physical_channels — open (planning/cycles/02_physical_channels.md)
 
 ## Conventions
 Short bullet list of naming rules or constraints relevant to this plan.
@@ -165,8 +202,13 @@ Short bullet list of naming rules or constraints relevant to this plan.
 - Phases must be independent — a phase should not depend on assumptions from another phase unless explicitly stated.
 - Every phase has exactly one `Done when:` line — a verifiable criterion (`/phase-executor`
   treats it as the phase's acceptance target alongside the verification gate).
-- `## Non-goals` and `## Invariants` are required in `PLAN.md`; if a blueprint exists they
-  are copied verbatim from it, otherwise authored with the user.
+- **`Done when:` is outcome-shaped, never activity-shaped.** It describes a quality of
+  the artifact, inspectable on disk and traceable to a Charter success criterion.
+  Good: `Done when: the rendered report has zero "Not computed" chapters`. Bad:
+  `Done when: the renderer is wired up`. Activity-shaped criteria can be satisfied by
+  hollow conformance ("report theater") — the phase completes, the product says nothing.
+- `## Non-goals`, `## Invariants`, and `## Pillars` are required in `PLAN.md`; if a
+  blueprint exists they are copied verbatim from it, otherwise authored with the user.
 
 ### Task states
 
@@ -204,10 +246,64 @@ discarded applies to plan tasks; the manifest rarely drops a document.)
   record** that the option was considered and dropped/blocked.
 - Do not delete tasks, ever — completed, blocked, discarded, or pending.
 - Do not add new tasks to a phase without user approval.
-- Never change a stated Non-goal or Invariant without explicit user approval (they are the
-  drift anchor; silently altering them defeats the whole point).
+- Never change a stated Non-goal, Invariant, or Pillar without explicit user approval
+  (they are the drift anchor; silently altering them defeats the whole point).
+  Architecture decisions are the revisable tier — those change via a logged decision line.
 - If a phase is fully completed (all tasks `[x]` or discarded), add `(COMPLETED)` to the title.
+- **When the floor is complete (all phases COMPLETED), new work opens a cycle (§C)** —
+  never append new phases to the master plan. An ever-growing plan becomes a history
+  file; cycles keep each effort short, closable, and measured against the Goal.
 - Never rewrite or reformat existing content — only update task states and phase titles.
+
+---
+
+## §C — Cycles (project life after the floor)
+
+The floor (`PLAN.md`) builds the skeleton; the project's real life then runs in
+**cycles**: audit/doubt → cycle → measurement against the Goal → close. Each cycle is
+one file in `planning/cycles/NN_<slug>.md` — short, self-contained, and always closed
+with a measurement (never abandoned, never appended to the master plan).
+
+### Cycle file format
+
+```markdown
+# Cycle NN — <short name>
+
+## Origin
+The audit finding, doubt, or user decision that opened this cycle (1-3 lines,
+link the bitácora entry or gap report if one exists).
+
+## Objective
+One outcome-shaped, measurable statement tied to the Charter Goal — what the
+artifact will do when this cycle closes that it cannot do today.
+
+## Goal-run command
+Ready to paste — derived from the Charter, never re-invented:
+
+    /goal <this cycle's objective> respecting the Pillars in planning/PLAN.md;
+          stop when <the closing measurement below is met or provably blocked>
+
+## Tasks
+- [ ] Same five task states as §B (one action per task, file/module named).
+
+## Close — measurement against the Goal
+Filled at close: the measured result vs the Objective (numbers, not adjectives),
+and what it moved on the Charter Goal. A cycle without this section is not closed.
+```
+
+### Cycle rules
+
+- **One objective per cycle.** If a second objective appears mid-cycle, it opens the
+  next cycle — it does not stretch this one.
+- **Open ↔ index**: opening a cycle adds a `[>]` line to the `## Cycles index` in
+  `PLAN.md`; closing it flips the line to `[x]` with the one-line measurement.
+- **Closing requires the measurement.** "Done" without numbers against the Objective
+  is report theater — the cycle stays `[>]` until measured (or `[!]` if blocked).
+- **Execution vehicle**: interactive work, `/phase-executor` on the cycle's tasks, or
+  the cycle's Goal-run command via `/goal` (autonomous, condition-stopped). Long
+  external runs (training, batch inference) are babysat with `/loop`, not by leaving
+  the run unwatched overnight.
+- Same marker language as §A/§B; same discard-don't-delete discipline.
 
 ## Foundation gap report (the return signal)
 
@@ -238,6 +334,8 @@ viable option, say so explicitly rather than inventing one.
 ## Cross-references
 
 - See `blueprint/SKILL.md` and `blueprinter` agent for generating the §A suite.
-- See `plan-writing/SKILL.md` for the procedure to create/seed and update `PLAN.md`.
-- See `phase-executor/SKILL.md` for phase execution (reads Non-goals/Invariants, honors Done-when/BLOCKED).
+- See `plan-writing/SKILL.md` for the procedure to create/seed and update `PLAN.md`,
+  and to open/close §C cycles.
+- See `phase-executor/SKILL.md` for phase execution (reads Goal/Non-goals/Invariants/
+  Pillars, honors Done-when/BLOCKED, runs the anti-theater check).
 - See `bitacora/SKILL.md` for session logging that feeds into plan updates.

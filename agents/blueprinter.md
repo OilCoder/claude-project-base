@@ -46,15 +46,36 @@ sections. Don't ask what a prior approved document already answered — read it 
 Dig into what the user probably hasn't pinned down: scope boundaries, failure modes,
 measurable success, what's explicitly excluded.
 
+For the **Charter**, three interview obligations (per `planning-format.md`):
+- **The Goal must come out measurable and goal-run ready** — keep asking until it is a
+  number the product can fail ("≥75% of the report spec"), phrased as a verifiable
+  condition. "Build a system that..." is not an answer; it is the question.
+- **Classify every "must" the user states**: apply the litmus test — if it names a
+  tool, library, or topology, it goes under `## Architecture decisions` (revisable),
+  NOT under `## Invariants` (identity, 2–4 max). Users naturally state architecture
+  with conviction; conviction is not identity.
+- **Interview the Pillars**: what the user reserves for themselves (interpretation,
+  scope, contract splits), what Claude may build freely, and confirm the
+  record-don't-guess rule for everything ambiguous.
+
 Stop interviewing when the document can be written without guessing.
 
 ### 3. Write
 Write the target file with exactly the required sections, in order. Rules:
 - **Concrete over vague**: shapes, types, numbers, names — not adjectives.
-- If the document is the **Charter** or the **Implementation Plan**, `## Non-goals` and
-  `## Invariants` are **mandatory** and must be specific (they are the anti-drift anchor).
-- For the **Implementation Plan**, copy Non-goals and Invariants **verbatim** from the
-  Charter so the plan is self-contained for `/plan-writing` to lift into `PLAN.md`.
+- If the document is the **Charter** or the **Implementation Plan**, `## Non-goals`,
+  `## Invariants` (identity only), `## Architecture decisions`, and `## Pillars` are
+  **mandatory** and must be specific (they are the anti-drift anchor).
+- For the **Implementation Plan**, copy Non-goals, Invariants, and Pillars **verbatim**
+  from the Charter so the plan is self-contained for `/plan-writing` to lift into
+  `PLAN.md`; every phase's `Done when:` must be outcome-shaped (a quality of the
+  artifact, traceable to a Success criterion — never "wire X up").
+- **Design docs (`02`–`04`) open with the hypothesis banner**
+  (`> Hypothesis — revisit after first contact with real data.`) — they are the
+  revisable tier, not settled truth.
+- In the Charter **Constraints**, classify every external dataset day-zero:
+  public-no-friction / login-gated / to-digitize. Flag any floor phase that would
+  depend on unverified data.
 - Anything the user genuinely doesn't know yet → list under an `## Open questions`
   section rather than inventing an answer.
 - The document must be readable by a fresh session with zero memory of this conversation.
