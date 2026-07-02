@@ -47,14 +47,15 @@ Always create these 5 folders, no more:
 
 ```bash
 mkdir -p .claude/rules .claude/skills .claude/agents .claude/hooks
-mkdir -p planning         # planning hub: PLAN.md, blueprint/, specs/, bitacora/
+mkdir -p planning         # planning hub: PLAN.md, blueprint/, specs/, cycles/, bitacora/
 mkdir -p documentation    # code docs (target of /document)
 mkdir -p aprendizaje      # study material (target of /study)
 mkdir -p docs             # GitHub Pages landing site (always reserved)
 ```
 
-The `planning/` subfolders (`blueprint/`, `specs/`, `bitacora/`) are created on demand
-by the skills that write them (`/blueprint`, `architect`, `/bitacora`) — not at bootstrap.
+The `planning/` subfolders (`blueprint/`, `specs/`, `cycles/`, `bitacora/`) are created
+on demand by the skills that write them (`/blueprint`, `architect`, `/plan-writing`,
+`/bitacora`) — not at bootstrap.
 
 Do **not** create `src/`, `pipeline/`, `tests/`, `data/`, `models/`, `experiments/`,
 or any other domain-specific folder. The user creates those when they start coding.
@@ -223,8 +224,13 @@ bash .claude/scripts/promptloop.sh 5      # start small; 5 = max iterations
 It drives `/phase-executor` in non-interactive loop mode (fresh context per phase),
 committing one phase per iteration and stopping on: all phases COMPLETED · any BLOCKED
 task · max iterations · no progress. It uses `--dangerously-skip-permissions`, so the
-branch guard, the PreToolUse blocking hooks, and commit-per-phase are the safety net —
-recommend running it in a container/sandbox or a throwaway branch.
+branch guard, the PreToolUse blocking hooks, per-tick brakes (`MAX_TURNS`,
+`MAX_BUDGET_USD`), and commit-per-phase are the safety net — recommend running it in a
+container/sandbox or a throwaway branch.
+
+Also tell the user the loop map: `promptloop.sh` = floor phases unattended;
+`/goal` (native) = cycle goal-runs (objective + Pillars, stops on a condition);
+`/loop` (native) = babysitting long external runs (training, overnight batches).
 
 ### 15. (Optional) GitHub publishing — Pages + Wiki
 

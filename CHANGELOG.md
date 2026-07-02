@@ -9,6 +9,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Two-tier anchor: identity vs architecture** (post-mortem of 3 real projects).
+  The Charter now separates `## Invariants` (identity, 2–4 max; litmus test: *if it
+  names a tool, library, or topology it is NOT an Invariant*) from a new
+  `## Architecture decisions` section — the revisable "how", changed with one logged
+  decision line, no ceremony. Lesson: enshrining architecture as Invariants turned
+  the blueprint into a straitjacket; the identity invariant survived every pivot.
+- **`## Pillars` (decision rails)** in Charter → Implementation Plan → `PLAN.md`
+  (verbatim propagation, like Non-goals/Invariants): what Claude never decides ·
+  what it builds freely · ambiguous/interpretive → record, never guess. The
+  formalization of the goal-run pattern that broke petro-agent's "report theater".
+- **Goal-run-ready `## Goal`**: outcome-shaped and measurable — a number the product
+  can fail — phrased as a verifiable condition liftable verbatim into a `/goal` run.
+- **Cycles (§C in `planning-format.md`)** — project life after the floor. `PLAN.md`
+  covers the enumerable floor; afterwards each effort opens
+  `planning/cycles/NN_<slug>.md` (Origin · Objective tied to the Goal · ready-to-paste
+  **Goal-run command** for `/goal` · tasks · **close = measurement against the Goal**)
+  indexed from `PLAN.md`. Opened/closed by `/plan-writing`, kept current by
+  `/checkpoint`. Fixes both observed failure modes: the ever-growing plan-as-history
+  and the abandoned plan with orphan tasks.
+- **Proportional ceremony in `/blueprint`**: a bounded project (hypothesis + dataset +
+  protocol knowable today) gets a **charter-lite** (`00` + `09`, one session, or
+  `--lite`); only open-ended projects run the full 5-step suite.
+- **Re-blueprint as a first-class flow (`/blueprint --v2`)**: freeze the current suite
+  (`FROZEN vN`), open `blueprint_v2/` with **full approval gates** (gates are what
+  erode during improvised pivots), identity check on which Invariants survive,
+  reconcile open cycles.
+- **Contact checkpoint**: the seeded plan's first real-data phase carries the task
+  "review the blueprint — did any Architecture decision die on contact with real
+  data?" — the revisit is scheduled work, not a failure.
+- **Anti-theater oracle**: `/phase-executor` (and the loop prompt) re-read the plan's
+  `## Goal` before closing a phase — "does this artifact serve the Goal, or is it
+  conformant emptiness?" — and **verify COMPLETED against disk** (cited files exist,
+  the criterion is demonstrated by running it), never against recollection (lesson D8).
+- **Per-tick brakes in `promptloop.sh`**: `--max-turns` (env `MAX_TURNS`, default 50)
+  and optional `--max-budget-usd` (env `MAX_BUDGET_USD`); sequence gate now also
+  requires `## Pillars`. Header documents the loop map: `promptloop.sh` = floor,
+  `/goal` (native) = cycle goal-runs, `/loop` (native) = babysitting long runs.
+- **ML honesty checklist** in the `ml-research` pack's evaluation protocol:
+  class-balanced headline metric · leakage check · **paired control** (a λ=0-style
+  run that must reproduce the baseline) — required sections, not rediscoveries.
+- **External-data risk classified day zero** (Charter Constraints): each dataset
+  tagged public-no-friction / login-gated / to-digitize; no floor phase may depend
+  on data not verified in hand.
+- **Design docs (`02`–`04`) are hypotheses**: they open with
+  `> Hypothesis — revisit after first contact with real data.`
+- **`Done when:` hardened to outcome shape**: a quality of the artifact traceable to
+  a Success criterion ("zero Not-computed chapters"), never activity ("wire the
+  renderer") — activity-shaped criteria are satisfiable by hollow conformance.
+
 - **Autonomous phase-execution loop** (`templates/promptloop.sh` → `.claude/scripts/`) —
   Ralph-style: a shell `while` loop runs a fresh `claude -p` per iteration against
   `planning/PLAN.md`, driving `/phase-executor` in non-interactive **loop mode**, one

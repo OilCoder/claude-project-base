@@ -33,7 +33,7 @@ my-project/
 ├── .claude/             ← rules, skills, agents, hooks
 ├── planning/            ← planning hub (subfolders grow on demand):
 │                          blueprint/ (/blueprint), specs/ (architect),
-│                          bitacora/ (/bitacora), PLAN.md
+│                          cycles/ (/plan-writing), bitacora/ (/bitacora), PLAN.md
 ├── documentation/       ← code docs (target of /document)
 ├── aprendizaje/         ← study material (target of /study)
 ├── docs/                ← reserved for GitHub Pages landing site
@@ -63,35 +63,47 @@ These never overlap. `/document` always writes to `documentation/`. GitHub Pages
 
 Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enforce.
 
-## The two loops (project lifecycle)
+## The project lifecycle: floor by plan, life by cycles
 
-A project runs as two sequential loops. The second cannot start until the first finishes.
+**The anchor** (from `/blueprint`) is two-tiered: a measurable, goal-run-ready **Goal**
++ **Invariants** (identity, 2–4 max — never a tool/library/topology) + **Pillars**
+(decision rails) are constitutional; **Architecture decisions** (the "how") are
+revisable via one logged line. Ceremony scales with ambition: bounded projects get a
+**charter-lite** (2 docs); open ones the full 5-step cycle. Pivots are a supported
+flow (`/blueprint --v2`: freeze the suite, re-blueprint with full gates).
+
+### The floor — two sequential loops
 
 | | Loop 1 — Planning | Loop 2 — Code |
 |---|---|---|
 | **Tool** | `/blueprint` (skill) | `.claude/scripts/promptloop.sh` |
 | **Nature** | Interactive — interviews you | Autonomous — headless `claude -p` per phase |
-| **Produces** | Blueprint suite → seeded `PLAN.md` (Non-goals, Invariants, Done-when) | Code, one committed phase per iteration |
-| **Why this shape** | A PRD/charter comes from *your* answers — it can't be headless | The work is already defined in `PLAN.md` — it runs unattended |
+| **Produces** | Blueprint suite → seeded `PLAN.md` (Goal, Non-goals, Invariants, Pillars, Done-when) | Code, one committed phase per iteration |
 | **Ends when** | `PLAN.md` anchor is approved | All phases `(COMPLETED)` / BLOCKED / max-iter |
 
-Loop 1 is the anchor builder; Loop 2 executes against that anchor. `promptloop.sh`
-**refuses to run** until Loop 1 has produced an anchored `PLAN.md` (and any started
-blueprint is fully approved) — so code never gets written before the foundation exists.
+Loop 1 is a 5-step cycle — (1) Charter → (2) Context → (3) Design → (4) Implementation
+Plan → (5) Validation & Seed — whose step 5 **returns** to the weak step on a failed
+coherence check. `promptloop.sh` **refuses to run** until the anchor exists, judges
+every phase against the Goal (anti-theater: no conformant emptiness), verifies
+COMPLETED against disk, and brakes per tick (`--max-turns` / `MAX_BUDGET_USD`).
+If Loop 2 blocks on a *plan* gap, it returns to Loop 1 with a Foundation gap report —
+never improvises in code.
 
-**Loop 1 is a 5-step cycle, not a line:** (1) Charter → (2) Context & Interfaces →
-(3) Design → (4) Implementation Plan → (5) Validation & Seed. Step 5 is a coherence gate; a
-weak foundation **returns** to the failing step instead of advancing.
+### The life — cycles (after the floor)
 
-**Feedback edge:** if Loop 2 blocks because the *plan* is insufficient (not just a code
-bug), it doesn't patch around it — it returns to Loop 1 to strengthen the anchor, then
-resumes. Drift is prevented by going back to planning, never by improvising in code.
+Post-floor work runs in **cycles** (`planning/cycles/NN_<slug>.md`, per
+`planning-format.md` §C): Origin (audit/doubt) → Objective tied to the Goal →
+execute → **close with a measurement against the Goal**. Each cycle carries a
+ready-to-paste **Goal-run command** for `/goal` (objective + Pillars + stop
+condition). `/plan-writing` opens/closes them; `/checkpoint` keeps them current.
 
-```
-1 → 2 → 3 → 4 → 5 ──(anchor ok)──▶ Loop 2: code  ──phase ok──▶ next phase
-        ▲           ▲                   │
-        └──(gap)────┘                   └──(BLOCKED: plan gap)──▶ back to Loop 1
-```
+### Which loop when
+
+| Moment | Tool |
+|---|---|
+| Floor phases, unattended | `promptloop.sh` — fresh context per phase, hard gates |
+| Cycles / goal-runs | `/goal` (native) — measurable objective, stops on condition |
+| Babysitting long runs (training, batches) | `/loop` (native) on an interval |
 
 ## Rules (13)
 
@@ -109,7 +121,7 @@ resumes. Drift is prevented by going back to planning, never by improvising in c
 | `doc-enforcement` | Source files (`paths:`) | Mandatory docstrings |
 | `docs-style` | Markdown (`paths:`) | Documentation format; `documentation/` vs `docs/` |
 | `learning-style` | `aprendizaje/` (`paths:`) | Study material standard (Explanation layer) |
-| `planning-format` | `planning/**/*.md` (`paths:`) | `planning/` authority: blueprint suite + PLAN.md format (Non-goals/Invariants/Done-when/BLOCKED) |
+| `planning-format` | `planning/**/*.md` (`paths:`) | `planning/` authority: blueprint suite (identity vs architecture, Pillars) + PLAN.md floor + cycles |
 
 ## Skills (11)
 
