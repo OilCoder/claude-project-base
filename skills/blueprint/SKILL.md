@@ -7,7 +7,7 @@ description: >
   or run again to resume an unfinished suite. Say "blueprint the project",
   "scaffold the foundation", "start the planning docs".
 disable-model-invocation: true
-argument-hint: "[ml-research | data-pipeline | other | --core]"
+argument-hint: "[ml-research | data-pipeline | other | --core | --lite | --v2]"
 allowed-tools: Read Write Edit Bash(mkdir:*) Bash(ls:*) Bash(date:*) Grep Glob Task AskUserQuestion
 ---
 
@@ -59,20 +59,30 @@ weak step and re-interview that document** — do not proceed to code on a shaky
 
 ## Procedure
 
-### 1. Determine the project kind
+### 1. Determine the project kind and ambition
 
 - If `$ARGUMENTS` names a kind (`ml-research`, `data-pipeline`, `other`), use it.
 - If a manifest already exists, read its `Kind:` and **resume** — do not re-ask.
 - Otherwise ask with `AskUserQuestion`: which kind? (`ml-research` / `data-pipeline` /
   `other`). `other` (or the `--core` flag on any kind) produces the **core docs only**.
+- **Also ask the ambition** (ceremony is proportional to it — record it in the manifest):
+  - **Bounded** — the hypothesis, dataset, and protocol are knowable today (a
+    pinn-sized project). → **Charter-lite**: only `00_charter.md` +
+    `09_implementation_plan.md`, one short interview session, then seed `PLAN.md`.
+    A bounded project does not need nine documents.
+  - **Open** — the "how" is itself the unknown under investigation. → The full
+    5-step cycle below.
+  - `--lite` in `$ARGUMENTS` forces bounded without asking.
 
 ### 2. Derive the document list
 
 Read the catalog for this kind from `planning-format.md` (it defines the ordered document
 list, each document's required sections, and the manifest format). The list is always:
 the **core** docs (`00_charter`, `01_context_interfaces`, `09_implementation_plan`) plus,
-unless `--core`/`other`, the kind's pack (`02`–`04`). Documents are processed in filename
-order so `09_implementation_plan` is always last.
+unless `--core`/`other`, the kind's pack (`02`–`04`). **Bounded/`--lite` reduces further**:
+only `00_charter` + `09_implementation_plan`. Documents are processed in filename
+order so `09_implementation_plan` is always last. Kind-pack design docs (`02`–`04`)
+carry the hypothesis banner per `planning-format.md` — they are the revisable tier.
 
 ### 3. Ensure the manifest
 
@@ -131,14 +141,36 @@ When `09_implementation_plan.md` is approved:
      options — never pick for the user. Log the return in the manifest's Decisions section.
      Do **not** proceed; a shaky anchor is exactly what makes Loop 2 drift later.
 2. **Seed the plan**: run `/plan-writing` to create `planning/PLAN.md` from
-   `09_implementation_plan.md` (carrying `## Non-goals` and `## Invariants` **verbatim**,
-   and each phase's `Done when:`).
-3. **Present the seeded `PLAN.md` and STOP for approval** — the final gate of the planning loop.
-4. On approval, report that the anchor is ready and Loop 2 can now run:
+   `09_implementation_plan.md` (carrying `## Non-goals`, `## Invariants`, and
+   `## Pillars` **verbatim**, and each phase's `Done when:`).
+3. **Inject the contact checkpoint**: add to the first phase that touches real
+   data/models the task
+   `- [ ] Contact checkpoint: review the blueprint — did any Architecture decision die on contact with real data?`
+   A pivot found here is expected learning (revise via a logged decision, or `--v2`
+   below if it is large), not a failure.
+4. **Present the seeded `PLAN.md` and STOP for approval** — the final gate of the planning loop.
+5. On approval, report that the anchor is ready and Loop 2 can now run:
 
    > Planning loop complete (5/5). The anchor (`PLAN.md` with Non-goals/Invariants/Done-when)
    > is ready. The autonomous coding loop can now run on a feature branch:
    > `bash .claude/scripts/promptloop.sh 5`
+
+### 7. Re-blueprint (`--v2`) — pivots are a supported flow, not a failure
+
+When the project's direction genuinely changes (the contact checkpoint or a
+Foundation gap report reveals the current suite no longer describes the project):
+
+1. **Freeze, don't rewrite**: mark the current manifest heading `FROZEN vN
+   (YYYY-MM-DD: reason)` and leave the suite intact — it is the historical baseline.
+2. **Open `planning/blueprint_v2/`** (v3, ... on later pivots) with a fresh manifest
+   and run the same document loop **with full gates — every document gets a real
+   approval, exactly like v1**. Approval gates erode precisely during pivots (the
+   moment of most drift risk), so "drafted" is not an accepted terminal state.
+3. Identity check at v2's Charter: which v1 **Invariants** survive? (They usually
+   all do — that is what makes them identity.) Log what moved from Invariant to
+   Architecture decision, or vice versa, in the new manifest's Decisions.
+4. Re-seed `PLAN.md` via step 6; reconcile open cycles (close or discard each with
+   a dated reason — never silently orphan them).
 
 ## Rules
 

@@ -73,7 +73,7 @@ Per `verification.md`, do **not** create a checkpoint while verification is fail
 - If anything fails: stop, report, and let the user fix before continuing.
 - If no verification commands are configured, say so and continue.
 
-### 3. Update `planning/PLAN.md`
+### 3. Update `planning/PLAN.md` (and the open cycle, if any)
 
 Apply the `/plan-writing` rules to update the plan:
 
@@ -81,6 +81,11 @@ Apply the `/plan-writing` rules to update the plan:
 - If a phase is fully done, append `(COMPLETED)` to its title.
 - Promote any pending items from the latest bitácora that became real plan tasks.
 - Do **not** add new tasks without user approval.
+- **If a cycle is open** (`planning/cycles/*.md` with a `[>]` line in the plan's
+  `## Cycles index`): update its tasks too, and if this milestone completes the
+  cycle's Objective, fill its **Close — measurement against the Goal** section
+  (numbers vs the Objective) and flip the index line to `[x]` per `/plan-writing`.
+  Never close a cycle without the measurement.
 
 ### 4. Update documentation (selective)
 

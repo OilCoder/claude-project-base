@@ -36,6 +36,10 @@ LATEST=$(ls -1t planning/bitacora/*.md 2>/dev/null | head -n1); [ -n "$LATEST" ]
 ```!
 [ -f planning/blueprint/09_implementation_plan.md ] && cat planning/blueprint/09_implementation_plan.md || echo "(no blueprint — plan authored from scratch)"
 ```
+- **Cycles** (post-floor work, if any):
+```!
+ls -1 planning/cycles/*.md 2>/dev/null | tail -n5 || echo "(no cycles yet)"
+```
 
 ## Procedure
 
@@ -59,10 +63,12 @@ If `planning/blueprint/09_implementation_plan.md` exists (pre-rendered above), *
 `PLAN.md` from it instead of authoring from scratch:
 
 1. Lift each phase from the implementation plan into a `### Phase N — <Name>` block,
-   carrying its **`Done when:`** line as the phase's acceptance criterion.
-2. Copy the `## Non-goals` and `## Invariants` sections **verbatim** — do not paraphrase.
-   They are the drift anchor; changing them requires explicit user approval.
-3. Fill `## Goal`, `## Stack`, `## Structure` from the Charter / Context docs.
+   carrying its **`Done when:`** line as the phase's acceptance criterion (outcome-shaped
+   per `planning-format.md` — a quality of the artifact, never "wire X up").
+2. Copy the `## Non-goals`, `## Invariants`, and `## Pillars` sections **verbatim** — do
+   not paraphrase. They are the drift anchor; changing them requires explicit user approval.
+3. Fill `## Goal`, `## Stack`, `## Structure` from the Charter / Context docs — the Goal
+   stays measurable and goal-run ready, exactly as the Charter phrased it.
 4. Show the seeded draft and wait for approval before saving.
 
 ### 3b. When creating a plan from scratch (no blueprint)
@@ -86,8 +92,9 @@ If `planning/blueprint/09_implementation_plan.md` exists (pre-rendered above), *
   - Completed: `- [x] task (YYYY-MM-DD)`
   - Blocked: `- [!] task (BLOCKED YYYY-MM-DD: reason)` — hard stop, surface to user, never skip
   - Discarded: `- ~~task~~ (discarded YYYY-MM-DD: reason)` — no checkbox, strikethrough, reason required
-- **Non-goals / Invariants required**: `PLAN.md` must carry `## Non-goals` and `## Invariants`
-  (verbatim from the blueprint Charter if one exists). Never alter them without explicit user approval.
+- **Non-goals / Invariants / Pillars required**: `PLAN.md` must carry `## Non-goals`,
+  `## Invariants`, and `## Pillars` (verbatim from the blueprint Charter if one exists).
+  Never alter them without explicit user approval.
 - **Discard, don't delete**: when a task becomes obsolete (pivot, scope cut, replaced),
   convert it to the discarded form. Always include the date and a specific reason.
   This preserves the record of what was considered and why it was dropped — part of
@@ -109,6 +116,29 @@ or the user signals a pivot:
    explanation, add an Errors entry to the bitácora and reference it from the
    reason: `(discarded 2026-04-29: see planning/bitacora/2026-04-29.md)`.
 5. Never delete the task line. The strikethrough preserves it as a record.
+
+## Cycles (project life after the floor)
+
+Once every floor phase is `(COMPLETED)`, new work does **not** append phases to
+`PLAN.md` — it opens a **cycle** (format and rules in `planning-format.md` §C).
+
+### Opening a cycle
+
+1. Create `planning/cycles/NN_<slug>.md` with the §C sections: **Origin** (the audit
+   finding or doubt that opened it) · **Objective** (one outcome-shaped statement tied
+   to the plan's Goal) · **Goal-run command** (the ready-to-paste `/goal` invocation:
+   the objective + the plan's Pillars + the closing measurement as stop condition) ·
+   **Tasks** · **Close** (left empty until measured).
+2. Add a `- [>] NN_<slug> — open` line to the `## Cycles index` in `PLAN.md`
+   (create the section if this is the first cycle).
+
+### Closing a cycle
+
+1. Fill the **Close — measurement against the Goal** section with numbers vs the
+   Objective — a cycle without measurement is not closed (that is report theater).
+2. Flip the index line to `- [x] NN_<slug> — closed YYYY-MM-DD (goal check: <one line>)`.
+3. If the measurement reveals the next doubt, that opens the next cycle — one
+   objective per cycle, always.
 
 ## Relationship with bitácora
 
