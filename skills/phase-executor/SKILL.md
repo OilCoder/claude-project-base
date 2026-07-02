@@ -29,11 +29,13 @@ the phase's tasks in order, updating checkboxes as each one is completed.
 ## Before writing any code
 
 1. The PLAN.md is already pre-rendered above. Identify the requested phase from `$ARGUMENTS` and extract its task list **and its `Done when:` line**.
-2. **Drift check (anti-drift gate)**: read the `## Non-goals` and `## Invariants` sections
-   of `PLAN.md`. If any task in this phase would violate a Non-goal or an Invariant, **stop
-   and ask the user** — do not code around it, do not silently re-interpret the task. The
-   Non-goals/Invariants are the project's anchor; honoring them is what keeps execution from
-   drifting into a different project.
+2. **Drift check (anti-drift gate)**: read the `## Goal`, `## Non-goals`, `## Invariants`,
+   and `## Pillars` sections of `PLAN.md`. If any task in this phase would violate a
+   Non-goal or an Invariant, **stop and ask the user** — do not code around it, do not
+   silently re-interpret the task. The Pillars are decision rails: anything under
+   "Claude never decides" needs the user's call, and anything ambiguous/interpretive is
+   recorded, never guessed. The anchor is what keeps execution from drifting into a
+   different project.
 3. Present a short plan to the user:
    - Files to create or modify
    - Order of execution
@@ -83,18 +85,27 @@ result has been verified. Before declaring the phase done:
 
 1. **Check the phase's `Done when:` criterion** — it is the phase's acceptance target.
    The phase is not complete until that criterion is demonstrably met.
-2. Read `project-guidelines.md` to find the project's verification commands
+2. **Verify against disk, never against recollection.** `(COMPLETED)` is asserted by
+   re-checking that every file the tasks cite actually exists and the `Done when:`
+   result is demonstrated by running it — not by remembering having written the code.
+   (A green test suite covers what exists, not what was promised.)
+3. **Anti-theater check**: re-read the plan's `## Goal` and ask — *does this phase's
+   artifact serve the Goal, or is it conformant emptiness?* A result that satisfies
+   the task list but adds no substance toward the Goal (a report that renders but
+   says nothing, a metric that passes because it measures nothing) does **not** close
+   the phase — surface the gap instead.
+4. Read `project-guidelines.md` to find the project's verification commands
    (under **Tech constraints** or referenced from `package.json` /
    `pyproject.toml`).
-3. Run the relevant subset for the type of change:
+5. Run the relevant subset for the type of change:
    - Code changes → test command (`pytest`, `npm test`, etc.)
    - Type-annotated code → type checker (`mypy`, `tsc --noEmit`)
    - Always → linter and formatter on the changed files
-4. If the `Done when:` criterion is unmet or any verification fails:
+6. If the `Done when:` criterion is unmet or any verification fails:
    - Do **not** mark the phase complete.
    - Address the root cause, not the symptom.
    - Re-run the verification.
-5. If no verification command exists for this type of change, say so
+7. If no verification command exists for this type of change, say so
    explicitly in the report instead of claiming verified.
 
 ## After completing the phase

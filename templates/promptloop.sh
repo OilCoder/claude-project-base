@@ -10,6 +10,15 @@
 # RUN IT FROM YOUR SHELL (not from inside a Claude session):
 #   bash .claude/scripts/promptloop.sh [MAX_ITERATIONS]
 #   # log it:  bash .claude/scripts/promptloop.sh 8 2>&1 | tee "planning/loop-$(date +%F).log"
+#   # optional brakes: MAX_TURNS=80 MAX_BUDGET_USD=5 bash .claude/scripts/promptloop.sh 8
+#
+# WHEN TO USE WHICH LOOP:
+#   - This script      → the FLOOR: enumerable PLAN.md phases, unattended, fresh
+#                        context per phase, hard gates. No native equivalent.
+#   - /goal (native)   → goal-runs / cycles: a measurable objective + the plan's
+#                        Pillars, stops on a verifiable condition (interactive session).
+#   - /loop (native)   → babysitting long external runs (training, batch inference)
+#                        on an interval — never leave an overnight run unwatched.
 #
 # SAFETY MODEL (permissions are skipped, so these compensating controls matter):
 #   - Refuses to run on main/master — use a dedicated, disposable feature branch.
@@ -19,12 +28,17 @@
 #     --no-verify remain blocked) — --dangerously-skip-permissions does not bypass hooks.
 #   - Hard stops: all phases COMPLETED · any BLOCKED task · MAX iterations · no progress.
 #   - MAX iterations is the cost ceiling. Start small (e.g. 5) the first time.
+#   - Per-tick brakes: --max-turns (MAX_TURNS, default 50) caps how long a single
+#     phase can churn before failing loudly; MAX_BUDGET_USD (optional) caps its cost.
 #   Strongly recommended: run inside a container/sandbox or a throwaway branch.
 
 set -uo pipefail
 
 MAX="${1:-12}"
 PLAN="planning/PLAN.md"
+MAX_TURNS="${MAX_TURNS:-50}"   # per-tick turn brake (claude -p --max-turns)
+BUDGET_ARGS=()
+[[ -n "${MAX_BUDGET_USD:-}" ]] && BUDGET_ARGS=(--max-budget-usd "$MAX_BUDGET_USD")
 
 # ---- Pre-flight guards -------------------------------------------------------
 command -v claude >/dev/null 2>&1 || { echo "✗ claude CLI not found on PATH"; exit 1; }
@@ -46,6 +60,7 @@ fi
 # The anchor must exist: PLAN.md needs Non-goals + Invariants + at least one Done-when.
 grep -qE '^##[[:space:]]+Non-goals'  "$PLAN" || { echo "✗ refuse: $PLAN has no '## Non-goals' — finish the planning loop (/blueprint → /plan-writing) first"; exit 1; }
 grep -qE '^##[[:space:]]+Invariants' "$PLAN" || { echo "✗ refuse: $PLAN has no '## Invariants' — finish the planning loop first"; exit 1; }
+grep -qE '^##[[:space:]]+Pillars'    "$PLAN" || { echo "✗ refuse: $PLAN has no '## Pillars' — the loop needs its decision rails (see planning-format.md)"; exit 1; }
 grep -qE '^[[:space:]]*Done when:'   "$PLAN" || { echo "✗ refuse: no phase has a 'Done when:' criterion — the plan is not loop-ready"; exit 1; }
 
 # If a blueprint was started, it must be fully approved (no pending/in-progress/blocked docs).
@@ -64,10 +79,17 @@ read -r -d '' LOOP_PROMPT <<'EOF'
 Execute the next non-completed phase in planning/PLAN.md by following the
 phase-executor skill in NON-INTERACTIVE LOOP MODE:
 - Do NOT ask for approval; proceed autonomously on the first non-completed phase.
-- Honor the plan's ## Non-goals and ## Invariants. If a task would violate either,
-  mark it `- [!] ... (BLOCKED <date>: reason)` in PLAN.md and STOP without coding.
+- The plan's ## Goal and ## Pillars are your oracle. Honor ## Non-goals and
+  ## Invariants — if a task would violate either, mark it
+  `- [!] ... (BLOCKED <date>: reason)` in PLAN.md and STOP without coding.
+  Anything the Pillars reserve for the user, or anything ambiguous/interpretive:
+  record it and BLOCK — never guess.
 - Implement the phase's tasks, run the verification gate, and confirm the phase's
-  `Done when:` criterion is met.
+  `Done when:` criterion is met — verified AGAINST DISK (cited files exist, the
+  result is demonstrated by running it), never against your memory of the work.
+- Anti-theater check before closing: does this phase's artifact serve the ## Goal,
+  or is it conformant emptiness? Hollow output that merely satisfies the task list
+  does NOT complete the phase — BLOCK with the gap instead.
 - On success: mark the phase title `(COMPLETED)` and create exactly ONE conventional commit.
 - If anything is ambiguous, a dependency is missing, or verification fails: mark the
   affected task `- [!] ... (BLOCKED <date>: reason)` and STOP. Never guess. Never commit
@@ -85,7 +107,7 @@ while (( i < MAX )); do
   echo "── iteration $((i+1))/$MAX → ${phase}"
   before="$(plan_sig)"
 
-  if ! claude -p --dangerously-skip-permissions "$LOOP_PROMPT"; then
+  if ! claude -p --dangerously-skip-permissions --max-turns "$MAX_TURNS" "${BUDGET_ARGS[@]}" "$LOOP_PROMPT"; then
     echo "■ claude exited non-zero — stopping"; break
   fi
 
