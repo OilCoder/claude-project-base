@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>claude-project-base // Guía de operación</title>
-<meta name="description" content="Guía de usuario del sistema claude-project-base: piso por plan, vida por ciclos, todo juzgado por un Goal medible.">
+<meta name="description" content="Cómo trabajar en cualquier proyecto — guía genérica destilada de 13 proyectos reales (2023-2026).">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -23,7 +23,6 @@
       linear-gradient(90deg, rgba(0,240,255,.035) 1px, transparent 1px);
     background-size:44px 44px;
   }
-  /* scanlines */
   body::after{
     content:""; position:fixed; inset:0; pointer-events:none; z-index:9999;
     background:repeating-linear-gradient(0deg, rgba(0,0,0,.14) 0 1px, transparent 1px 3px);
@@ -33,7 +32,6 @@
   a:hover{text-shadow:0 0 8px var(--cyan)}
   ::selection{background:var(--magenta); color:#000}
 
-  /* ---------- NAV ---------- */
   nav{
     position:sticky; top:0; z-index:100; display:flex; flex-wrap:wrap; gap:2px 18px; align-items:center;
     padding:10px 22px; background:rgba(5,7,13,.92); backdrop-filter:blur(6px);
@@ -46,7 +44,6 @@
 
   .wrap{max-width:1020px; margin:0 auto; padding:0 22px}
 
-  /* ---------- HERO ---------- */
   header{padding:84px 0 60px; position:relative; overflow:hidden}
   .sysline{font-size:.72rem; color:var(--dim); letter-spacing:.18em; text-transform:uppercase}
   .sysline b{color:var(--green)}
@@ -69,17 +66,17 @@
   .chip{border:1px solid var(--line); padding:6px 13px; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)}
   .chip b{color:var(--cyan); font-weight:400}
 
-  /* ---------- SECTIONS ---------- */
   section{padding:58px 0 30px; border-top:1px solid var(--line)}
   .sec-tag{font-size:.72rem; letter-spacing:.24em; color:var(--magenta); text-transform:uppercase}
   h2{font-family:var(--disp); font-weight:700; font-size:clamp(1.15rem,3vw,1.7rem); color:#eaf6ff; margin:8px 0 8px; letter-spacing:.06em; text-transform:uppercase}
   h2 .hash{color:var(--cyan)}
+  h3.sub{font-family:var(--disp); font-size:.95rem; letter-spacing:.1em; color:var(--cyan); text-transform:uppercase; margin:34px 0 10px}
   .lead{color:var(--dim); max-width:820px; margin-bottom:26px}
   .lead b{color:var(--txt); font-weight:400}
 
-  /* cards */
   .grid{display:grid; gap:14px}
   .g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
   .card{
     background:linear-gradient(180deg,var(--panel),var(--panel2));
     border:1px solid var(--line); border-top:2px solid var(--cyan); padding:20px 20px 16px; position:relative;
@@ -93,7 +90,12 @@
   .card p b{color:#fff; font-weight:400}
   .card .src{display:block; margin-top:10px; font-size:.72rem; color:var(--dim)}
 
-  /* timeline steps */
+  /* quick-nav situación */
+  .sit{display:block; border:1px solid var(--line); border-left:4px solid var(--magenta); background:var(--panel); padding:14px 18px; margin:10px 0; transition:border-color .2s}
+  .sit:hover{border-left-color:var(--cyan); text-shadow:none}
+  .sit b{font-family:var(--disp); font-size:.8rem; letter-spacing:.1em; color:#eaf6ff; text-transform:uppercase}
+  .sit span{display:block; font-size:.82rem; color:var(--dim); margin-top:3px}
+
   .step{
     display:grid; grid-template-columns:64px 1fr; gap:0 22px; padding:26px 0; border-bottom:1px dashed var(--line); position:relative;
   }
@@ -101,7 +103,6 @@
   .stepno{
     font-family:var(--disp); font-weight:900; font-size:1.5rem; color:var(--bg); text-align:center; line-height:52px;
     width:56px; height:52px; background:var(--cyan); clip-path:polygon(0 0,100% 0,100% 78%,84% 100%,0 100%);
-    text-shadow:none;
   }
   .step.alt .stepno{background:var(--magenta)}
   .step h3{font-family:var(--disp); font-size:1rem; letter-spacing:.1em; color:#eaf6ff; text-transform:uppercase; margin-bottom:6px}
@@ -112,7 +113,6 @@
   .step .why{margin-top:8px; font-size:.8rem; color:var(--dim)}
   .step .why b{color:var(--magenta); font-weight:400}
 
-  /* terminal */
   .term{
     margin:14px 0 4px; background:#020409; border:1px solid var(--line); font-size:.85rem; overflow-x:auto;
   }
@@ -122,7 +122,6 @@
   .term pre{padding:14px 16px; white-space:pre; color:var(--green)}
   .term pre .c{color:var(--dim)} .term pre .m{color:var(--magenta)} .term pre .cy{color:var(--cyan)} .term pre .y{color:var(--yellow)}
 
-  /* tables */
   .tblwrap{overflow-x:auto; border:1px solid var(--line); margin:16px 0}
   table{width:100%; border-collapse:collapse; font-size:.85rem; min-width:640px}
   th{
@@ -140,7 +139,6 @@
   .mkr{white-space:nowrap; font-weight:400}
   .ok{color:var(--green)} .prog{color:var(--cyan)} .blk{color:var(--red)} .dis{color:var(--dim); text-decoration:line-through}
 
-  /* callout */
   .callout{
     border:1px solid var(--yellow); background:rgba(255,233,92,.05); padding:16px 18px; margin:20px 0; position:relative; font-size:.9rem;
   }
@@ -152,17 +150,15 @@
   .callout.cy{border-color:var(--cyan); background:rgba(0,240,255,.04)}
   .callout.cy::before{content:"◢ EL HILO"; color:var(--cyan)}
 
-  /* NO HACER */
   .no{
     border:1px solid rgba(255,59,92,.4); border-left:4px solid var(--red); background:rgba(255,59,92,.045);
     padding:16px 18px; margin:12px 0;
   }
   .no h3{font-family:var(--disp); font-size:.82rem; color:var(--red); letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px}
-  .no h3::before{content:"✗ "; }
+  .no h3::before{content:"✗ "}
   .no p{font-size:.88rem}
   .no p b{color:#fff; font-weight:400}
-  .no .case{display:block; margin-top:7px; font-size:.76rem; color:var(--dim)}
-  .no .case b{color:var(--magenta); font-weight:400}
+  .no .case{display:block; margin-top:7px; font-size:.74rem; color:var(--dim)}
 
   .flow{
     font-size:.8rem; color:var(--cyan); background:#020409; border:1px solid var(--line);
@@ -186,127 +182,159 @@
 
 <nav>
   <span class="brand">CLAUDE<b>::</b>PROJECT<b>::</b>BASE</span>
-  <a class="lnk" href="#filosofia">Filosofía</a>
-  <a class="lnk" href="#flujo">Flujo</a>
-  <a class="lnk" href="#ancla">Ancla</a>
-  <a class="lnk" href="#loops">Loops</a>
-  <a class="lnk" href="#ciclos">Ciclos</a>
-  <a class="lnk" href="#cambios">Cambios</a>
+  <a class="lnk" href="#idea">La idea</a>
+  <a class="lnk" href="#ahora">¿Qué hago ahora?</a>
+  <a class="lnk" href="#empezar">Empezar</a>
+  <a class="lnk" href="#piso">El piso</a>
+  <a class="lnk" href="#vida">La vida</a>
+  <a class="lnk" href="#sesion">Cada sesión</a>
+  <a class="lnk" href="#pausar">Pausar y cerrar</a>
   <a class="lnk" href="#nohacer">No hacer</a>
   <a class="lnk" href="#comandos">Comandos</a>
 </nav>
 
 <header>
   <div class="wrap">
-    <div class="sysline">// sistema operativo de proyectos · <b>ONLINE</b> · v-2026.07</div>
+    <div class="sysline">// manual del operador · <b>ONLINE</b> · v-2026.07</div>
     <h1 class="glitch"><span data-t="GUÍA DE OPERACIÓN">GUÍA DE OPERACIÓN</span></h1>
-    <div class="tagline">piso por plan · vida por ciclos · goal medible</div>
+    <div class="tagline">cómo trabajar en cualquier proyecto — sea cual sea el tema</div>
     <p class="hero-p">
-      Este sitio documenta <em>cómo trabajar</em> con la base: el orden de los pasos, qué
-      teclear en cada momento, qué decide la máquina y qué decides tú. Cada regla de esta
-      guía viene de la autopsia de tres proyectos reales — no es teoría, es cicatriz.
+      Da igual si el proyecto es una red neuronal, un bot de Discord, un optimizador de builds,
+      un simulador físico o documentación de rol de mesa. <em>El método es el mismo.</em>
+      Esta guía destila las reglas de trabajo de 13 proyectos reales (2023–2026): lo que
+      funcionó, lo que dolió, y el orden exacto de los pasos para no repetir los dolores.
     </p>
     <div class="chips">
-      <span class="chip">13 <b>rules</b></span>
-      <span class="chip">11 <b>skills</b></span>
-      <span class="chip">5 <b>agents</b></span>
-      <span class="chip">3 <b>loops</b></span>
-      <span class="chip">1 <b>goal intocable</b></span>
+      <span class="chip"><b>13</b> proyectos auditados</span>
+      <span class="chip"><b>4</b> años de evidencia</span>
+      <span class="chip"><b>8</b> dominios distintos</span>
+      <span class="chip"><b>1</b> método genérico</span>
     </div>
   </div>
 </header>
 
-<!-- ================= FILOSOFIA ================= -->
-<section id="filosofia">
+<!-- ================= LA IDEA ================= -->
+<section id="idea">
   <div class="wrap">
-    <div class="sec-tag">//01 · el porqué</div>
-    <h2><span class="hash">#</span> Filosofía</h2>
-    <p class="lead">Cuatro principios sostienen todo el sistema. Si un día dudas de un paso,
-    vuelve aquí: el paso existe para servir a uno de estos cuatro.</p>
+    <div class="sec-tag">//01 · la idea central</div>
+    <h2><span class="hash">#</span> Cuatro principios, cualquier proyecto</h2>
+    <p class="lead">Si un día dudas de un paso, vuelve aquí: todo paso de esta guía existe
+    para servir a uno de estos cuatro principios.</p>
     <div class="grid g2">
       <div class="card reveal">
-        <h3>Identidad intocable</h3>
-        <p>Los <b>Invariantes</b> dicen qué ES el proyecto (2–4 máximo). Prueba de fuego:
-        si nombra una herramienta, librería o topología, <b>no es un invariante</b> — es una
-        decisión de arquitectura, y esas se cambian con una línea en el log.</p>
-        <span class="src">→ lección: el blueprint que fija el "cómo" se vuelve camisa de fuerza.</span>
+        <h3>La identidad es sagrada; el "cómo" es barato</h3>
+        <p>Define en 2–4 frases <b>qué ES tu proyecto</b> (los Invariantes) y protégelas.
+        Todo lo demás — la librería, el framework, la arquitectura — son decisiones
+        revisables que se cambian con una línea en un log. <b>Prueba de fuego:</b> si la
+        frase nombra una herramienta, no es identidad.</p>
+        <span class="src">La arquitectura casi nunca sobrevive al contacto con la realidad. La identidad sí — y eso está bien.</span>
       </div>
       <div class="card mg reveal">
-        <h3>Goal medible</h3>
-        <p>El Goal es <b>un número que el producto puede fallar</b> ("el agente recrea ≥75%
-        de la spec"), nunca una descripción ("construir un sistema que..."). Es el juez de
-        cada fase y de cada ciclo.</p>
-        <span class="src">→ lección: sin norte medible, la ejecución produce vacío conformante.</span>
+        <h3>El norte es un número que puedes fallar</h3>
+        <p>Tu Goal no es "construir X" — es un resultado <b>medible sobre el producto</b>:
+        "el modelo supera Y en datos ciegos", "el bot resume 3 horas de audio en 1 página",
+        "la build calculada gana a la manual". Si no se puede fallar, no dirige nada.</p>
+        <span class="src">Sin norte medible, la ejecución produce vacío conformante: todo "cumple" y nada sirve.</span>
       </div>
       <div class="card yl reveal">
         <h3>Piso por plan, vida por ciclos</h3>
-        <p>La infraestructura (el <b>piso</b>) es enumerable: se planifica y se ejecuta por
-        fases. La vida real del proyecto son <b>ciclos</b>: duda → objetivo → medición → cierre.</p>
-        <span class="src">→ lección: todo proyecto real terminó viviendo en ciclos; el sistema ahora los soporta.</span>
+        <p>La infraestructura inicial (el <b>piso</b>) es enumerable: se planifica por fases
+        y se ejecuta. Pero la vida real de todo proyecto son <b>ciclos</b>: una duda → un
+        objetivo → trabajo → medición → cierre. Los 13 proyectos, sin excepción, terminaron
+        viviendo así — el sistema simplemente lo hace oficial.</p>
+        <span class="src">Un plan que crece para siempre se vuelve ilegible; un plan abandonado deja huérfanos.</span>
       </div>
       <div class="card gr reveal">
-        <h3>Medición o teatro</h3>
-        <p>Nada se declara terminado sin <b>verificarse contra disco</b> y medirse contra el
-        Goal. Un informe que renderiza pero no dice nada, una métrica inflada por desbalance:
-        eso es <b>report theater</b>, y el sistema lo caza explícitamente.</p>
-        <span class="src">→ lección: COMPLETED de memoria = fases falsas; métrica sin balancear = 0.84 mentiroso.</span>
+        <h3>Sin medición es teatro</h3>
+        <p>Nada se declara terminado sin <b>verificarlo contra disco</b> (los archivos
+        existen, el criterio se demuestra ejecutándolo) y sin medirlo contra el Goal.
+        La memoria de "haberlo hecho" no cuenta. La métrica inflada no cuenta.
+        El README aspiracional no cuenta.</p>
+        <span class="src">El teatro se detectó en proyectos de simulación, ML y agentes por igual. Es universal.</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ================= FLUJO ================= -->
-<section id="flujo">
+<!-- ================= QUE HAGO AHORA ================= -->
+<section id="ahora">
   <div class="wrap">
-    <div class="sec-tag">//02 · el orden de los pasos</div>
-    <h2><span class="hash">#</span> El flujo, en orden</h2>
-    <p class="lead">De cero a proyecto vivo. Las etiquetas <b>[TÚ]</b> marcan lo que tecleas;
-    <b>[AUTO]</b> lo que el sistema dispara solo.</p>
+    <div class="sec-tag">//02 · navegación rápida</div>
+    <h2><span class="hash">#</span> ¿Qué hago ahora?</h2>
+    <p class="lead">Busca tu situación y salta directo.</p>
+    <a class="sit reveal" href="#empezar"><b>→ Tengo una idea nueva</b><span>Instala la base y construye el ancla (pasos 00–01). No escribas código todavía.</span></a>
+    <a class="sit reveal" href="#piso"><b>→ Ya tengo el ancla aprobada</b><span>Ejecuta el piso con el loop autónomo (paso 02) y pasa el checkpoint de contacto (03).</span></a>
+    <a class="sit reveal" href="#vida"><b>→ El proyecto ya funciona y quiero mejorarlo</b><span>Abre un ciclo con objetivo medible y córrelo con /goal (pasos 04–06).</span></a>
+    <a class="sit reveal" href="#sesion"><b>→ Estoy terminando una sesión de trabajo</b><span>Teclea /checkpoint. Siempre. Es tu único ritual obligatorio.</span></a>
+    <a class="sit reveal" href="#pausar"><b>→ Voy a pausar el proyecto / volví después de meses</b><span>Protocolo de pausa y regreso — la diferencia entre retomar y re-descubrir.</span></a>
+    <a class="sit reveal" href="#pausar"><b>→ Creo que el proyecto está listo</b><span>Cierre completo: medir + publicar + indexar. "Terminado" a medias es invisible.</span></a>
+    <a class="sit reveal" href="#nohacer"><b>→ Algo se siente mal y no sé qué</b><span>Revisa los anti-patrones — probablemente estás dentro de uno.</span></a>
+  </div>
+</section>
+
+<!-- ================= EMPEZAR ================= -->
+<section id="empezar">
+  <div class="wrap">
+    <div class="sec-tag">//03 · vas a empezar un proyecto</div>
+    <h2><span class="hash">#</span> Del cero al ancla</h2>
 
     <div class="step reveal">
       <div class="stepno">00</div>
       <div>
-        <h3>Instalar la base <span class="who">TÚ</span></h3>
-        <p>Clona/instala el plugin en el proyecto nuevo e inicializa. <code>/setup</code> hace
-        solo 2 preguntas (nombre y stack), crea las 5 carpetas mínimas, copia rules/skills/
-        agents/hooks e instala <code>promptloop.sh</code>.</p>
-        <div class="term"><div class="bar"><i></i><i></i><i></i>terminal</div><pre><span class="c"># dentro de Claude Code, en el repo nuevo:</span>
+        <h3>Instala la base <span class="who">TÚ</span></h3>
+        <div class="term"><div class="bar"><i></i><i></i><i></i>terminal</div><pre><span class="c"># en el repo nuevo, dentro de Claude Code:</span>
 <span class="m">/plugin</span> marketplace add OilCoder/claude-project-base
 <span class="m">/plugin</span> install claude-project-base
 <span class="m">/setup</span></pre></div>
-        <p class="why"><b>Recomendación:</b> no crees <code>src/</code>, <code>tests/</code>, <code>data/</code> a mano — nacen cuando el proyecto los pide.</p>
+        <p>Dos preguntas (nombre y stack), 5 carpetas mínimas, y las reglas quedan activas.
+        <b>No crees carpetas de código a mano</b> — nacen cuando el proyecto las pide.</p>
+        <p class="why"><b>Por qué importa:</b> las reglas que se instalan aquí son las que se cumplen solas
+        (formato automático, bloqueo de comandos destructivos, convención de commits). La evidencia de 13
+        proyectos es clara: <b>lo que fuerza un hook sobrevive; lo que depende de tu voluntad, no.</b></p>
       </div>
     </div>
 
     <div class="step alt reveal">
       <div class="stepno">01</div>
       <div>
-        <h3>El ancla: /blueprint <span class="who">TÚ</span></h3>
-        <p>Se hace <b>una sola vez</b>. Te pregunta el tipo de proyecto (<code>ml-research</code> /
-        <code>data-pipeline</code> / <code>other</code>) y la <b>ambición</b>:</p>
-        <div class="term"><div class="bar"><i></i><i></i><i></i>decisión de ambición</div><pre><span class="y">ACOTADO</span>  hipótesis + dataset + protocolo conocibles hoy
-         → charter-lite: 2 documentos, 1 sesión de entrevista
-<span class="m">ABIERTO</span>  el "cómo" es la incógnita a investigar
-         → ciclo completo de 5 pasos (Charter → Contexto → Diseño → Plan → Validación)</pre></div>
-        <p>El resultado es el Charter con <b>Goal medible</b>, <b>Invariantes de identidad</b>,
-        <b>Architecture decisions</b> (revisables) y <b>Pilares</b> — y siembra <code>planning/PLAN.md</code>.</p>
-        <p class="why"><b>Recomendación:</b> aprueba cada documento con escrutinio real. Aprobar 9 docs en un día convierte el ancla en lastre.</p>
+        <h3>Construye el ancla: /blueprint <span class="who">TÚ</span></h3>
+        <p>Una sola vez por proyecto. Te pregunta el tipo y, lo más importante, <b>la ambición</b>:</p>
+        <div class="term"><div class="bar"><i></i><i></i><i></i>decisión de ambición</div><pre><span class="y">ACOTADO</span>  ya sabes qué construir y cómo probarlo
+         → charter-lite: 2 documentos, 1 sesión. Suficiente y sobra.
+<span class="m">ABIERTO</span>  el "cómo" es justamente lo que vas a investigar
+         → ciclo completo de 5 pasos con revisión entre documentos</pre></div>
+        <p>El resultado es tu Charter: <b>Goal medible</b> + <b>Invariantes</b> (identidad) +
+        <b>Architecture decisions</b> (revisables) + <b>Pilares</b> (qué decide la máquina y qué
+        decides tú) — y siembra el plan del piso.</p>
+        <p class="why"><b>Recomendaciones ganadas a golpes:</b> (1) aprueba cada documento con
+        escrutinio real — aprobar todo en batch convierte el ancla en lastre; (2) clasifica tus
+        datos externos HOY: ¿los tienes en la mano, requieren login, hay que digitalizarlos? —
+        <b>ninguna fase puede depender de un dato no verificado</b> (este error descarriló fases
+        en 2 proyectos distintos); (3) los documentos de diseño son <b>hipótesis</b>, no promesas.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ================= PISO ================= -->
+<section id="piso">
+  <div class="wrap">
+    <div class="sec-tag">//04 · construir el piso</div>
+    <h2><span class="hash">#</span> El piso: infraestructura antes que libertad</h2>
 
     <div class="step reveal">
       <div class="stepno">02</div>
       <div>
-        <h3>El piso: promptloop.sh <span class="who auto">AUTO</span></h3>
-        <p>Las fases enumerables del plan (esqueleto E2E, verificación, infraestructura) las
-        ejecuta el loop autónomo — <b>contexto fresco por fase, un commit por fase</b>, y se
-        niega a arrancar si el ancla no existe.</p>
+        <h3>El loop autónomo ejecuta las fases <span class="who auto">AUTO</span></h3>
         <div class="term"><div class="bar"><i></i><i></i><i></i>tu shell (no dentro de claude)</div><pre>git switch -c <span class="cy">loop/floor</span>
-bash .claude/scripts/promptloop.sh <span class="y">3</span>          <span class="c"># empieza pequeño</span>
+bash .claude/scripts/promptloop.sh <span class="y">3</span>          <span class="c"># empieza pequeño, siempre</span>
 <span class="c"># frenos opcionales:</span>
 MAX_TURNS=<span class="y">80</span> MAX_BUDGET_USD=<span class="y">5</span> bash .claude/scripts/promptloop.sh 8</pre></div>
-        <p class="why"><b>Por qué antes de /goal:</b> la libertad solo funciona sobre un suelo
-        verificado. <b>Goal-run sin piso = basura con confianza.</b></p>
+        <p>Contexto fresco por fase, un commit por fase, y se niega a arrancar sin ancla.
+        Se detiene solo ante: todo completado · algo bloqueado · límite de iteraciones · sin progreso.</p>
+        <p class="why"><b>Por qué el piso va primero:</b> la autonomía solo funciona sobre un
+        suelo verificado. Darle libertad a la máquina sin infraestructura de verificación
+        produce <b>basura con confianza</b> — resultados que suenan bien y no puedes comprobar.</p>
       </div>
     </div>
 
@@ -314,177 +342,144 @@ MAX_TURNS=<span class="y">80</span> MAX_BUDGET_USD=<span class="y">5</span> bash
       <div class="stepno">03</div>
       <div>
         <h3>Checkpoint de contacto <span class="who auto">AUTO</span></h3>
-        <p>La primera fase que toca datos reales trae sembrada la tarea: <b>"¿alguna
-        Architecture decision murió al tocar los datos?"</b>. Si algo murió: una línea en el
-        log de decisiones y sigues. Si murió la identidad: <code>/blueprint --v2</code>.</p>
-        <p class="why"><b>Recomendación:</b> espera que algo pivote aquí — la mitad del diseño solo es descubrible construyendo. No es fracaso, es el sistema funcionando.</p>
+        <p>La primera fase que toca datos/realidad trae sembrada la pregunta: <b>"¿alguna
+        decisión de arquitectura murió al tocar lo real?"</b>. Casi siempre la respuesta es sí,
+        y no pasa nada: una línea en el log de decisiones y sigues. Si lo que murió es la
+        identidad → <code>/blueprint --v2</code> (congelar y re-blueprintear con gates).</p>
+        <p class="why"><b>Espera este momento.</b> La mitad del diseño solo es descubrible
+        construyendo — el dato con formato raro, el modelo que no cabe en tu GPU, la API que
+        no expone lo que necesitas. El pivote aquí es el sistema funcionando, no fallando.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ================= VIDA ================= -->
+<section id="vida">
+  <div class="wrap">
+    <div class="sec-tag">//05 · el proyecto ya vive</div>
+    <h2><span class="hash">#</span> La vida: ciclos, cambios y goal-runs</h2>
 
     <div class="step reveal">
       <div class="stepno">04</div>
       <div>
-        <h3>La vida: ciclos con /goal <span class="who">TÚ</span></h3>
-        <p>Piso completo → cada duda o auditoría abre un ciclo en
-        <code>planning/cycles/NN_&lt;slug&gt;.md</code>. El archivo trae el comando listo:</p>
-        <div class="term"><div class="bar"><i></i><i></i><i></i>goal-run</div><pre><span class="m">/goal</span> &lt;objetivo del ciclo&gt; respetando los Pillars de planning/PLAN.md;
-      para cuando &lt;la medición de cierre se cumpla o esté probadamente bloqueada&gt;</pre></div>
-        <p class="why"><b>El ciclo se cierra midiendo contra el Goal</b> — números, no adjetivos. Sin medición no hay cierre.</p>
+        <h3>Cada mejora es un ciclo <span class="who">TÚ</span></h3>
+        <p>Piso completo → nunca más anexes fases al plan. Cada duda, auditoría o mejora abre
+        un ciclo en <code>planning/cycles/NN_&lt;nombre&gt;.md</code>: <b>de dónde nace → qué
+        objetivo medible persigue → trabajo → cierre con números</b>. Un objetivo por ciclo;
+        si aparece un segundo, ese abre el siguiente.</p>
       </div>
     </div>
 
     <div class="step alt reveal">
       <div class="stepno">05</div>
       <div>
-        <h3>/checkpoint — tu único ritual <span class="who">TÚ</span></h3>
-        <p>En cada hito tecleas <code>/checkpoint</code> y el sistema encadena solo: plan +
-        ciclo abierto + documentación + material de estudio + bitácora + commit (+ push/PR si
-        confirmas). Es lo único que tienes que recordar.</p>
+        <h3>El goal-run: /goal <span class="who">TÚ</span></h3>
+        <p>Cada archivo de ciclo trae su comando listo para pegar:</p>
+        <div class="term"><div class="bar"><i></i><i></i><i></i>goal-run</div><pre><span class="m">/goal</span> &lt;objetivo del ciclo&gt; respetando los Pillars de planning/PLAN.md;
+      para cuando &lt;la medición de cierre se cumpla o esté probadamente bloqueada&gt;</pre></div>
+        <p>La sesión trabaja sola hacia el objetivo, con tus Pilares como rieles, y se detiene
+        cuando la condición se cumple — no cuando "parece que ya".</p>
       </div>
     </div>
 
     <div class="step reveal">
       <div class="stepno">06</div>
       <div>
-        <h3>Repetir ciclos hasta que el Goal no deje dudas</h3>
-        <p>El proyecto no "termina cuando se acaban las tareas" — termina cuando <b>la medición
-        contra el Goal ya no te deja dudas que valgan otro ciclo</b>. Cada ciclo nuevo nace de
-        la medición del anterior.</p>
+        <h3>Cuando algo cambia, mide el tamaño del cambio</h3>
+        <div class="tblwrap">
+          <table>
+            <tr><th>Cambio</th><th>Ejemplo genérico</th><th>Qué haces</th></tr>
+            <tr><td><b>De forma</b></td><td>Cambiar librería, método, modelo, topología</td><td class="ok">Una línea en el log de decisiones. Sigues.</td></tr>
+            <tr><td><b>Nuevo esfuerzo</b></td><td>Detectaste un hueco; quieres subir una métrica</td><td class="prog">Abres un ciclo con su objetivo medible.</td></tr>
+            <tr><td><b>De fondo</b></td><td>La identidad ya no describe el proyecto</td><td class="blk"><code>/blueprint --v2</code> — congela y re-blueprintea.</td></tr>
+          </table>
+        </div>
+        <p class="why"><b>Y una meta grande se come por escalones:</b> declara hitos ("dev-set
+        primero, batch completo después — y el batch es opcional"). Sin escalera, la meta se
+        erosiona en silencio y el proyecto "se detiene" en vez de cerrarse — pasó en 3 de los 13.</p>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="callout cy reveal">
-      El hilo completo: <b>Charter</b> (Goal + Pilares) → <b>PLAN.md</b> (piso) →
-      <b>promptloop.sh</b> (ejecuta con el Goal como juez) → <b>cycles/</b> (cada uno con su
-      comando <code>/goal</code> derivado del Charter) → <b>/checkpoint</b> (cierra midiendo).
-      El objetivo nunca se re-redacta: se hereda.
+<!-- ================= CADA SESION ================= -->
+<section id="sesion">
+  <div class="wrap">
+    <div class="sec-tag">//06 · el ritual diario</div>
+    <h2><span class="hash">#</span> Cada sesión termina igual: /checkpoint</h2>
+    <p class="lead">Es lo único que tienes que recordar. Un comando, y el sistema encadena solo:
+    actualizar el plan y el ciclo abierto → documentar lo que cambió → capturar material de
+    estudio → escribir la bitácora → commit (→ push si confirmas).</p>
+
+    <div class="grid g2">
+      <div class="card reveal">
+        <h3>La bitácora es tu máquina del tiempo</h3>
+        <p>Sus secciones <b>Pending</b> y <b>Learnings</b> son las que te salvan: la próxima
+        sesión arranca del Pending (sin re-descubrir dónde ibas), y los Learnings evitan
+        re-evaluar lo ya descartado. En el proyecto más intermitente del portafolio, la
+        bitácora fue la diferencia entre continuar y empezar de cero.</p>
+      </div>
+      <div class="card mg reveal">
+        <h3>El trabajo pesado también se commitea</h3>
+        <p>El patrón más viejo del portafolio (desde 2023): <b>el andamiaje se versiona, pero
+        el trabajo de valor — el modelo entrenado, el estudio de horas, el módulo nuevo — se
+        queda en el working tree.</b> Regla: si una sesión produjo algo que dolería perder,
+        esa sesión termina en commit. Y los artefactos pesados (modelos, datasets) que git
+        ignora necesitan un respaldo declarado, o no existen.</p>
+      </div>
+      <div class="card yl reveal">
+        <h3>El conocimiento vive en el repo</h3>
+        <p>Lo que aprendes del dominio (el escalado medido a mano, el formato del dato, el
+        umbral que funciona) va a <code>aprendizaje/</code> o a la documentación del proyecto —
+        <b>versionado</b>. La memoria del asistente es un índice, no el archivo: si el
+        conocimiento solo vive ahí, se salió del proyecto.</p>
+      </div>
+      <div class="card gr reveal">
+        <h3>Corridas largas, con niñera</h3>
+        <p>¿Entrenamiento de horas, batch nocturno? <code>/loop 30m "revisa el log y registra
+        métricas"</code>. Y persiste los resultados <b>por unidad de trabajo</b> apenas
+        terminan — lo que solo vive en memoria muere con el proceso a las 2 AM, y te enteras
+        a las 9.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ================= ANCLA ================= -->
-<section id="ancla">
+<!-- ================= PAUSAR Y CERRAR ================= -->
+<section id="pausar">
   <div class="wrap">
-    <div class="sec-tag">//03 · las piezas del charter</div>
-    <h2><span class="hash">#</span> El ancla de dos niveles</h2>
-    <p class="lead">El Charter separa lo constitucional de lo revisable. Confundir los niveles
-    es lo que convierte una guía en camisa de fuerza.</p>
+    <div class="sec-tag">//07 · pausar, volver, cerrar</div>
+    <h2><span class="hash">#</span> El final es parte del trabajo</h2>
+
+    <h3 class="sub">→ Si vas a pausar</h3>
+    <p class="lead">Antes de irte: <code>/checkpoint</code> (con push), bitácora con el Pending
+    honesto, y el ciclo abierto en su estado real. Diez minutos que valen semanas.</p>
+
+    <h3 class="sub">→ Si vuelves después de un tiempo</h3>
     <div class="tblwrap reveal">
       <table>
-        <tr><th>Sección</th><th>Qué es</th><th>Cambiarla cuesta</th></tr>
-        <tr><td><b>## Goal</b></td><td>Resultado medible sobre el artefacto, redactado como condición verificable (apto para <code>/goal</code>)</td><td class="blk">Re-blueprint — es el norte</td></tr>
-        <tr><td><b>## Invariants</b></td><td>Identidad: qué ES el proyecto (2–4 máx). Nunca una herramienta/topología</td><td class="blk">Decisión logueada + gate de aprobación</td></tr>
-        <tr><td><b>## Non-goals</b></td><td>Lo que el proyecto explícitamente NO hará</td><td class="blk">Decisión logueada + aprobación</td></tr>
-        <tr><td><b>## Pillars</b></td><td>Rieles de decisión: qué no decide Claude · qué construye libre · ambiguo → registrar, no adivinar</td><td class="blk">Decisión logueada + aprobación</td></tr>
-        <tr><td><b>## Architecture decisions</b></td><td>El "cómo" actual: frameworks, topologías, métodos, modelos</td><td class="ok">Una línea en el log. Sin ceremonia.</td></tr>
+        <tr><th>Cuánto pasó</th><th>Qué haces</th></tr>
+        <tr><td><b>Días / semanas</b></td><td>Lee la última bitácora (Pending + Learnings) y sigue. No intentes "recordar" — lee.</td></tr>
+        <tr><td><b>Meses</b></td><td>Relee el ancla completa (Goal, Invariantes, plan, ciclos abiertos) y <b>re-consolida el plan</b> antes de tocar código: cierra o descarta con fecha lo que ya no aplica.</td></tr>
+        <tr><td><b>Tanto que ya ni reconoces el código</b></td><td>Reiniciar limpio es una decisión <b>válida y a veces racional</b> — reconstruir contexto puede costar más que rehacer. Pero decídelo conscientemente, con una línea en el log, no por deriva.</td></tr>
       </table>
+    </div>
+
+    <h3 class="sub">→ Si vas a cerrar: el último 5% no es opcional</h3>
+    <p class="lead">El hallazgo más repetido de toda la auditoría: <b>proyectos completos, con
+    tests, funcionando… e invisibles</b>. Construidos y jamás publicados; publicados y jamás
+    verificados de punta a punta; verificados y jamás añadidos al portafolio. Cerrar significa
+    las tres cosas:</p>
+    <div class="grid g3">
+      <div class="card reveal"><h3>1 · Medir</h3><p>La medición final contra el Goal, con números. Si el Goal no se alcanzó, el cierre lo dice — cerrar honesto también es cerrar.</p></div>
+      <div class="card mg reveal"><h3>2 · Publicar</h3><p>Push final, README que describe <b>lo que corre</b>, release/tag, deploy si aplica, y una corrida real de punta a punta como prueba de vida.</p></div>
+      <div class="card yl reveal"><h3>3 · Indexar</h3><p>Añadirlo al portafolio (OilCoder-root) en el mismo impulso. Un proyecto no indexado no existe para nadie — incluido tu yo futuro.</p></div>
     </div>
     <div class="callout reveal">
-      <b>Prueba de fuego:</b> ¿la frase nombra una herramienta, librería o topología?
-      Entonces NO es un Invariante. La convicción con la que lo dices no lo vuelve identidad —
-      la arquitectura casi nunca sobrevive al contacto con los datos reales, y no pasa nada.
-    </div>
-  </div>
-</section>
-
-<!-- ================= LOOPS ================= -->
-<section id="loops">
-  <div class="wrap">
-    <div class="sec-tag">//04 · qué loop cuándo</div>
-    <h2><span class="hash">#</span> Los tres loops</h2>
-    <p class="lead">Tres herramientas para tres momentos. No compiten — se turnan.</p>
-    <div class="tblwrap reveal">
-      <table>
-        <tr><th>Momento</th><th>Herramienta</th><th>Por qué esa</th></tr>
-        <tr>
-          <td><b>Piso</b> — fases enumerables, tú ausente</td>
-          <td><code>promptloop.sh</code> <span class="st">(nuestro)</span></td>
-          <td>Contexto fresco por fase, gates duros (ancla, rama, BLOCKED, no-progreso), un commit por fase, frenos <code>MAX_TURNS</code>/<code>MAX_BUDGET_USD</code>. Sin equivalente nativo.</td>
-        </tr>
-        <tr>
-          <td><b>Ciclos / goal-runs</b> — objetivo medible, tú cerca</td>
-          <td><code>/goal</code> <span class="st">(nativo)</span></td>
-          <td>Corre turno tras turno hasta que la condición verificable se cumple. El contexto acumulado es un activo: va entendiendo el artefacto.</td>
-        </tr>
-        <tr>
-          <td><b>Corridas largas</b> — entrenamientos, batches nocturnos</td>
-          <td><code>/loop 30m "..."</code> <span class="st">(nativo)</span></td>
-          <td>Babysitting por intervalo: revisa el <code>run.log</code>, detecta el proceso muerto a las 2 AM en vez de a las 9. Con <code>/bg</code> sobrevive al cierre de la terminal.</td>
-        </tr>
-      </table>
-    </div>
-    <div class="flow reveal"><span class="d">// mapa del ciclo de vida</span>
-/blueprint ──▶ PLAN.md ──▶ <span class="y">promptloop.sh</span> ──fase ok──▶ siguiente fase
-    ▲              │              │
-    │              │              └─ BLOCKED (hueco de plan) ──▶ <span class="m">Foundation gap report</span> ──▶ vuelve al blueprint
-    │              ▼
-    │        piso completo ──▶ <span class="g">cycles/NN_*.md</span> ──▶ <span class="m">/goal</span> ──▶ medición ──▶ /checkpoint ──▶ ¿otra duda? ──▶ nuevo ciclo
-    │                                                     │
-    └── /blueprint --v2 ◀── la identidad ya no describe ──┘</div>
-  </div>
-</section>
-
-<!-- ================= CICLOS ================= -->
-<section id="ciclos">
-  <div class="wrap">
-    <div class="sec-tag">//05 · la unidad de vida</div>
-    <h2><span class="hash">#</span> Anatomía de un ciclo</h2>
-    <p class="lead">Un ciclo = un objetivo = un archivo. Corto, cerrable, medido.</p>
-    <div class="term reveal"><div class="bar"><i></i><i></i><i></i>planning/cycles/02_canales_fisicos.md</div><pre><span class="cy"># Cycle 02 — canales físicos</span>
-
-<span class="m">## Origin</span>
-Auditoría 06-09: errores difusos en yacimiento (ratio ≈ 1) — señal débil,
-no no-unicidad. Ver bitácora 2026-06-09.
-
-<span class="m">## Objective</span>
-Subir balanced accuracy de yacimiento de 0.61 a ≥0.64 en el test estratificado,
-sin regresión en extrapolación.
-
-<span class="m">## Goal-run command</span>
-/goal subir balanced acc de yacimiento a ≥0.64 (test estratificado) respetando
-      los Pillars de planning/PLAN.md; para cuando la medición lo confirme
-      o esté probadamente bloqueada
-
-<span class="m">## Tasks</span>
-- [x] Canal sep (Δp−Δp′) con test analítico (2026-06-09)
-- [>] Gate dual-seed 5ch vs control 3ch
-
-<span class="m">## Close — measurement against the Goal</span>
-<span class="c">(se llena al cerrar: números vs el Objective — sin esto el ciclo NO está cerrado)</span></pre></div>
-    <div class="callout reveal">
-      <b>Un objetivo por ciclo.</b> Si a mitad de ciclo aparece un segundo objetivo, ese abre
-      el ciclo siguiente — no estira este. Y el plan maestro solo lleva el índice:
-      una línea por ciclo, nunca más fases anexadas.
-    </div>
-  </div>
-</section>
-
-<!-- ================= CAMBIOS ================= -->
-<section id="cambios">
-  <div class="wrap">
-    <div class="sec-tag">//06 · cuando algo cambia</div>
-    <h2><span class="hash">#</span> Taxonomía del cambio</h2>
-    <p class="lead">Tres tamaños de cambio, tres costos. Saber cuál es cuál evita tanto la
-    parálisis como la deriva.</p>
-    <div class="tblwrap reveal">
-      <table>
-        <tr><th>Cambio</th><th>Ejemplo</th><th>Qué haces</th></tr>
-        <tr>
-          <td><b>De forma</b> <span class="st">(arquitectura)</span></td>
-          <td>Cambiar librería, topología del pipeline, método, modelo</td>
-          <td class="ok">Una línea en el log de decisiones. Sigues trabajando.</td>
-        </tr>
-        <tr>
-          <td><b>Nuevo esfuerzo</b> <span class="st">(duda/mejora)</span></td>
-          <td>La auditoría reveló un hueco; quieres subir una métrica</td>
-          <td class="prog">Abres un ciclo nuevo con su objetivo medible.</td>
-        </tr>
-        <tr>
-          <td><b>De fondo</b> <span class="st">(identidad)</span></td>
-          <td>Los Invariantes ya no describen lo que el proyecto es</td>
-          <td class="blk"><code>/blueprint --v2</code>: congela la suite, re-blueprintea con gates completos, re-siembra el plan.</td>
-        </tr>
-      </table>
+      Si el cierre no ocurre en el mismo impulso que el final del trabajo, <b>tiende a no
+      ocurrir nunca</b>. Trata "publicar + indexar" como tareas del plan con checkbox — no
+      como algo que harás "después".
     </div>
   </div>
 </section>
@@ -492,75 +487,100 @@ sin regresión en extrapolación.
 <!-- ================= NO HACER ================= -->
 <section id="nohacer">
   <div class="wrap">
-    <div class="sec-tag">//07 · anti-patrones — cada uno costó caro una vez</div>
+    <div class="sec-tag">//08 · anti-patrones — 13 proyectos, 4 años de cicatrices</div>
     <h2><span class="hash">#</span> Qué NO hacer</h2>
-    <p class="lead">Diez prohibiciones. Ninguna es hipotética: cada una tiene nombre, fecha y cicatriz.</p>
+    <p class="lead">Cada regla de esta lista se pagó al menos una vez. Están agrupadas por
+    momento, en genérico: aplican igual a un bot, un modelo o un simulador.</p>
 
-    <div class="no reveal"><h3>No eleves arquitectura a Invariante</h3>
-      <p>"El orquestador es LangGraph, nunca un LLM" parecía identidad. Duró 2 días. Cuando el
-      "cómo" es constitución, <b>cada aprendizaje legítimo se siente como violación</b> y el
-      blueprint se vuelve camisa de fuerza.</p>
-      <span class="case">caso real: <b>petro-agent</b> — blueprint v1 muerto en 48h; el único invariante verdadero sobrevivió ambos pivotes.</span>
+    <h3 class="sub">Al planear</h3>
+    <div class="no reveal"><h3>No conviertas decisiones técnicas en constitución</h3>
+      <p>"Usaremos X framework con Y topología" es una decisión de trabajo, no identidad.
+      Si la blindas como invariante, cada aprendizaje se sentirá como traición y el plan se
+      volverá camisa de fuerza. <b>Identidad = qué es el proyecto. Arquitectura = cómo lo
+      intentas hoy.</b></p>
+      <span class="case">— un blueprint entero murió en 48 h por esto; el único invariante real sobrevivió todos los pivotes.</span>
     </div>
-
-    <div class="no reveal"><h3>No corras /goal sin piso</h3>
-      <p>El goal-run funciona <b>porque</b> debajo hay librería verificada, gates y trazabilidad.
-      Dársela a un proyecto sin suelo produce basura con confianza: números inventados sin forma
-      de detectarlos.</p>
-      <span class="case">caso real: el breakthrough del 30-jun funcionó sobre 2 días de infraestructura previa — no a pesar de ellos.</span>
+    <div class="no reveal"><h3>No apruebes los fundamentos en batch</h3>
+      <p>Aprobar 9 documentos en una tarde no es anclar — es acumular papel. La puerta de
+      aprobación solo funciona si aprobar significa haber pensado.</p>
+      <span class="case">— suite completa aprobada en 1 día → pivote total a los 2 días.</span>
     </div>
-
-    <div class="no reveal"><h3>No marques COMPLETED de memoria</h3>
-      <p>COMPLETED se verifica <b>contra disco</b>: los archivos citados existen y el
-      <code>Done when:</code> se demuestra ejecutándolo. La suite verde cubre lo que existe,
-      no lo que se prometió.</p>
-      <span class="case">caso real: <b>petro-agent D8</b> — fases enteras marcadas completas citando archivos que no existían.</span>
-    </div>
-
-    <div class="no reveal"><h3>No cierres un ciclo sin medición</h3>
-      <p>"Quedó bien" no es un cierre. El cierre son <b>números contra el objetivo</b>. Sin
-      medición, el ciclo sigue abierto — lo contrario es report theater con fecha.</p>
-      <span class="case">caso real: <b>pinn</b> — el trabajo post-plan quedó huérfano: tareas nunca cerradas ni descartadas.</span>
-    </div>
-
-    <div class="no reveal"><h3>No anexes fases al plan maestro</h3>
-      <p>El PLAN.md cubre el piso. Después, <b>cada esfuerzo abre su ciclo</b> y el plan solo
-      lleva el índice. Un plan que crece para siempre se convierte en archivo histórico que
-      nadie puede leer.</p>
-      <span class="case">caso real: <b>Deep-PTA</b> — 7 ciclos anexados como fases: 193 líneas de historia densa.</span>
-    </div>
-
-    <div class="no reveal"><h3>No apruebes el blueprint en batch</h3>
-      <p>La puerta de aprobación solo ancla si aprobar significa escrutinio. Nueve documentos
-      aprobados en un día es un ancla de papel.</p>
-      <span class="case">caso real: <b>petro-agent</b> — suite completa aprobada el 06-24; pivote total el 06-26.</span>
-    </div>
-
     <div class="no reveal"><h3>No dependas de datos que no tienes en la mano</h3>
-      <p>Todo dato externo se clasifica el día cero: público-sin-fricción / con-login /
-      por-digitalizar. <b>Ninguna fase del piso puede depender de un dato no verificado.</b></p>
-      <span class="case">caso real: el dataset <b>Volve</b> (login Equinor) descarriló fases en DOS proyectos distintos.</span>
+      <p>"Los descargo cuando llegue esa fase" es una fase muerta esperando su turno.
+      Clasifica el día cero: en-mano / con-login / por-capturar — y no planifiques sobre lo
+      que no está verificado.</p>
+      <span class="case">— el mismo dataset con login descarriló fases en 2 proyectos; otro proyecto requirió capturar 79 pantallazos a mano.</span>
     </div>
 
+    <h3 class="sub">Al ejecutar</h3>
+    <div class="no reveal"><h3>No des autonomía sin piso</h3>
+      <p>La máquina trabajando sola sobre un proyecto sin verificación produce resultados
+      que suenan bien y no puedes comprobar. Primero el suelo (tests, trazabilidad, gates),
+      después la libertad.</p>
+      <span class="case">— el goal-run que funcionó lo hizo PORQUE había 2 días de infraestructura debajo.</span>
+    </div>
+    <div class="no reveal"><h3>No dejes el trabajo pesado fuera de git</h3>
+      <p>El hábito más viejo y persistente del portafolio: commitear el andamiaje y dejar el
+      trabajo de valor (el modelo, el módulo nuevo, el estudio de horas) solo en disco.
+      <b>Sesión que produjo algo valioso = sesión que termina en commit.</b> Artefactos
+      pesados gitignoreados → respaldo declarado o no existen.</p>
+      <span class="case">— detectado en 4 proyectos, de 2023 a la semana pasada. Dos repos además se corrompieron al copiarse entre sistemas: el working tree no es un respaldo.</span>
+    </div>
+    <div class="no reveal"><h3>No confundas gobernanza con validación</h3>
+      <p>Reglas, políticas y agentes elaborados no sustituyen el test de dominio. Puedes
+      tener 83% de "cumplimiento de políticas" y cero evidencia de que el resultado sea
+      físicamente/lógicamente correcto. <b>Define desde el inicio contra qué referencia se
+      prueba que el resultado es verdad.</b></p>
+      <span class="case">— un proyecto con 6 políticas inmutables y 4 agentes terminó con exactamente 1 test.</span>
+    </div>
     <div class="no reveal"><h3>No dejes corridas nocturnas sin niñera</h3>
-      <p>Un batch de horas se vigila con <code>/loop 30m "revisa run.log..."</code>. Y persiste
-      artefactos <b>por unidad de trabajo</b> apenas terminan — lo que vive solo en memoria
-      muere con el proceso.</p>
-      <span class="case">caso real: batch v7 muerto tras el 4º pozo a medianoche; nadie lo supo hasta las 9 AM.</span>
+      <p>Todo proceso de horas se vigila con <code>/loop</code> y persiste resultados por
+      unidad apenas terminan. Lo que solo vive en memoria muere con el proceso.</p>
+      <span class="case">— un batch murió a medianoche tras la 4ª unidad; nadie lo supo hasta las 9 AM. Otro proyecto entero terminó en un "Killed" sin respaldo.</span>
     </div>
 
-    <div class="no reveal"><h3>No presentes una métrica de cabecera sin balancear</h3>
-      <p>El protocolo ML exige de serie: métrica balanceada, chequeo de fuga y <b>control
-      pareado</b> (una corrida λ=0 que debe reproducir el baseline). La métrica inflada te
+    <h3 class="sub">Al medir</h3>
+    <div class="no reveal"><h3>No marques "hecho" de memoria</h3>
+      <p>Completado se verifica contra disco: los archivos citados existen y el criterio se
+      demuestra ejecutándolo. La suite verde cubre lo que existe, no lo que prometiste.</p>
+      <span class="case">— fases enteras marcadas completas citando archivos que no existían.</span>
+    </div>
+    <div class="no reveal"><h3>No reinterpretes un bug como éxito</h3>
+      <p>El anti-patrón más peligroso encontrado. Cuando un número sale mal por un defecto
+      real, la salida es corregir el defecto — no re-narrar el número como si fuera bueno.
+      Si te descubres explicando por qué el resultado defectuoso "en realidad está bien",
+      detente.</p>
+      <span class="case">— un resultado causado por un grid 6.8× sobredimensionado se re-narró como "top-quartile" en vez de corregirse. El proyecto murió poco después.</span>
+    </div>
+    <div class="no reveal"><h3>No presentes métricas sin balancear ni control</h3>
+      <p>Métrica de cabecera balanceada, chequeo de fuga de datos, y un control pareado (la
+      versión "sin el ingrediente nuevo" debe reproducir tu baseline). La métrica inflada te
       engaña primero a ti.</p>
-      <span class="case">caso real: <b>Deep-PTA</b> — 0.84 de frontera que era 0.61 balanceado (70% de la clase dominante).</span>
+      <span class="case">— un 0.84 celebrado era 0.61 balanceado: el 70% del test era una sola clase.</span>
     </div>
 
-    <div class="no reveal"><h3>No corras promptloop en main ni a lo grande la primera vez</h3>
-      <p>Siempre en rama desechable (<code>loop/...</code>) — el script se niega a correr en
-      main/master — y empieza con <code>MAX=2-3</code> para ver los gates en acción antes de
-      soltarle 10 iteraciones.</p>
-      <span class="case">defensa en profundidad: guard de rama + hooks PreToolUse + un commit por fase = todo reversible.</span>
+    <h3 class="sub">Al cerrar (o no cerrar)</h3>
+    <div class="no reveal"><h3>No confundas "terminado" con "publicado" con "indexado"</h3>
+      <p>Código completo ≠ verificado de punta a punta ≠ visible al mundo. El cierre son las
+      tres cosas, en el mismo impulso. Si lo dejas "para después", el después no llega.</p>
+      <span class="case">— una herramienta completa y testeada lleva meses sin publicarse; un bot desplegable nunca procesó una sesión real; el portafolio nunca los indexó.</span>
+    </div>
+    <div class="no reveal"><h3>No dejes que el README sueñe</h3>
+      <p>El README describe <b>lo que corre hoy</b>, con los números de hoy. Cada promesa
+      no cumplida en el README es deuda de credibilidad — y suele esconder el estancamiento
+      real del proyecto detrás del marketing.</p>
+      <span class="case">— "25 scripts, 38+ tests, 3 fases" en el papel; 21 scripts de setup, 1 test y 2 fases en el disco.</span>
+    </div>
+    <div class="no reveal"><h3>No pivotes de plataforma como huida</h3>
+      <p>Cambiar de herramienta justo cuando la actual no converge suele ser fuga hacia
+      adelante, no solución. Antes de migrar: ¿el problema es la herramienta o algo que la
+      migración va a heredar intacto?</p>
+      <span class="case">— el commit final de un proyecto fue "READY para la plataforma nueva". Nunca hubo un commit más.</span>
+    </div>
+    <div class="no reveal"><h3>No reorganices sin actualizar el índice</h3>
+      <p>Cada reorganización de carpetas toca el README/índice <b>en el mismo commit</b>.
+      Una estructura que evolucionó más rápido que su documentación es un mapa que miente.</p>
+      <span class="case">— READMEs describiendo carpetas que ya no existen, en 2 proyectos.</span>
     </div>
   </div>
 </section>
@@ -568,47 +588,46 @@ sin regresión en extrapolación.
 <!-- ================= COMANDOS ================= -->
 <section id="comandos">
   <div class="wrap">
-    <div class="sec-tag">//08 · arsenal</div>
-    <h2><span class="hash">#</span> Comandos a tu disposición</h2>
+    <div class="sec-tag">//09 · referencia</div>
+    <h2><span class="hash">#</span> Tu arsenal</h2>
     <p class="lead">Lo único que tecleas a diario es <code>/checkpoint</code>. Los marcados
-    <b>[deliberado]</b> también los tecleas tú (nunca se auto-disparan); el resto los invoca
-    Claude cuando tocan.</p>
+    <b>[deliberado]</b> también los tecleas tú; el resto los invoca Claude cuando tocan.</p>
 
     <div class="tblwrap reveal">
       <table>
         <tr><th>Skill</th><th>Cuándo</th><th>Qué hace</th></tr>
         <tr><td><code>/setup</code> <span class="st">[deliberado]</span></td><td>Una vez, al nacer el proyecto</td><td>Copia la base, crea las 5 carpetas, configura stack y hooks</td></tr>
-        <tr><td><code>/blueprint</code> <span class="st">[deliberado]</span></td><td>Inicio (o <code>--v2</code> en pivote de fondo)</td><td>Suite de fundamento gated por documento; acotado → charter-lite; siembra PLAN.md</td></tr>
+        <tr><td><code>/blueprint</code> <span class="st">[deliberado]</span></td><td>Inicio (o <code>--v2</code> en pivote de fondo)</td><td>El ancla: Goal + Invariantes + Pilares; acotado → charter-lite; siembra el plan</td></tr>
         <tr><td><code>/checkpoint</code> <span class="st">[deliberado]</span></td><td>Cada hito — <b>tu ritual</b></td><td>Plan + ciclo + docs + estudio + bitácora + commit (+ push/PR)</td></tr>
-        <tr><td><code>/plan-writing</code></td><td>Auto al sembrar/actualizar el plan</td><td>Crea/actualiza PLAN.md; abre y cierra ciclos</td></tr>
-        <tr><td><code>/phase-executor</code></td><td>Auto al ejecutar fases (y en el loop)</td><td>Ejecuta una fase con drift-check, verificación contra disco y anti-teatro</td></tr>
+        <tr><td><code>/plan-writing</code></td><td>Auto</td><td>Crea/actualiza el plan; abre y cierra ciclos</td></tr>
+        <tr><td><code>/phase-executor</code></td><td>Auto (y en el loop)</td><td>Ejecuta una fase con verificación contra disco y chequeo anti-teatro</td></tr>
         <tr><td><code>/bug-fix</code></td><td>Auto ante un bug</td><td>TDD: reproducir → test que falla → fix → confirmar</td></tr>
         <tr><td><code>/test</code></td><td>Auto sobre tests/</td><td>Crea tests para un módulo</td></tr>
         <tr><td><code>/investigate</code></td><td>Auto al depurar</td><td>Script aislado en debug/ (gitignored)</td></tr>
         <tr><td><code>/document</code></td><td>Auto ante API nueva</td><td>Docs de código en documentation/</td></tr>
         <tr><td><code>/doc-enforce</code></td><td>Auto sobre código fuente</td><td>Revisa/genera docstrings</td></tr>
-        <tr><td><code>/study</code></td><td>Auto en checkpoints</td><td>Notas de estudio atómicas en aprendizaje/ (referencias verificadas, jamás inventadas)</td></tr>
-        <tr><td><code>/bitacora</code></td><td>Auto post-commit</td><td>Registro de sesión en planning/bitacora/</td></tr>
+        <tr><td><code>/study</code></td><td>Auto en checkpoints</td><td>Notas de estudio en aprendizaje/ (referencias verificadas, jamás inventadas)</td></tr>
+        <tr><td><code>/bitacora</code></td><td>Auto post-commit</td><td>Registro de sesión: Pending + Learnings — tu máquina del tiempo</td></tr>
       </table>
     </div>
 
     <div class="tblwrap reveal">
       <table>
-        <tr><th>Loop / nativo</th><th>Cuándo</th><th>Invocación</th></tr>
-        <tr><td><code>promptloop.sh</code></td><td>Piso desatendido</td><td><code>bash .claude/scripts/promptloop.sh 3</code> en rama <code>loop/...</code></td></tr>
-        <tr><td><code>/goal</code></td><td>Ciclos / goal-runs</td><td>El comando viene escrito en cada <code>cycles/NN_*.md</code></td></tr>
-        <tr><td><code>/loop</code></td><td>Babysitting de corridas</td><td><code>/loop 30m "revisa run.log y registra métricas"</code></td></tr>
+        <tr><th>Loop</th><th>Momento</th><th>Invocación</th></tr>
+        <tr><td><code>promptloop.sh</code></td><td>Piso desatendido, tú ausente</td><td><code>bash .claude/scripts/promptloop.sh 3</code> en rama <code>loop/...</code></td></tr>
+        <tr><td><code>/goal</code></td><td>Ciclos con objetivo medible, tú cerca</td><td>El comando viene escrito en cada archivo de ciclo</td></tr>
+        <tr><td><code>/loop</code></td><td>Vigilar corridas largas</td><td><code>/loop 30m "revisa el log y registra métricas"</code></td></tr>
       </table>
     </div>
 
     <div class="tblwrap reveal">
       <table>
         <tr><th>Agente</th><th>Rol</th></tr>
-        <tr><td><code>blueprinter</code></td><td>Redacta UN documento de fundamento por invocación (lo dirige /blueprint)</td></tr>
-        <tr><td><code>architect</code></td><td>Diseño de UNA feature a mitad de proyecto → spec en planning/specs/</td></tr>
-        <tr><td><code>implementer</code></td><td>Escritor de código autónomo con las rules precargadas</td></tr>
+        <tr><td><code>blueprinter</code></td><td>Redacta un documento de fundamento por invocación (lo dirige /blueprint)</td></tr>
+        <tr><td><code>architect</code></td><td>Diseño de una feature a mitad de proyecto → spec</td></tr>
+        <tr><td><code>implementer</code></td><td>Escritor de código autónomo con las reglas precargadas</td></tr>
         <tr><td><code>code-reviewer</code></td><td>Revisa el diff sin commitear, en contexto fresco</td></tr>
-        <tr><td><code>security-reviewer</code></td><td>Auditoría de vulnerabilidades estilo OWASP</td></tr>
+        <tr><td><code>security-reviewer</code></td><td>Auditoría de vulnerabilidades</td></tr>
       </table>
     </div>
 
@@ -616,11 +635,19 @@ sin regresión en extrapolación.
       <table>
         <tr><th>Marcador</th><th>Estado</th><th>Regla</th></tr>
         <tr><td class="mkr"><span class="prog">- [ ]</span></td><td>Pendiente</td><td>Una tarea = una acción, con el archivo que toca</td></tr>
-        <tr><td class="mkr"><span class="prog">- [&gt;]</span></td><td>En progreso</td><td>Máximo una por fase — muestra qué se trabaja ahora</td></tr>
+        <tr><td class="mkr"><span class="prog">- [&gt;]</span></td><td>En progreso</td><td>Máximo una por fase — qué se trabaja ahora mismo</td></tr>
         <tr><td class="mkr"><span class="ok">- [x]</span></td><td>Completada</td><td>Con fecha; verificada contra disco, no de memoria</td></tr>
         <tr><td class="mkr"><span class="blk">- [!]</span></td><td>Bloqueada</td><td>Parada dura con razón fechada — jamás se salta en silencio</td></tr>
         <tr><td class="mkr"><span class="dis">~~tarea~~</span></td><td>Descartada</td><td>Nunca se borra: tachado + razón. El plan es historia visible</td></tr>
       </table>
+    </div>
+
+    <div class="callout cy reveal">
+      El hilo completo, para cualquier proyecto: <b>Charter</b> (Goal + Pilares) →
+      <b>plan del piso</b> → <b>promptloop.sh</b> (ejecuta con el Goal como juez) →
+      <b>ciclos</b> (cada uno con su <code>/goal</code> heredado del Charter) →
+      <b>/checkpoint</b> (cierra midiendo) → <b>cierre completo</b> (medir + publicar + indexar).
+      El objetivo nunca se re-redacta: se hereda.
     </div>
   </div>
 </section>
@@ -629,7 +656,7 @@ sin regresión en extrapolación.
   <div class="wrap">
     <span><b>claude-project-base</b> // guía de operación — es · 2026</span>
     <span>repo: <a href="https://github.com/OilCoder/claude-project-base">github.com/OilCoder/claude-project-base</a></span>
-    <span>doctrina: <b>piso por plan · vida por ciclos · goal medible</b></span>
+    <span>doctrina: <b>piso por plan · vida por ciclos · goal medible · cierre completo</b></span>
   </div>
 </footer>
 
