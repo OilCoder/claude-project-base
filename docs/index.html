@@ -459,6 +459,15 @@ cierre: medición vs baseline → <span class="y">merge o descarte explícito</s
         terminan — lo que solo vive en memoria muere con el proceso a las 2 AM, y te enteras
         a las 9.</p>
       </div>
+      <div class="card reveal">
+        <h3>Antes de escribir código: la escalera</h3>
+        <p>El mejor código es el que nunca se escribió. Antes de una línea nueva, en orden:
+        <b>¿necesita existir? → ¿ya lo hace este codebase? → ¿stdlib? → ¿feature nativa? →
+        ¿dependencia instalada? → ¿cabe en una línea? → solo entonces, el mínimo que
+        funcione.</b> Nunca perezoso con: seguridad, validación en fronteras, pérdida de
+        datos, accesibilidad — ni con leer el código afectado primero.</p>
+        <span class="src">Destilada de ponytail (MIT): −54% líneas, −20% costo, guardias intactas. Vive en code-change.md.</span>
+      </div>
     </div>
   </div>
 </section>
@@ -645,6 +654,15 @@ cierre: medición vs baseline → <span class="y">merge o descarte explícito</s
         <tr><td><code>implementer</code></td><td>Escritor de código autónomo con las reglas precargadas</td></tr>
         <tr><td><code>code-reviewer</code></td><td>Revisa el diff sin commitear, en contexto fresco</td></tr>
         <tr><td><code>security-reviewer</code></td><td>Auditoría de vulnerabilidades</td></tr>
+      </table>
+    </div>
+
+    <div class="tblwrap reveal">
+      <table>
+        <tr><th>Plugin externo (opcional)</th><th>Qué aporta</th><th>Instalación</th></tr>
+        <tr><td><b>frontend-design</b> <span class="st">(oficial · instalado)</span></td><td>Plan de diseño obligatorio + auto-revisión anti-genérico antes de cualquier CSS — para los sitios docs/</td><td><code>/plugin install frontend-design@claude-plugins-official</code></td></tr>
+        <tr><td><b>ponytail</b> <span class="st">(completo)</span></td><td>La escalera con modos enforced (lite/full/ultra) y hooks — la base ya trae la versión destilada</td><td><code>/plugin marketplace add DietrichGebert/ponytail</code></td></tr>
+        <tr><td><b>LSP del stack</b></td><td>Def/refs exactos para repos medianos/grandes (p.ej. basedpyright)</td><td><code>/plugin marketplace add Piebald-AI/claude-code-lsps</code></td></tr>
       </table>
     </div>
 
