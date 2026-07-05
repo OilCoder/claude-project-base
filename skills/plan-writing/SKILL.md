@@ -5,7 +5,7 @@ description: >
   Use when the user says "write the plan", "update the plan",
   "what's left to do", "create the project phases".
 argument-hint: "[phase or context]"
-allowed-tools: Read Write Edit Bash(git log:*) Bash(ls:*) Bash(date:*) Grep Glob
+allowed-tools: Read Write Edit Bash(git log:*) Bash(git switch:*) Bash(git branch:*) Bash(ls:*) Bash(date:*) Grep Glob
 ---
 
 # Plan Writing
@@ -124,20 +124,35 @@ Once every floor phase is `(COMPLETED)`, new work does **not** append phases to
 
 ### Opening a cycle
 
-1. Create `planning/cycles/NN_<slug>.md` with the §C sections: **Origin** (the audit
-   finding or doubt that opened it) · **Objective** (one outcome-shaped statement tied
-   to the plan's Goal) · **Goal-run command** (the ready-to-paste `/goal` invocation:
-   the objective + the plan's Pillars + the closing measurement as stop condition) ·
-   **Tasks** · **Close** (left empty until measured).
-2. Add a `- [>] NN_<slug> — open` line to the `## Cycles index` in `PLAN.md`
-   (create the section if this is the first cycle).
+0. **Evidence first (baseline).** If the cycle is born from a symptom or doubt,
+   `/investigate` runs **before** opening: an isolated diagnostic in `debug/`
+   produces the numbers. If they show the problem isn't real, log one line in the
+   bitácora and stop — no cycle (phantom-cycle guard). If the cycle is born from a
+   want (new capability), a one-line current-state note suffices — but a measured
+   baseline is **never optional**.
+1. **Create the cycle branch**: `git switch -c cycle/NN-<slug>` (from the default
+   branch, clean tree). The cycle's work — including autonomous goal-runs — lives here.
+2. Create `planning/cycles/NN_<slug>.md` with the §C sections: **Branch** line ·
+   **Origin** (what opened it **+ the baseline copied out of the `/investigate`
+   findings** — `debug/` is gitignored; evidence lives in the cycle file or nowhere) ·
+   **Objective** (move the baseline from X to Y, tied to the plan's Goal) ·
+   **Goal-run command** (the ready-to-paste `/goal` invocation: the objective + the
+   plan's Pillars + the closing measurement as stop condition) · **Tasks** ·
+   **Close** (left empty until measured).
+3. Add a `- [>] NN_<slug> — open (cycle/NN-<slug>)` line to the `## Cycles index`
+   in `PLAN.md` (create the section if this is the first cycle).
 
 ### Closing a cycle
 
 1. Fill the **Close — measurement against the Goal** section with numbers vs the
-   Objective — a cycle without measurement is not closed (that is report theater).
+   baseline and the Objective — a cycle without measurement is not closed (that is
+   report theater).
 2. Flip the index line to `- [x] NN_<slug> — closed YYYY-MM-DD (goal check: <one line>)`.
-3. If the measurement reveals the next doubt, that opens the next cycle — one
+3. **Resolve the branch** (via `/checkpoint`, which owns git): merge `cycle/NN-<slug>`
+   into the default branch — or discard it explicitly, appending
+   `(discarded: <reason>)` to the index line. Never leave a zombie branch: an
+   unmerged lingering branch is an open cycle wearing a costume.
+4. If the measurement reveals the next doubt, that opens the next cycle — one
    objective per cycle, always.
 
 ## Relationship with bitácora

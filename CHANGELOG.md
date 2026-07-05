@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Evidence-based cycle openings (baseline + branch)**. The cycle mechanic gains
+  symmetry of measurement — *a cycle opens with a number and closes with a number*:
+  - **`/investigate` is the opening move** for symptom-born cycles: an isolated
+    diagnostic produces the numbers that decide whether the cycle opens at all
+    (phantom-cycle guard — measuring first has redirected "problems" to their real
+    cause before) and sets the **baseline** the Objective moves (X → Y). Findings are
+    copied into the cycle's `## Origin` (debug/ is gitignored — evidence lives in the
+    cycle file or nowhere). Want-born cycles still record a measured current state.
+  - **One branch per cycle** (`cycle/NN-<slug>`), created at open by `/plan-writing`:
+    goal-runs run on it, the default branch stays clean, and a failed cycle is an
+    abandoned branch instead of pollution.
+  - **Close = measurement + branch resolution**: `/checkpoint` merges the cycle
+    branch into the default branch or discards it explicitly (reason in the index) —
+    a lingering unmerged branch is an open cycle wearing a costume; no zombies.
+  Pattern lifted from the portfolio's best recorded session: doubt → isolated
+  diagnostic → metric → cycle (Deep-PTA 2026-06-07), and from the healthiest
+  post-plan work observed (branch-per-effort with PRs in pinn).
+
 - **Two-tier anchor: identity vs architecture** (post-mortem of 3 real projects).
   The Charter now separates `## Invariants` (identity, 2–4 max; litmus test: *if it
   names a tool, library, or topology it is NOT an Invariant*) from a new

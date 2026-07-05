@@ -84,8 +84,12 @@ Apply the `/plan-writing` rules to update the plan:
 - **If a cycle is open** (`planning/cycles/*.md` with a `[>]` line in the plan's
   `## Cycles index`): update its tasks too, and if this milestone completes the
   cycle's Objective, fill its **Close — measurement against the Goal** section
-  (numbers vs the Objective) and flip the index line to `[x]` per `/plan-writing`.
-  Never close a cycle without the measurement.
+  (numbers vs the baseline in its Origin) and flip the index line to `[x]` per
+  `/plan-writing`. Never close a cycle without the measurement.
+- **Closing a cycle also resolves its branch**: after the commit, merge
+  `cycle/NN-<slug>` into the default branch (ask before pushing, as always) — or,
+  if the cycle failed and its work is being dropped, discard the branch explicitly
+  and append `(discarded: <reason>)` to the index line. No zombie branches.
 
 ### 4. Update documentation (selective)
 

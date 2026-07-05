@@ -260,22 +260,29 @@ discarded applies to plan tasks; the manifest rarely drops a document.)
 ## §C — Cycles (project life after the floor)
 
 The floor (`PLAN.md`) builds the skeleton; the project's real life then runs in
-**cycles**: audit/doubt → cycle → measurement against the Goal → close. Each cycle is
-one file in `planning/cycles/NN_<slug>.md` — short, self-contained, and always closed
-with a measurement (never abandoned, never appended to the master plan).
+**cycles**: doubt → `/investigate` (measure) → cycle on its own branch → measurement
+against the Goal → close (merge or discard). Each cycle is one file in
+`planning/cycles/NN_<slug>.md` — short, self-contained, and always closed with a
+measurement (never abandoned, never appended to the master plan). **A cycle opens
+with a number and closes with a number.**
 
 ### Cycle file format
 
 ```markdown
 # Cycle NN — <short name>
 
+Branch: cycle/NN-<slug>
+
 ## Origin
-The audit finding, doubt, or user decision that opened this cycle (1-3 lines,
-link the bitácora entry or gap report if one exists).
+What opened this cycle (audit finding, doubt, want — link the bitácora entry or
+gap report if one exists) **plus the baseline**: the measured starting number,
+copied out of the `/investigate` findings (`debug/` is gitignored — the evidence
+lives here or nowhere). For want-born cycles a one-line current-state note is
+enough, but the baseline number is never optional.
 
 ## Objective
-One outcome-shaped, measurable statement tied to the Charter Goal — what the
-artifact will do when this cycle closes that it cannot do today.
+One outcome-shaped, measurable statement tied to the Charter Goal — move the
+baseline from X to Y.
 
 ## Goal-run command
 Ready to paste — derived from the Charter, never re-invented:
@@ -293,12 +300,26 @@ and what it moved on the Charter Goal. A cycle without this section is not close
 
 ### Cycle rules
 
+- **Symptom-born cycles open with `/investigate`.** Measure before opening: an
+  isolated diagnostic script produces the numbers that say whether the problem is
+  real. If it isn't, log one line in the bitácora and do **not** open the cycle —
+  this is the phantom-cycle guard (measuring first has redirected more than one
+  "problem" to its actual cause).
+- **The baseline is never optional.** No cycle opens without a measured starting
+  number in its Origin — it is what the Objective moves (X → Y) and what the Close
+  is judged against. Symmetric measurement: open with a number, close with a number.
+- **One branch per cycle** (`cycle/NN-<slug>`), created when the cycle opens.
+  Autonomous goal-runs run on it; the default branch stays clean; a failed cycle is
+  an abandoned branch, not pollution.
 - **One objective per cycle.** If a second objective appears mid-cycle, it opens the
   next cycle — it does not stretch this one.
 - **Open ↔ index**: opening a cycle adds a `[>]` line to the `## Cycles index` in
   `PLAN.md`; closing it flips the line to `[x]` with the one-line measurement.
-- **Closing requires the measurement.** "Done" without numbers against the Objective
-  is report theater — the cycle stays `[>]` until measured (or `[!]` if blocked).
+- **Closing requires the measurement AND resolving the branch.** "Done" without
+  numbers against the Objective is report theater — the cycle stays `[>]` until
+  measured (or `[!]` if blocked). And a closed cycle's branch is **merged to the
+  default branch or explicitly discarded** (reason in the index line) — a lingering
+  unmerged branch is an open cycle wearing a costume; no zombie branches.
 - **Execution vehicle**: interactive work, `/phase-executor` on the cycle's tasks, or
   the cycle's Goal-run command via `/goal` (autonomous, condition-stopped). Long
   external runs (training, batch inference) are babysat with `/loop`, not by leaving

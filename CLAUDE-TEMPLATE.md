@@ -92,10 +92,13 @@ never improvises in code.
 ### The life — cycles (after the floor)
 
 Post-floor work runs in **cycles** (`planning/cycles/NN_<slug>.md`, per
-`planning-format.md` §C): Origin (audit/doubt) → Objective tied to the Goal →
-execute → **close with a measurement against the Goal**. Each cycle carries a
-ready-to-paste **Goal-run command** for `/goal` (objective + Pillars + stop
-condition). `/plan-writing` opens/closes them; `/checkpoint` keeps them current.
+`planning-format.md` §C): doubt → **`/investigate` first** (the numbers say if the
+problem is real — phantom-cycle guard — and set the **baseline**) → own branch
+`cycle/NN-<slug>` → Objective moves the baseline X→Y → execute → **close with a
+measurement and merge (or explicit discard)**. A cycle opens with a number and
+closes with a number. Each cycle carries a ready-to-paste **Goal-run command** for
+`/goal` (objective + Pillars + stop condition). `/plan-writing` opens/closes them;
+`/checkpoint` keeps them current and resolves the branch.
 
 ### Which loop when
 

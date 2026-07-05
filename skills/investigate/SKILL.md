@@ -80,3 +80,18 @@ If a debug script reveals a real bug worth preserving as a regression check:
 1. Create a test with the `/test` skill that captures the bug.
 2. Document the fix in the commit message.
 3. Remove or archive the original debug script after resolving the bug.
+
+## Feeding a cycle (the baseline)
+
+`/investigate` is also the **opening move of a work cycle** (`planning-format.md` §C):
+when a symptom or doubt might deserve a cycle, the investigation runs first and its
+numbers decide.
+
+- **The findings decide whether the cycle opens at all.** If the measurement shows
+  the problem isn't real (or has a different cause), log one line in the bitácora
+  and stop — a phantom cycle avoided is a win, not wasted work.
+- **If the cycle opens, copy the findings + the measured baseline into the cycle's
+  `## Origin`** before moving on. `debug/` is gitignored: the script is disposable,
+  the evidence is not — it lives in the cycle file or nowhere.
+- The baseline number becomes the X in the cycle's Objective ("move X → Y") and the
+  reference its Close is measured against.
