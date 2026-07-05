@@ -264,9 +264,14 @@ derive them from the actual `<user>/<repo>`.
 
 ### 16. (Optional) Recommended external plugins
 
-The base distills the essentials, but two external plugins compose well with it —
-mention them to the user, install only if they want them:
+The base distills the essentials, but a few external plugins compose well with it —
+mention them to the user, install only if they want them (plugins are user-scoped:
+once installed they apply across all the user's projects):
 
+- **frontend-design** (`/plugin install frontend-design@claude-plugins-official`) —
+  Anthropic's official design skill: forces a design plan (purpose/tone/constraints/
+  differentiation + a token system with ONE signature element) and an anti-generic
+  self-review before any CSS. Directly serves the per-project `docs/` landing sites.
 - **ponytail** (`/plugin marketplace add DietrichGebert/ponytail` →
   `/plugin install ponytail@ponytail`, requires Node.js): the full "lazy senior dev"
   system — modes (`lite`/`full`/`ultra`), lifecycle hooks, MCP. The base already
