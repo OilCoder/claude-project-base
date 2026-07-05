@@ -363,11 +363,28 @@ MAX_TURNS=<span class="y">80</span> MAX_BUDGET_USD=<span class="y">5</span> bash
     <div class="step reveal">
       <div class="stepno">04</div>
       <div>
-        <h3>Cada mejora es un ciclo <span class="who">TÚ</span></h3>
-        <p>Piso completo → nunca más anexes fases al plan. Cada duda, auditoría o mejora abre
-        un ciclo en <code>planning/cycles/NN_&lt;nombre&gt;.md</code>: <b>de dónde nace → qué
-        objetivo medible persigue → trabajo → cierre con números</b>. Un objetivo por ciclo;
-        si aparece un segundo, ese abre el siguiente.</p>
+        <h3>Cada mejora es un ciclo — y todo ciclo abre con evidencia <span class="who">TÚ</span></h3>
+        <p>Piso completo → nunca más anexes fases al plan. Ante una duda o síntoma,
+        <b>primero se mide</b>:</p>
+        <div class="term"><div class="bar"><i></i><i></i><i></i>la mecánica del ciclo</div><pre>duda / síntoma
+   ▼
+<span class="m">/investigate</span>  →  diagnóstico aislado + NÚMEROS      <span class="c"># ¿el problema es real?</span>
+   ├─ no lo es → una línea en la bitácora, fin      <span class="c"># ciclo fantasma evitado</span>
+   ▼ sí lo es
+git switch -c <span class="cy">cycle/NN-nombre</span>                       <span class="c"># rama propia, main limpio</span>
+abrir <span class="cy">planning/cycles/NN_nombre.md</span>                 <span class="c"># Origin = hallazgos + BASELINE</span>
+   ▼
+trabajo / goal-run (<span class="m">/goal</span>)
+   ▼
+cierre: medición vs baseline → <span class="y">merge o descarte explícito</span></pre></div>
+        <p><b>Un ciclo abre con un número y cierra con un número.</b> El baseline del
+        investigate es la X que el objetivo mueve (X → Y). Un objetivo por ciclo; si
+        aparece un segundo, ese abre el siguiente. Y una rama sin mergear no es un ciclo
+        cerrado — es un ciclo abierto disfrazado.</p>
+        <p class="why"><b>De dónde sale esta mecánica:</b> de la mejor sesión registrada del
+        portafolio — una angustia ("¿esto no sirve o está mal pulido?") convertida en script
+        aislado, el script en una métrica, y la métrica en el ciclo correcto. Medir primero
+        redirigió el "problema" a su causa real.</p>
       </div>
     </div>
 
@@ -603,7 +620,7 @@ MAX_TURNS=<span class="y">80</span> MAX_BUDGET_USD=<span class="y">5</span> bash
         <tr><td><code>/phase-executor</code></td><td>Auto (y en el loop)</td><td>Ejecuta una fase con verificación contra disco y chequeo anti-teatro</td></tr>
         <tr><td><code>/bug-fix</code></td><td>Auto ante un bug</td><td>TDD: reproducir → test que falla → fix → confirmar</td></tr>
         <tr><td><code>/test</code></td><td>Auto sobre tests/</td><td>Crea tests para un módulo</td></tr>
-        <tr><td><code>/investigate</code></td><td>Auto al depurar</td><td>Script aislado en debug/ (gitignored)</td></tr>
+        <tr><td><code>/investigate</code></td><td>Auto al depurar · antes de abrir ciclo</td><td>Diagnóstico aislado en debug/; sus números deciden si el ciclo abre y fijan el baseline</td></tr>
         <tr><td><code>/document</code></td><td>Auto ante API nueva</td><td>Docs de código en documentation/</td></tr>
         <tr><td><code>/doc-enforce</code></td><td>Auto sobre código fuente</td><td>Revisa/genera docstrings</td></tr>
         <tr><td><code>/study</code></td><td>Auto en checkpoints</td><td>Notas de estudio en aprendizaje/ (referencias verificadas, jamás inventadas)</td></tr>
@@ -645,9 +662,10 @@ MAX_TURNS=<span class="y">80</span> MAX_BUDGET_USD=<span class="y">5</span> bash
     <div class="callout cy reveal">
       El hilo completo, para cualquier proyecto: <b>Charter</b> (Goal + Pilares) →
       <b>plan del piso</b> → <b>promptloop.sh</b> (ejecuta con el Goal como juez) →
-      <b>ciclos</b> (cada uno con su <code>/goal</code> heredado del Charter) →
-      <b>/checkpoint</b> (cierra midiendo) → <b>cierre completo</b> (medir + publicar + indexar).
-      El objetivo nunca se re-redacta: se hereda.
+      <b>/investigate</b> (mide el baseline, filtra ciclos fantasma) → <b>ciclos en su
+      rama</b> (cada uno con su <code>/goal</code> heredado del Charter) →
+      <b>/checkpoint</b> (cierra midiendo + merge) → <b>cierre completo</b>
+      (medir + publicar + indexar). El objetivo nunca se re-redacta: se hereda.
     </div>
   </div>
 </section>
