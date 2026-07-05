@@ -1,6 +1,26 @@
-<!-- description: Control scope and safety of code modifications -->
+<!-- description: Control scope and safety of code modifications, and the decision ladder that keeps new code minimal -->
 
 # Code Change
+
+## The decision ladder — before writing ANY new code
+
+Climb this ladder in order and stop at the first step that answers. The best code
+is the code never written. (Distilled from ponytail, MIT — DietrichGebert/ponytail;
+its agentic benchmark: −54% LOC, −20% cost, safety guards intact.)
+
+1. **Does this need to exist?** → No: skip it (YAGNI). Don't build for imagined futures.
+2. **Does this codebase already do it?** → Reuse it — never rewrite what exists.
+3. **Does the stdlib do it?** → Use it.
+4. **Is there a native platform feature?** → Use it (a native `<input type="date">`
+   beats a 400-line date picker).
+5. **Is it already an installed dependency?** → Use it.
+6. **Can it be one line?** → One line.
+7. **Only then**: write the minimum that works.
+
+Non-negotiable exceptions — never "lazy" about these: validation at trust
+boundaries, data-loss handling, security, accessibility. And never lazy about
+**reading**: understand the affected code and trace the real flow before picking
+a ladder step.
 
 ## Edit scope
 

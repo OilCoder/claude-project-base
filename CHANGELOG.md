@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Decision ladder in `code-change.md`** (distilled from ponytail, MIT,
+  DietrichGebert/ponytail — agentic benchmark: −54% LOC, −20% cost with safety
+  guards intact): before writing ANY new code, climb — needs to exist? → codebase
+  already does it? → stdlib? → native platform feature? → installed dependency? →
+  one line? → only then the minimum that works. Non-negotiable exceptions: trust-
+  boundary validation, data-loss handling, security, accessibility; and never lazy
+  about *reading* the affected code first. Attacks the over-engineering failure
+  mode documented in the portfolio audit (governance-heavy projects with hollow
+  artifacts). `/setup` step 16 now also lists the recommended external plugins for
+  users who want the enforced versions: ponytail (modes/hooks) and per-stack LSP
+  (exact def/refs on medium/large codebases).
+
 - **Evidence-based cycle openings (baseline + branch)**. The cycle mechanic gains
   symmetry of measurement — *a cycle opens with a number and closes with a number*:
   - **`/investigate` is the opening move** for symptom-born cycles: an isolated

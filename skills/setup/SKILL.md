@@ -262,6 +262,21 @@ fails on first run.
 Remind the user to set these after the first publish. Do not invent the URLs —
 derive them from the actual `<user>/<repo>`.
 
+### 16. (Optional) Recommended external plugins
+
+The base distills the essentials, but two external plugins compose well with it —
+mention them to the user, install only if they want them:
+
+- **ponytail** (`/plugin marketplace add DietrichGebert/ponytail` →
+  `/plugin install ponytail@ponytail`, requires Node.js): the full "lazy senior dev"
+  system — modes (`lite`/`full`/`ultra`), lifecycle hooks, MCP. The base already
+  ships its **decision ladder** distilled in `code-change.md`, so this is only
+  worth it when the user wants the enforced/hooked version.
+- **LSP for the stack** (`/plugin marketplace add Piebald-AI/claude-code-lsps`):
+  exact go-to-definition / find-references (e.g. `basedpyright` for Python).
+  Worth it on medium/large codebases; add a CLAUDE.md line telling Claude to
+  prefer LSP for def/refs (models underuse it by default).
+
 ## Final state
 
 After `/setup`, the project looks like this:
