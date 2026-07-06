@@ -129,21 +129,9 @@ Apply the `/bitacora` rules:
 
 ### 7. Commit
 
-Per `commit-style.md`, choose the prefix from the 9-prefix set:
-
-| Dominant nature of changes | Prefix |
-|---|---|
-| New functionality (came from `/phase-executor` or implementation) | `feat:` |
-| Bug fix (came from `/bug-fix`, or fixes incorrect behavior) | `fix:` |
-| Only `documentation/` changed (code docs) | `docs:` |
-| Only `docs/` changed (GitHub Pages landing site) | `site:` |
-| Only `aprendizaje/` changed (study material) | `learn:` |
-| Only code restructure with no behavior change | `refactor:` |
-| Only `tests/` changed | `test:` |
-| Performance improvement with benchmark | `perf:` |
-| Tooling / `.claude/` / configs / deps | `chore:` |
-
-When changes span categories, pick the **dominant** one. When in doubt: `chore:`.
+Choose the prefix per `commit-style.md` (always in context — its 9-prefix table and
+decision tree are the single authority). Quick rule: when changes span categories,
+pick the **dominant** one; when in doubt, `chore:`.
 
 - Stage **specific files** (not `git add -A`). Choose only files relevant to this checkpoint.
 - Compose a commit message:

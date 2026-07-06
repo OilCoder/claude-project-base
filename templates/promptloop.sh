@@ -77,23 +77,15 @@ plan_sig()   { printf '%s|%s' "$(git rev-parse HEAD)" "$(md5sum "$PLAN" | awk '{
 
 read -r -d '' LOOP_PROMPT <<'EOF'
 Execute the next non-completed phase in planning/PLAN.md by following the
-phase-executor skill in NON-INTERACTIVE LOOP MODE:
-- Do NOT ask for approval; proceed autonomously on the first non-completed phase.
-- The plan's ## Goal and ## Pillars are your oracle. Honor ## Non-goals and
-  ## Invariants — if a task would violate either, mark it
-  `- [!] ... (BLOCKED <date>: reason)` in PLAN.md and STOP without coding.
-  Anything the Pillars reserve for the user, or anything ambiguous/interpretive:
-  record it and BLOCK — never guess.
-- Implement the phase's tasks, run the verification gate, and confirm the phase's
-  `Done when:` criterion is met — verified AGAINST DISK (cited files exist, the
-  result is demonstrated by running it), never against your memory of the work.
-- Anti-theater check before closing: does this phase's artifact serve the ## Goal,
-  or is it conformant emptiness? Hollow output that merely satisfies the task list
-  does NOT complete the phase — BLOCK with the gap instead.
-- On success: mark the phase title `(COMPLETED)` and create exactly ONE conventional commit.
-- If anything is ambiguous, a dependency is missing, or verification fails: mark the
-  affected task `- [!] ... (BLOCKED <date>: reason)` and STOP. Never guess. Never commit
-  partial or unverified work.
+phase-executor skill's "Loop mode (non-interactive)" section — it is the single
+authority for every gate (Goal/Pillars oracle, drift check, verify-against-disk,
+anti-theater, BLOCKED semantics). Contract with this script:
+- Proceed autonomously on the FIRST non-completed phase; never ask for approval.
+- On success: mark the phase title `(COMPLETED)` and create exactly ONE
+  conventional commit (the loop relies on HEAD advancing).
+- On any block: mark the affected task `- [!] ... (BLOCKED <date>: reason)` in
+  PLAN.md and STOP without committing partial work — the loop detects the marker
+  and halts for human review. Never guess.
 EOF
 
 # ---- The loop ----------------------------------------------------------------
