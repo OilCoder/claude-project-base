@@ -110,14 +110,12 @@ closes with a number. Each cycle carries a ready-to-paste **Goal-run command** f
 
 ## Context discipline (long sessions)
 
-- **One task = one session.** `/checkpoint` is the session border; the bitácora
-  (Pending + Learnings) is the handoff the next session reads.
-- Watch the statusline `ctx %` — past ~60% (the "dumb zone"), close the phase:
-  `/compact <focus>` proactively or start fresh. Never let auto-compaction decide.
-- **When compacting, always preserve**: the modified-files list, verification
-  commands, decisions and their why, Non-goals/Invariants/Pillars, open BLOCKED items.
-- Corrected Claude twice on the same thing? The context is poisoned — `/clear`
-  and restate the prompt incorporating what you learned.
+- **One task = one session** — `/checkpoint` is the border; the bitácora is the handoff.
+- Statusline `ctx %` past ~60% = dumb zone: close the phase with `/compact <focus>`
+  or a fresh session. Never let auto-compaction decide what to remember.
+- **When compacting, always preserve**: modified-files list, verification commands,
+  decisions + their why, Non-goals/Invariants/Pillars, open BLOCKED items.
+- Two corrections on the same thing → context is poisoned: `/clear` + better prompt.
 
 ## Rules (13)
 
@@ -194,11 +192,8 @@ closes with a number. Each cycle carries a ready-to-paste **Goal-run command** f
 
 ## Validation modes
 
-- **suggest**: recommendations (prototype)
-- **warn**: violations flagged (active development)
-- **strict**: strict enforcement (production)
+`suggest` (prototype) · `warn` (active development) · `strict` (production)
 
 ## Policies (optional)
 
-If the project needs immutable principles, place them in `.claude/policies/`.
-Candidates: `kiss-principle`, `fail-fast`, `no-overengineering`.
+Immutable principles live in `.claude/policies/` — e.g. `kiss-principle`, `fail-fast`.
