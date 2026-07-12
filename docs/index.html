@@ -459,6 +459,15 @@ cierre: medición vs baseline → <span class="y">merge o descarte explícito</s
         terminan — lo que solo vive en memoria muere con el proceso a las 2 AM, y te enteras
         a las 9.</p>
       </div>
+      <div class="card mg reveal">
+        <h3>El contexto es un recurso — vigílalo</h3>
+        <p><b>Una tarea = una sesión</b>: el /checkpoint es la frontera, la bitácora es el
+        handoff. Mira el <code>ctx %</code> del statusline: pasado ~60% entras a la "dumb
+        zone" — cierra la fase con <code>/compact &lt;foco&gt;</code> o sesión nueva, nunca
+        dejes que la auto-compactación decida qué recordar. ¿Corregiste dos veces lo mismo?
+        Contexto envenenado: <code>/clear</code> y mejor prompt.</p>
+        <span class="src">Evidencia: el rendimiento degrada al llenarse la ventana — incluso en tareas triviales (Chroma, 2025).</span>
+      </div>
       <div class="card reveal">
         <h3>Antes de escribir código: la escalera</h3>
         <p>El mejor código es el que nunca se escribió. Antes de una línea nueva, en orden:

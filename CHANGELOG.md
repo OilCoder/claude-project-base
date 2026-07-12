@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Context discipline for long sessions** (evidence: official best-practices +
+  Chroma "context rot" — performance degrades as the window fills, practical
+  "dumb zone" ≈ 60%+):
+  - `statusline.sh` now shows **`ctx NN%`** (⚠ past 60%) — probed defensively
+    from the statusline stdin JSON, silently omitted when absent, never breaks.
+  - `CLAUDE-TEMPLATE.md` gains a **Context discipline** section: one task = one
+    session (`/checkpoint` is the border, the bitácora is the handoff);
+    compact proactively at phase close with `/compact <focus>`; permanent
+    compaction-preservation list (modified files, verification commands,
+    decisions + why, Non-goals/Invariants/Pillars, open BLOCKED); two
+    corrections on the same thing → `/clear` with a better prompt.
+
 - **Decision ladder in `code-change.md`** (distilled from ponytail, MIT,
   DietrichGebert/ponytail — agentic benchmark: −54% LOC, −20% cost with safety
   guards intact): before writing ANY new code, climb — needs to exist? → codebase

@@ -108,6 +108,17 @@ closes with a number. Each cycle carries a ready-to-paste **Goal-run command** f
 | Cycles / goal-runs | `/goal` (native) — measurable objective, stops on condition |
 | Babysitting long runs (training, batches) | `/loop` (native) on an interval |
 
+## Context discipline (long sessions)
+
+- **One task = one session.** `/checkpoint` is the session border; the bitácora
+  (Pending + Learnings) is the handoff the next session reads.
+- Watch the statusline `ctx %` — past ~60% (the "dumb zone"), close the phase:
+  `/compact <focus>` proactively or start fresh. Never let auto-compaction decide.
+- **When compacting, always preserve**: the modified-files list, verification
+  commands, decisions and their why, Non-goals/Invariants/Pillars, open BLOCKED items.
+- Corrected Claude twice on the same thing? The context is poisoned — `/clear`
+  and restate the prompt incorporating what you learned.
+
 ## Rules (13)
 
 | Rule | Scope | Purpose |
