@@ -1,6 +1,8 @@
 {
   "name": "claude-project-base",
   "version": "0.2.0",
+  "skills": "./.claude/skills/",
+  "agents": "./.claude/agents/",
   "description": "Generic base of rules, skills, agents, and hooks for Python/ML/research/LLM projects with Claude Code. Four-layer enforcement model + minimum folder convention + organic growth.",
   "author": {
     "name": "OilCoder",

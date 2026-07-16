@@ -86,9 +86,12 @@ Copy all 5 agents to `.claude/agents/` — they are stack-agnostic:
 
 ### 6. Copy hooks and settings
 
+Source paths are relative to the base (the plugin root, `${CLAUDE_PLUGIN_ROOT}`
+when installed as a plugin, or the local clone of `claude-project-base`):
+
 ```bash
-cp settings.template.json .claude/settings.json
-cp hooks/*.sh .claude/hooks/
+cp <base>/.claude/settings.template.json .claude/settings.json
+cp <base>/.claude/hooks/*.sh .claude/hooks/
 chmod +x .claude/hooks/*.sh
 ```
 
@@ -209,7 +212,7 @@ Copy the Ralph-style phase-execution loop so the project can run `PLAN.md` auton
 
 ```bash
 mkdir -p .claude/scripts
-cp templates/promptloop.sh .claude/scripts/promptloop.sh
+cp <base>/.claude/templates/promptloop.sh .claude/scripts/promptloop.sh
 chmod +x .claude/scripts/promptloop.sh
 ```
 
@@ -245,7 +248,7 @@ If the user wants the wiki synced, copy the template:
 
 ```bash
 mkdir -p .github/workflows
-cp templates/sync-wiki.yml .github/workflows/sync-wiki.yml
+cp <base>/.claude/templates/sync-wiki.yml .github/workflows/sync-wiki.yml
 ```
 
 Then tell the user to do the one-time wiki init: open the repo's **Wiki** tab and

@@ -56,5 +56,5 @@ No new agents are needed to use teams — just spawn them by name.
 ## Cross-references
 
 - See `verification.md` for the gate that applies regardless of where work runs.
-- See `agents/*.md` for the available specialist subagents.
+- See `.claude/agents/*.md` for the available specialist subagents.
 - See `code-change.md` for scope discipline when work returns from delegation.

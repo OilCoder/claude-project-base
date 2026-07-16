@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Repo restructured: everything functional now lives inside `.claude/`**
+  (`agents/`, `hooks/`, `rules/`, `skills/`, `templates/`,
+  `settings.template.json` moved from the repo root to `.claude/`). The base
+  now mirrors the exact shape it produces in target projects, and its own
+  skills/agents/hooks are active when working inside this repo.
+  `plugin.json` gains `skills`/`agents` path overrides so plugin installs keep
+  working; `/setup` copy sources updated accordingly.
+
 ### Added
 
 - **Context discipline for long sessions** (evidence: official best-practices +
