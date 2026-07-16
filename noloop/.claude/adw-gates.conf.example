@@ -1,0 +1,7 @@
+# adw-gates.conf — per-project override of the ADW gate commands.
+# Copy to the target project root and adjust. Any gate not listed here falls
+# back to stack autodetection (see .claude/hooks/adw-detect.sh).
+# Format: <gate>=<shell command>, run from the project root, exit 0 = pass.
+lint=uvx ruff check .
+format=uvx ruff format --check .
+test=uv run pytest -x -q

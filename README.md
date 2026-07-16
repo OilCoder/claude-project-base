@@ -1,84 +1,66 @@
-# claude-project-base
+# claude-project-base — dos métodos de generación de código
 
-A generic Claude Code plugin: rules, skills, agents, and hooks that codify how to write code well, regardless of project type.
+Este repo contiene **dos métodos de generación de código con Claude Code**, cada uno
+autocontenido en su propia carpeta con su `.claude/` adentro — porque así funciona
+Claude: el método vive en la carpeta `.claude/` del proyecto donde trabaja.
 
-Designed for Python / ML / research / LLM-app projects but works for any stack.
+```
+clasico/
+└── .claude/          ← método CLÁSICO: rules + skills + agents + hooks de disciplina
+    ├── skills/       (/checkpoint, /blueprint, /plan-writing, /phase-executor, ...)
+    ├── agents/       (architect, implementer, code-reviewer, ...)
+    ├── rules/        (13 reglas: code-style, verification, planning-format, ...)
+    ├── hooks/        (statusline, session-start, stop-suggest-checkpoint, ...)
+    └── settings.template.json
 
-## Install
-
-```bash
-# In any Claude Code session
-/plugin marketplace add OilCoder/claude-project-base
-/plugin install claude-project-base
+noloop/
+└── .claude/          ← método NO-LOOP (ADW): la estructura impone, la memoria no
+    ├── hooks/        (adw-detect, adw-gate, adw-stop-gate, adw-posttool-lint)
+    ├── settings.json / settings.template.json
+    ├── referencias/  (diagramas del método, investigación, transcripción)
+    ├── fixture-project/  (banco de pruebas con errores deliberados)
+    ├── run-e2e.sh    (verificación end-to-end con claude -p real)
+    └── adw-gates.conf.example
 ```
 
-Then bootstrap a new project:
+## Filosofías
+
+- **Clásico**: las reglas y skills *guían* al agente — disciplina de planeación
+  (blueprint → PLAN.md → fases), bitácora, checkpoint. El agente recuerda verificar.
+- **No-loop (ADW)**: los gates deterministas *imponen* el flujo — hooks que no dejan
+  al agente terminar su turno con lint/tests rotos (exit 2 le devuelve los errores:
+  el "fail: loop back" de los diagramas en `noloop/.claude/referencias/`). El humano
+  aparece solo en los extremos: prompt y review.
+
+## Usar un método en un proyecto
+
+Copiar el `.claude/` del método al proyecto destino:
 
 ```bash
-/setup
+cp -r clasico/.claude  /ruta/al/proyecto/.claude   # o
+cp -r noloop/.claude   /ruta/al/proyecto/.claude
 ```
 
-`/setup` asks 2 questions (project name, stack), creates 5 folders (`.claude/`, `planning/`, `documentation/`, `aprendizaje/`, `docs/`), copies all the rules/skills/agents/hooks, and customizes the linter hook + permissions for your stack.
+(Para no-loop: renombrar `settings.template.json` a `settings.json` en el destino y,
+opcionalmente, definir los gates en `adw-gates.conf`; sin él se autodetectan —
+Python → ruff/pytest, JS → eslint/prettier. Para el clásico: correr `/setup`.)
 
-Updates:
+También puedes abrir Claude directamente dentro de `clasico/` o `noloop/` para
+trabajar sobre el método mismo.
+
+## Verificar el método no-loop
 
 ```bash
-/plugin update claude-project-base
+bash noloop/.claude/run-e2e.sh
 ```
 
-## What you get
+Copia el fixture a /tmp, instala el método, corre un `claude -p` real y muestra el log
+de gates (`.claude/adw-runs/*.jsonl`) con la secuencia fail → loop-back → pass.
 
-### 13 rules
-9 always loaded (code style, code change, file naming, logging, verification, delegation, memory policy, commit style, project guidelines) + 4 path-scoped (doc enforcement, docs style, learning style, planning format).
+## Progresión del método no-loop (v0 → v4)
 
-### 11 skills
-- `/blueprint` — scaffolding loop: foundation doc suite in `planning/blueprint/`, gated per document, before coding
-- `/checkpoint` — plan + docs + study + bitácora + commit + (push/PR) in one
-- `/bug-fix` — TDD bug fix workflow
-- `/bitacora` — session log
-- `/plan-writing` — write/update PLAN.md (seeds from blueprint if present)
-- `/phase-executor` — execute a plan phase with verification gate
-- `/study` — capture project knowledge as didactic study notes in `aprendizaje/`
-- `/test`, `/investigate`, `/document`, `/doc-enforce`
-
-### 5 agents
-- `code-reviewer` — fresh-context diff review
-- `security-reviewer` — OWASP-style audit
-- `architect` — interview-driven feature design
-- `blueprinter` — drafts one project-inception foundation doc (driven by `/blueprint`)
-- `implementer` — autonomous code writer with rules preloaded
-
-### Autonomous loop
-- `.claude/scripts/promptloop.sh` — Ralph-style loop: runs a fresh `claude -p` per phase against `planning/PLAN.md`, driving `/phase-executor` in non-interactive mode, one commit per phase. Branch-guarded; stops on all-done / BLOCKED / max-iterations / no-progress.
-
-### 5 hooks
-- Statusline (branch + active phase + bitácora flag)
-- SessionStart (inject PLAN active phase, pending bitácora, verification commands)
-- Stop (suggest `/checkpoint` when work is unrecorded)
-- PreToolUse blockers (`rm -rf`, force-push, `--no-verify`, `git reset --hard`)
-- PostToolUse `check-debug-isolation` + stack-specific linter
-
-### Permissions allowlist
-Pre-approved safe read-only commands so Claude doesn't prompt on every git/ls/cat.
-
-## Philosophy
-
-**Four layers:** Rules guide. Skills orchestrate. Agents review or design in isolation. Hooks enforce. Pick the hardest layer that can express the behavior.
-
-**Folder minimum:** Only 5 folders are created at bootstrap. Everything else (`src/`, `pipeline/`, `tests/`, `data/`, etc.) is created when the project demands it.
-
-**`documentation/` vs `docs/`:** Code docs go to `documentation/`. `docs/` is reserved for GitHub Pages.
-
-**`aprendizaje/` (study material):** A distinct layer from `documentation/`. Code docs are *reference* (what the code does); study notes are *explanation* (the concepts and domain knowledge behind it — petroleum, geology, ML, data-eng), written as didactic material with formulas, flowcharts, and verified references, exported to Obsidian to accumulate across projects.
-
-**Verification first:** Per official Claude Code guidance, no task is complete until verification (tests + lint + type-check) passes.
-
-## Documentation
-
-- [`PERSONALIZAR.md`](PERSONALIZAR.md) — full customization guide per rule and skill
-- [`CHANGELOG.md`](CHANGELOG.md) — version history
-- [`CLAUDE-TEMPLATE.md`](CLAUDE-TEMPLATE.md) — template that becomes `CLAUDE.md` in target projects
-
-## License
-
-MIT
+- **v0 (hecho)** — gate de lint que bloquea el turno (diagrama 1)
+- **v1** — cadena lint → format → test (diagramas 2-3)
+- **v2** — Test Agent con contexto fresco (diagrama 4)
+- **v3** — Planner al frente + escalamiento de fallos (diagrama 5)
+- **v4** — fan-out a N worktrees en paralelo (diagrama 6)

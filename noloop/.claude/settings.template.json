@@ -1,0 +1,64 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(pwd)",
+      "Bash(mkdir -p *)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/adw-stop-gate.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/adw-posttool-lint.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(rm -rf *)",
+            "command": "printf 'BLOCKED: rm -rf is restricted. Delete specific files instead, or ask the user for explicit approval.' >&2; exit 2"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git push --force *)",
+            "command": "printf 'BLOCKED: force-push requires explicit user approval.' >&2; exit 2"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git reset --hard *)",
+            "command": "printf 'BLOCKED: git reset --hard discards uncommitted work. Ask the user before proceeding.' >&2; exit 2"
+          }
+        ]
+      }
+    ]
+  }
+}
