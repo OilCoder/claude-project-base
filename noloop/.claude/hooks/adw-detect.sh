@@ -40,6 +40,8 @@ if [ -f "$proj/pyproject.toml" ] || compgen -G "$proj/*.py" > /dev/null; then
           echo "uv run pytest -x -q"
         elif command -v pytest > /dev/null 2>&1; then
           echo "pytest -x -q"
+        elif command -v uvx > /dev/null 2>&1; then
+          echo "uvx pytest -x -q"
         fi
       fi
       ;;

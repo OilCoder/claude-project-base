@@ -19,13 +19,16 @@ cp "$claude_dir"/hooks/adw-*.sh "$work/.claude/hooks/"
 cp "$claude_dir/settings.json" "$work/.claude/settings.json"
 git -C "$work" init -q && git -C "$work" add -A && git -C "$work" -c user.email=e2e@adw -c user.name=adw commit -qm "estado inicial (con errores de lint deliberados)"
 
-# 2. Baseline: the gate must fail before the run
-echo "→ Gate lint ANTES de la corrida:"
-if bash "$work/.claude/hooks/adw-gate.sh" lint "$work" > /dev/null 2>&1; then
-  echo "ERROR: el fixture no tiene errores de lint — el experimento no prueba nada." >&2
-  exit 1
-fi
-echo "   FALLA (esperado: el fixture trae errores deliberados)"
+# 2. Baseline: every gate must fail before the run (deliberate fixture errors)
+echo "→ Gates ANTES de la corrida:"
+for gate in lint format test; do
+  if bash "$work/.claude/hooks/adw-gate.sh" "$gate" "$work" > /dev/null 2>&1; then
+    echo "   $gate: pasa (¡inesperado! el fixture debe traer errores deliberados)" >&2
+    exit 1
+  else
+    echo "   $gate: FALLA (esperado)"
+  fi
+done
 
 # 3. The real run: the Stop hook must keep the agent working until lint passes
 echo "→ Corriendo claude -p (esto toma un rato)..."
@@ -37,15 +40,17 @@ echo "→ Corriendo claude -p (esto toma un rato)..."
     --output-format json > claude-output.json 2> claude-stderr.log
 ) || echo "   (claude terminó con código $? — se evalúa por el estado del gate)"
 
-# 4. Verdict: lint must pass now
-echo "→ Gate lint DESPUÉS de la corrida:"
-if bash "$work/.claude/hooks/adw-gate.sh" lint "$work"; then
-  echo "   PASA ✔"
-  outcome=0
-else
-  echo "   SIGUE FALLANDO ✘ (revisar log)"
-  outcome=1
-fi
+# 4. Verdict: the whole chain must pass now
+echo "→ Gates DESPUÉS de la corrida:"
+outcome=0
+for gate in lint format test; do
+  if bash "$work/.claude/hooks/adw-gate.sh" "$gate" "$work" > /dev/null 2>&1; then
+    echo "   $gate: PASA ✔"
+  else
+    echo "   $gate: SIGUE FALLANDO ✘ (revisar log)"
+    outcome=1
+  fi
+done
 
 # 5. Evidence for study
 echo "→ Log de gates (adw-runs):"

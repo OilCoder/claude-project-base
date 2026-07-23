@@ -1,5 +1,16 @@
 {
   "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "^builder$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/adw-stop-gate.sh\""
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

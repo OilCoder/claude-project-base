@@ -5,3 +5,6 @@
 lint=uvx ruff check .
 format=uvx ruff format --check .
 test=uv run pytest -x -q
+# To make the lint gate also enforce docstrings (pydocstyle, Google style),
+# extend the lint command or configure it in the project's pyproject.toml:
+#   lint=uvx ruff check . --extend-select D --config 'lint.pydocstyle.convention="google"'

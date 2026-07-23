@@ -60,7 +60,7 @@ de gates (`.claude/adw-runs/*.jsonl`) con la secuencia fail → loop-back → pa
 ## Progresión del método no-loop (v0 → v4)
 
 - **v0 (hecho)** — gate de lint que bloquea el turno (diagrama 1)
-- **v1** — cadena lint → format → test (diagramas 2-3)
+- **v1 (hecho)** — cadena lint → format → test (diagramas 2-3)
 - **v2** — Test Agent con contexto fresco (diagrama 4)
 - **v3** — Planner al frente + escalamiento de fallos (diagrama 5)
 - **v4** — fan-out a N worktrees en paralelo (diagrama 6)

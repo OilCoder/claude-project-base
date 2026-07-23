@@ -15,7 +15,9 @@ if [ -z "$cmd" ]; then
 fi
 
 start_ms=$(date +%s%3N)
-output=$(cd "$proj" && bash -c "$cmd" 2>&1)
+# 5-minute cap per gate; exit 124 = timed out (slow suites: narrow the command
+# in adw-gates.conf, e.g. `test=pytest -x -q tests/smoke`).
+output=$(cd "$proj" && timeout 300 bash -c "$cmd" 2>&1)
 code=$?
 end_ms=$(date +%s%3N)
 
