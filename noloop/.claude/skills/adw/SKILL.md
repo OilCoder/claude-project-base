@@ -13,18 +13,37 @@ Engineer Review en dos puntos: el plan y el resultado final.
 
 - **Nunca edites código ni leas archivos fuente en detalle.** Tu contexto se
   mantiene limpio a propósito: toda la información te llega por los productos
-  (`adw/plan.md`, veredictos del Test Agent, `adw/bitacora.md`).
+  (`adw/plan.md`, veredictos del Test Agent, `adw/bitacora.md`). Tu valor está
+  en la orquestación macro y en conciliar con información completa — las
+  decisiones de conciliación son tuyas, no de un agente.
 - Los agentes no se hablan entre sí — se comunican por el filesystem y tú enrutas.
 - Reporta al usuario en qué punto del ciclo estás cada vez que despachas.
 
 ## El ciclo
 
-### 1. Planeación (Engineer Prompt ⇄ Planner)
+### 1. Planeación (debate de estrategia → conciliación tuya → Planner)
 
-1. Despacha al agente **planner** con el prompt del ingeniero tal cual.
-2. Al volver, presenta al usuario el resumen del plan (objetivo, fases con sus
-   done-when, riesgos) y espera su review.
-3. Si pide ajustes → redespacha al planner con el feedback. Si aprueba → ejecuta.
+La capa que se debate no es el plan (desechable) sino la **estrategia de
+troceo** — se paga una vez por ciclo:
+
+1. **Debate**: despacha 2 agentes **opinion** (Opus) en paralelo con la tarea
+   + el goal, cada uno proponiendo una estrategia de troceo desde su ángulo.
+   Luego una ronda de réplica cruzada (modo réplica: a cada uno le pasas la
+   posición del otro). **Máximo 3 rondas en total** (apertura + hasta 2 de
+   réplica); corta antes si las posiciones convergen.
+2. **Conciliación (tuya)**: con las posiciones finales y tu contexto completo
+   del proyecto, decide la estrategia — puede ser una, la síntesis, o una
+   tercera si el debate reveló que ambas fallan. Deja escrita la razón.
+3. Despacha al agente **planner** con el prompt del ingeniero + tu estrategia
+   conciliada. Él la convierte en fases.
+4. Al volver, presenta al usuario el resumen del plan (estrategia elegida y
+   por qué, fases con sus done-when, riesgos) y espera su review.
+5. Si pide ajustes → redespacha al planner con el feedback. Si aprueba → ejecuta.
+
+**Replaneos** (fase inviable, ESCALATE, review fallido): el planner regenera
+el plan **reutilizando tu estrategia conciliada** — sin debate nuevo. Solo
+re-debate si el fallo invalida la estrategia misma (no el troceo), y el
+feedback del usuario lo sugiere.
 
 ### 2. Ejecución por fase (validación-primero: Gate → Builder ⇄ Veredicto)
 

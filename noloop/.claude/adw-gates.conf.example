@@ -8,3 +8,7 @@ test=uv run pytest -x -q
 # To make the lint gate also enforce docstrings (pydocstyle, Google style),
 # extend the lint command or configure it in the project's pyproject.toml:
 #   lint=uvx ruff check . --extend-select D --config 'lint.pydocstyle.convention="google"'
+# Context-watch threshold (KB of transcript ≈ proxy of context usage) at which
+# the orchestrator is told to update adw/estado.md and propose a directed
+# /compact. Default 1200 ≈ ~50% of a 200k window; calibrate per project:
+#   context_watch_kb=1200

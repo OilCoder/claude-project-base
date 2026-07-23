@@ -34,14 +34,29 @@ verdad** — ángulos que siempre coinciden no aportan contraste.
 Despacha N agentes **opinion** en un solo mensaje, cada uno con la pregunta
 y su ángulo.
 
-### 3. Fusión
+### 2b. Réplicas (opcional, si hay divergencia que lo amerite)
 
-Despacha al agente **fusion** con la pregunta y las N salidas completas.
+Si las posiciones divergen en algo decisivo, corre rondas de réplica cruzada
+(modo réplica del opinador: a cada uno le pasas la posición del otro).
+**Máximo 3 rondas en total** (apertura + hasta 2 de réplica); corta antes si
+convergen o si la divergencia ya quedó bien caracterizada.
+
+### 3. Conciliación
+
+**El conciliador eres tú** — el orquestador, con el contexto completo del
+proyecto que los opinadores no tienen. Contrasta: consenso, divergencias
+(¿por ángulo o por hecho? los hechos se verifican, no se votan), descartado,
+y tu recomendación con la razón.
+
+El agente **fusion** queda como descarga opcional: úsalo solo si las salidas
+son tan largas o tantas que conciliarlas directamente ensuciaría tu contexto
+macro — y aun así, la decisión final sobre su fusión es tuya.
 
 ### 4. Presentación
 
-Presenta al usuario la fusión tal cual (consenso / divergencias / descartado /
-recomendación). La decisión final es del usuario — la fusión informa, no decide.
+Presenta al usuario la conciliación (consenso / divergencias / descartado /
+recomendación tuya). La decisión final es del usuario — la conciliación
+informa, no decide.
 
 Si el usuario quiere el resultado en disco, guárdalo donde él diga
 (p.ej. `adw/decisiones/<slug>.md`).
