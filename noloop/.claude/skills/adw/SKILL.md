@@ -47,15 +47,21 @@ feedback del usuario lo sugiere.
 
 ### 2. Ejecución por fase (validación-primero: Gate → Builder ⇄ Veredicto)
 
+**Briefings autocontenidos y en caveman** (ver `rules/caveman-protocol.md`):
+cada despacho incluye INLINE el texto de la fase (alcance, archivos, done-when)
+y la ruta del gate — el agente arranca frío; no lo pongas a re-localizar lo que
+tú ya tienes enfrente.
+
 Para cada fase del plan, en orden:
 
-1. **Gate primero**: despacha al **test-agent** en modo GATE con el número de
-   fase — escribe `adw/gates/fase-N.sh` (el contrato de terminado) antes de
+1. **Gate primero**: despacha al **test-agent** en modo GATE con el briefing de
+   la fase — escribe `adw/gates/fase-N.sh` (el contrato de terminado) antes de
    que exista el código, y confirma que falla en vacío.
-2. Despacha al agente **builder** con el número de fase. Construye contra el
-   gate (puede ejecutarlo, no editarlo — un hook lo bloquea).
-3. Al volver, despacha al **test-agent** en modo VEREDICTO con el mismo número
-   de fase.
+2. Despacha al agente **builder** con el briefing de la fase (+ veredicto si es
+   loop-back). Construye contra el gate (puede ejecutarlo, no editarlo — un
+   hook lo bloquea).
+3. Al volver, despacha al **test-agent** en modo VEREDICTO con el briefing de
+   la misma fase.
 4. Según el veredicto:
    - **PASS** → siguiente fase.
    - **FAIL** → redespacha al builder con el veredicto completo (loop-back).

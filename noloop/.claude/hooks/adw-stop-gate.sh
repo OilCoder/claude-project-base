@@ -5,9 +5,10 @@
 # agent, which must fix them before it is allowed to finish. After a fix, the
 # next stop attempt re-runs the WHOLE chain from the start. Claude Code caps
 # consecutive blocks (~8), which acts as the method's implicit max-iterations.
-# Also registered on SubagentStop (matcher ^builder$): there exit 2 is
-# informational per current docs — the JSONL log still records the verdict,
-# and the loop-back authority for the builder is the test-agent (diagram 4).
+# Main-session Stop only. Deliberately NOT registered on SubagentStop: exit 2
+# is informational there, and the chain already runs twice per phase (builder
+# self-check + test-agent verdict) — a third run decided nothing and cost the
+# most idle minutes of the cycle.
 set -u
 
 # Consume hook input (JSON on stdin) — required so the pipe does not break.
