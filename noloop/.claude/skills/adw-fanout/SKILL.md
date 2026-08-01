@@ -51,9 +51,11 @@ planner.
 
 ## 3. Ejecución por worktree
 
-Para cada worktree, el ciclo interno idéntico al de `/adw`: Builder(fase) →
-Tester(fase) → PASS avanza / FAIL loop-back (máx. 3) / ESCALATE para ese
-worktree (no frena a los demás). Los despachos de worktrees distintos pueden
+Para cada worktree, el ciclo interno idéntico al de `/adw` con una excepción:
+**no se abre rama de ciclo** — la rama del worktree (`adw/wN`) ya cumple ese
+papel (commits por fase van ahí directo). Builder(fase) → Tester(fase) →
+PASS avanza / FAIL loop-back (máx. 3) / ESCALATE para ese worktree (no frena
+a los demás). Los despachos de worktrees distintos pueden
 ir en paralelo; dentro de un worktree son secuenciales.
 
 Un worktree que escala o agota loop-backs se marca **caído** y se reporta;
@@ -89,9 +91,12 @@ terminado — de todos modos tu Stop gate no te dejará cerrar el turno.
 1. **Preserva la evidencia primero**: copia la `adw/bitacora.md` de cada
    worktree (incluidos caídos y perdedores) al `adw/bitacora.md` principal,
    cada una bajo un encabezado `# Worktree wN — <modo/ángulo>`.
-2. Luego, con el ok del usuario: `git worktree remove` de cada uno y
-   `git branch -D` de las ramas no mergeadas. Nunca fuerces la eliminación de
-   un worktree con cambios sin commitear sin mostrárselo antes.
+2. Luego, con el ok del usuario: `git worktree remove` de cada uno (el
+   directorio, no la historia). **Las ramas no se borran**: renombra las no
+   mergeadas a `adw/descartado/wN` — perdedoras y caídas son evidencia
+   consultable. Podar ramas es decisión manual del ingeniero. Nunca fuerces
+   la eliminación de un worktree con cambios sin commitear sin mostrárselo
+   antes.
 
 ## Resumen del flujo
 

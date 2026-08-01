@@ -38,7 +38,9 @@ troceo** — se paga una vez por ciclo:
    conciliada. Él la convierte en fases.
 4. Al volver, presenta al usuario el resumen del plan (estrategia elegida y
    por qué, fases con sus done-when, riesgos) y espera su review.
-5. Si pide ajustes → redespacha al planner con el feedback. Si aprueba → ejecuta.
+5. Si pide ajustes → redespacha al planner con el feedback. Si aprueba →
+   **abre la rama del ciclo** (`git checkout -b adw/<slug-corto>` desde la rama
+   actual — anota cuál era, es el destino del merge) y ejecuta.
 
 **Replaneos** (fase inviable, ESCALATE, review fallido): el planner regenera
 el plan **reutilizando tu estrategia conciliada** — sin debate nuevo. Solo
@@ -63,7 +65,9 @@ Para cada fase del plan, en orden:
 3. Al volver, despacha al **test-agent** en modo VEREDICTO con el briefing de
    la misma fase.
 4. Según el veredicto:
-   - **PASS** → siguiente fase.
+   - **PASS** → commit de la fase en la rama del ciclo
+     (`feat(fase-N): <título>` — la rama acumula un commit verificado por
+     fase, trazabilidad del ciclo) y siguiente fase.
    - **FAIL** → redespacha al builder con el veredicto completo (loop-back).
      Máximo **3 loop-backs por fase**; al cuarto FAIL, para y escala al usuario.
    - **ESCALATE** → para el ciclo y preséntale al usuario el motivo. Casi
@@ -76,10 +80,19 @@ Para cada fase del plan, en orden:
    `adw/goal.md` define métricas de éxito medibles por comando, córrelas y
    presenta el valor obtenido junto a la meta — el review decide con números,
    no con impresiones.
-2. **Review falla** → despacha al planner con el feedback del usuario. El plan
-   anterior está muerto: el planner genera uno nuevo (el plan cambia a toda
-   hora — es desechable por diseño; el goal del ingeniero es lo estable).
-3. **Review pasa** → ship: ofrece commit (no comitees sin que lo pida).
+2. **Review falla con feedback** → despacha al planner con el feedback. El
+   plan anterior está muerto pero el ciclo sigue: el nuevo plan trabaja sobre
+   la **misma rama del ciclo** (el plan cambia a toda hora — es desechable;
+   el goal del ingeniero es lo estable).
+3. **El usuario descarta el intento entero** → ese es el valor de la rama:
+   vuelve a la rama base con la base intacta. **Nunca borres la rama** — los
+   intentos fallidos son evidencia: renómbrala a `adw/descartado/<slug>`
+   (la lista de ramas queda auto-documentada) y registra en la bitácora por
+   qué se descartó — insumo directo para "Lo intentado que falló".
+4. **Review pasa** → ship: merge de la rama del ciclo a la rama base
+   (`git merge --no-ff adw/<slug>`). La rama mergeada queda viva (podarla es
+   decisión manual del ingeniero, nunca del orquestador). La base solo recibe
+   ciclos completos aprobados, en commits de fase verificados.
 
 ## Variante fan-out
 
