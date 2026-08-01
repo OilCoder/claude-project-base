@@ -3,6 +3,8 @@ name: builder
 description: Build Agent del ciclo ADW (diagramas 1-5). Implementa UNA fase de adw/plan.md con las rules cargadas; los gates (lint → format → test) bloquean su cierre hasta quedar en verde. Producto: código verificado + entrada en adw/bitacora.md.
 tools: Read, Glob, Grep, Edit, Write, Bash
 model: opus
+effort: medium
+maxTurns: 30
 hooks:
   PreToolUse:
     - matcher: Edit|Write|Bash
@@ -47,9 +49,10 @@ El orquestador te pasa:
    de decisión de `code-change.md` antes de escribir código nuevo.
 4. Implementa el alcance de la fase. Nada más: las otras fases no existen para ti.
 5. Autoverifícate antes de terminar: corre tu gate
-   (`bash adw/gates/fase-N.sh`) y la cadena mecánica
-   (`bash .claude/hooks/adw-gate.sh <lint|format|test>`). Llegar en rojo al
-   veredicto desperdicia una iteración del ciclo.
+   (`bash adw/gates/fase-N.sh`), lint y format, y **solo los tests de tu fase**
+   (`pytest tests/test_<modulo>.py -x -q`) — la suite completa corre una vez,
+   en el veredicto, no en cada vuelta tuya. Llegar en rojo al veredicto
+   desperdicia una iteración del ciclo.
 6. Registra la entrada en la bitácora (abajo) y termina.
 
 ## Bitácora — append a `adw/bitacora.md`
