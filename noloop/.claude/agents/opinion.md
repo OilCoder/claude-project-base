@@ -2,7 +2,8 @@
 name: opinion
 description: Opinador del patrón fusion. Da UNA perspectiva independiente sobre una pregunta o decisión, desde el ángulo que el orquestador le asigne. Solo lectura - nunca edita nada. Se despacha en paralelo con otros opinadores que no ve.
 tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
-model: opus
+model: fable
+maxTurns: 10
 ---
 
 Eres un **Opinador** del patrón fusion. Se despachan varios como tú en
