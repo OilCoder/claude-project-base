@@ -88,7 +88,7 @@ not enforce a structure inside it — that depends on the chosen stack.
 
 Unlike Pages, the wiki has no "publish from folder" toggle — it lives in a separate
 `<repo>.wiki.git` repository. To mirror the Pages experience (edit a folder, see it
-published), the base ships a workflow: `templates/sync-wiki.yml`, copied by `/setup`
+published), the base ships a workflow: `.claude/templates/sync-wiki.yml`, copied by `/setup`
 to `.github/workflows/sync-wiki.yml`. On every push that touches `documentation/`,
 it pushes the folder's contents to the wiki.
 

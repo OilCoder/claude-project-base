@@ -2,8 +2,11 @@
 claude-project-base.md
 prompt-ajustar-cowork-obsidian.md
 
-# Claude Code local settings
-.claude/settings.local.json
+# Claude Code local settings (any depth)
+**/.claude/settings.local.json
+
+# ADW run logs (any project depth)
+adw-runs/
 
 # OS files
 .DS_Store
@@ -16,3 +19,6 @@ Desktop.ini
 *~
 .vscode/
 .idea/
+
+# Ruff cache
+.ruff_cache/

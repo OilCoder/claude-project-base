@@ -1,0 +1,3791 @@
+1
+00:00:00,080 --> 00:00:02,159
+It's time for us to talk about loop
+
+2
+00:00:02,159 --> 00:00:03,679
+engineering. I was hoping this would
+
+3
+00:00:03,679 --> 00:00:05,759
+just blow over after a couple weeks. I
+
+4
+00:00:05,759 --> 00:00:07,680
+was hoping a cracked engineer would call
+
+5
+00:00:07,680 --> 00:00:09,679
+this stupid phrase what it really is,
+
+6
+00:00:09,679 --> 00:00:13,360
+but no one has. So, I'll do it myself.
+
+7
+00:00:13,360 --> 00:00:15,360
+Forget about loop engineering. It's the
+
+8
+00:00:15,360 --> 00:00:17,199
+wrong way to think about building
+
+9
+00:00:17,199 --> 00:00:20,640
+valuable software with agents at scale
+
+10
+00:00:20,640 --> 00:00:22,960
+consistently. Loop engineering is a
+
+11
+00:00:22,960 --> 00:00:25,600
+terrible rebrand of the software
+
+12
+00:00:25,600 --> 00:00:28,240
+development life cycle. It's as unclear
+
+13
+00:00:28,240 --> 00:00:31,119
+as it is hype-filled. In this video, we
+
+14
+00:00:31,119 --> 00:00:33,520
+simplify loop engineering and call it
+
+15
+00:00:33,520 --> 00:00:35,840
+what it really is. If you understand
+
+16
+00:00:35,840 --> 00:00:37,600
+this concept properly, we're going to
+
+17
+00:00:37,600 --> 00:00:39,360
+break down in this video, [music]
+
+18
+00:00:39,360 --> 00:00:42,640
+you'll accelerate far ahead of the AI
+
+19
+00:00:42,640 --> 00:00:45,280
+industry. Clarity and simplicity of
+
+20
+00:00:45,280 --> 00:00:48,000
+information gives you [music] speed and
+
+21
+00:00:48,000 --> 00:00:50,399
+performance in your work. It's much more
+
+22
+00:00:50,399 --> 00:00:53,280
+valuable and helpful to think about
+
+23
+00:00:53,280 --> 00:00:55,039
+building with [music] agents as if
+
+24
+00:00:55,039 --> 00:00:57,920
+you're building developer workflows
+
+25
+00:00:57,920 --> 00:01:00,915
+inside your software factory. Your props
+
+26
+00:01:00,915 --> 00:01:03,280
+[music] go into your software factory. A
+
+27
+00:01:03,280 --> 00:01:05,500
+specific workflow runs. Each workflow
+
+28
+00:01:05,500 --> 00:01:08,240
+[music] is a combination of code plus
+
+29
+00:01:08,240 --> 00:01:10,640
+agents and then your results [music]
+
+30
+00:01:10,640 --> 00:01:13,439
+come out. Forget about loop engineering.
+
+31
+00:01:13,439 --> 00:01:16,080
+Focus your valuable engineering time and
+
+32
+00:01:16,080 --> 00:01:19,600
+tokens on building AI developer
+
+33
+00:01:19,600 --> 00:01:22,600
+workflows.
+
+34
+00:01:25,759 --> 00:01:28,159
+So, first off, who am I to go up against
+
+35
+00:01:28,159 --> 00:01:31,040
+big ideas from AI engineers like Boris
+
+36
+00:01:31,040 --> 00:01:33,040
+Churnney from Anthropic and Peter
+
+37
+00:01:33,040 --> 00:01:35,360
+Steinberg, now from OpenAI? If you
+
+38
+00:01:35,360 --> 00:01:37,040
+already know who I am and the work I've
+
+39
+00:01:37,040 --> 00:01:39,119
+done, or you don't care, skip to this
+
+40
+00:01:39,119 --> 00:01:41,920
+timestamp. My name is Dan Eisler aka
+
+41
+00:01:41,920 --> 00:01:43,920
+Indie Dev Dan. I'm a software engineer
+
+42
+00:01:43,920 --> 00:01:46,640
+with over 15 years of EXP. I started out
+
+43
+00:01:46,640 --> 00:01:48,880
+building Adobe Flash games with Action
+
+44
+00:01:48,880 --> 00:01:50,960
+Script 2 and three with my brothers. I
+
+45
+00:01:50,960 --> 00:01:52,720
+interned at Blizzard and then I quickly
+
+46
+00:01:52,720 --> 00:01:54,640
+moved into the finance and accounting
+
+47
+00:01:54,640 --> 00:01:57,280
+space programming in C, TypeScript,
+
+48
+00:01:57,280 --> 00:02:00,320
+Python, God awful React and God bless
+
+49
+00:02:00,320 --> 00:02:03,280
+Evanu for creating Vue. I was AI coding
+
+50
+00:02:03,280 --> 00:02:05,040
+before anyone had a name for it with
+
+51
+00:02:05,040 --> 00:02:08,080
+tools like Ader and classic models like
+
+52
+00:02:08,080 --> 00:02:12,720
+GPT3.5 Turbo, GPT4, and Sonnet 3. Tools
+
+53
+00:02:12,720 --> 00:02:14,720
+and models you've probably never heard
+
+54
+00:02:14,720 --> 00:02:17,200
+of or used. I own the domain name
+
+55
+00:02:17,200 --> 00:02:18,879
+agenticengineer.com
+
+56
+00:02:18,879 --> 00:02:20,720
+where thousands of engineers you've
+
+57
+00:02:20,720 --> 00:02:22,800
+heard of from companies you know have
+
+58
+00:02:22,800 --> 00:02:24,959
+improved their agentic engineering
+
+59
+00:02:24,959 --> 00:02:26,800
+thanks to information products I've
+
+60
+00:02:26,800 --> 00:02:29,360
+built by hand. But anyone can pick up a
+
+61
+00:02:29,360 --> 00:02:31,120
+domain name and create a course though,
+
+62
+00:02:31,120 --> 00:02:33,840
+right? Sure. I also have an irrefutable
+
+63
+00:02:33,840 --> 00:02:37,200
+trail of code and content for engineers
+
+64
+00:02:37,200 --> 00:02:40,160
+on GitHub and this YouTube channel every
+
+65
+00:02:40,160 --> 00:02:42,560
+single week for years now. You can see
+
+66
+00:02:42,560 --> 00:02:44,720
+myself and engineers that follow this
+
+67
+00:02:44,720 --> 00:02:47,200
+channel consistently ahead of the curve
+
+68
+00:02:47,200 --> 00:02:49,840
+of the AI industry. I don't just farm
+
+69
+00:02:49,840 --> 00:02:52,400
+news for views like every other tech
+
+70
+00:02:52,400 --> 00:02:54,400
+content creator. On this channel, we
+
+71
+00:02:54,400 --> 00:02:56,959
+think, plan, and build. Every few
+
+72
+00:02:56,959 --> 00:02:58,959
+months, it's important for me to sit
+
+73
+00:02:58,959 --> 00:03:01,360
+down and say this. I'm not a content
+
+74
+00:03:01,360 --> 00:03:03,760
+creator. I'm a software engineer that
+
+75
+00:03:03,760 --> 00:03:06,800
+does content creation on the side. Why?
+
+76
+00:03:06,800 --> 00:03:09,040
+Because this technology is too valuable
+
+77
+00:03:09,040 --> 00:03:11,519
+to fall into the hands of a lucky few.
+
+78
+00:03:11,519 --> 00:03:14,159
+And yes, I sell courses. And yes, I
+
+79
+00:03:14,159 --> 00:03:16,159
+benefit from it. Big whoop. Don't do
+
+80
+00:03:16,159 --> 00:03:17,680
+anything you're great at for free.
+
+81
+00:03:17,680 --> 00:03:19,599
+Welcome to capitalism. Enough about me.
+
+82
+00:03:19,599 --> 00:03:21,360
+I don't show up here every single Monday
+
+83
+00:03:21,360 --> 00:03:23,519
+to gloat and talk about myself. I show
+
+84
+00:03:23,519 --> 00:03:25,680
+up here to give engineers like you an
+
+85
+00:03:25,680 --> 00:03:28,159
+advantage you can use to accelerate your
+
+86
+00:03:28,159 --> 00:03:30,159
+career, your work, your business, your
+
+87
+00:03:30,159 --> 00:03:33,599
+engineering in the age of AI, no hype.
+
+88
+00:03:33,599 --> 00:03:36,319
+So, forget about loop engineering and
+
+89
+00:03:36,319 --> 00:03:39,519
+focus on this instead. There are now
+
+90
+00:03:39,519 --> 00:03:42,239
+three actors of value creation for
+
+91
+00:03:42,239 --> 00:03:44,080
+engineering work. The engineers like you
+
+92
+00:03:44,080 --> 00:03:46,799
+and I, there are the agents and there's
+
+93
+00:03:46,799 --> 00:03:49,920
+the code. Knowing when and where to
+
+94
+00:03:49,920 --> 00:03:52,239
+place each of these is the name of the
+
+95
+00:03:52,239 --> 00:03:54,239
+game of agentic engineering. And you
+
+96
+00:03:54,239 --> 00:03:55,680
+might be thinking, where is he going
+
+97
+00:03:55,680 --> 00:03:57,120
+with this? How does this relate to loop
+
+98
+00:03:57,120 --> 00:03:59,040
+engineering and developer workflows?
+
+99
+00:03:59,040 --> 00:04:00,480
+Stick with me here. We're going to work
+
+100
+00:04:00,480 --> 00:04:01,840
+up to it. If you master the
+
+101
+00:04:01,840 --> 00:04:03,519
+fundamentals, you'll master the
+
+102
+00:04:03,519 --> 00:04:05,519
+compositions. Everyone in their AI
+
+103
+00:04:05,519 --> 00:04:09,040
+psychosis seems to forget code is fast,
+
+104
+00:04:09,040 --> 00:04:11,040
+always runs the same way unless you tell
+
+105
+00:04:11,040 --> 00:04:13,360
+it not to. And guess what? It costs
+
+106
+00:04:13,360 --> 00:04:15,200
+nothing. There are no token costs
+
+107
+00:04:15,200 --> 00:04:17,440
+associated with code. the thing that
+
+108
+00:04:17,440 --> 00:04:19,680
+truly moves at light speed. There's a
+
+109
+00:04:19,680 --> 00:04:21,840
+hidden cost to implementing every single
+
+110
+00:04:21,840 --> 00:04:25,040
+one of these actors of value creation.
+
+111
+00:04:25,040 --> 00:04:27,040
+Everyone's talking about agents. We're
+
+112
+00:04:27,040 --> 00:04:29,120
+all well aware of the cost of engineers,
+
+113
+00:04:29,120 --> 00:04:32,160
+but code is the unsung hero of all of
+
+114
+00:04:32,160 --> 00:04:34,560
+this. Consistent value creation creates
+
+115
+00:04:34,560 --> 00:04:36,320
+consistent business value. And out of
+
+116
+00:04:36,320 --> 00:04:39,040
+these three, code is the most reliable
+
+117
+00:04:39,040 --> 00:04:42,000
+by miles followed by engineers [music]
+
+118
+00:04:42,000 --> 00:04:44,560
+and then agents. So let's start with the
+
+119
+00:04:44,560 --> 00:04:48,680
+most basic developer workflow.
+
+120
+00:04:50,960 --> 00:04:53,520
+An engineer prompts an LLM and the
+
+121
+00:04:53,520 --> 00:04:55,759
+engineer reviews the result. This is the
+
+122
+00:04:55,759 --> 00:04:58,479
+simple foundation that makes up every
+
+123
+00:04:58,479 --> 00:05:01,280
+single loop, every single workflow,
+
+124
+00:05:01,280 --> 00:05:03,360
+every single piece of work moving
+
+125
+00:05:03,360 --> 00:05:05,440
+forward. Now, of course, we're not just
+
+126
+00:05:05,440 --> 00:05:07,600
+using the LLM anymore. In this central
+
+127
+00:05:07,600 --> 00:05:10,320
+node, we have an agent. Insert your
+
+128
+00:05:10,320 --> 00:05:11,840
+favorite agent. Insert your favorite
+
+129
+00:05:11,840 --> 00:05:14,479
+model. It doesn't matter anymore. It's
+
+130
+00:05:14,479 --> 00:05:16,800
+about the workflow that you and I
+
+131
+00:05:16,800 --> 00:05:19,440
+execute every single day. Great. Let's
+
+132
+00:05:19,440 --> 00:05:22,800
+scale it up. Now, we have code, agents,
+
+133
+00:05:22,800 --> 00:05:24,960
+and engineers all involved in the
+
+134
+00:05:24,960 --> 00:05:27,039
+process. We're building up to more and
+
+135
+00:05:27,039 --> 00:05:29,360
+more advanced developer workflows.
+
+136
+00:05:29,360 --> 00:05:31,199
+You'll notice something really important
+
+137
+00:05:31,199 --> 00:05:33,520
+here. We now have code. In this case,
+
+138
+00:05:33,520 --> 00:05:35,440
+we're just running a llinter. We have a
+
+139
+00:05:35,440 --> 00:05:37,840
+condition. If the llinter fails, the
+
+140
+00:05:37,840 --> 00:05:40,400
+results go back into our build agent. If
+
+141
+00:05:40,400 --> 00:05:42,800
+they're successful, it passes. This
+
+142
+00:05:42,800 --> 00:05:45,039
+condition and this routing back to our
+
+143
+00:05:45,039 --> 00:05:47,919
+build agent creates our first loop.
+
+144
+00:05:47,919 --> 00:05:50,160
+Hence the term loop engineering. But
+
+145
+00:05:50,160 --> 00:05:52,639
+loop engineering is too simple. It's too
+
+146
+00:05:52,639 --> 00:05:54,560
+inaccurate. And there's a lot more to
+
+147
+00:05:54,560 --> 00:05:56,800
+this story. So what comes next? How can
+
+148
+00:05:56,800 --> 00:05:58,400
+we continue to enhance our developer
+
+149
+00:05:58,400 --> 00:06:00,240
+workflow to get better results? We can
+
+150
+00:06:00,240 --> 00:06:03,120
+of course add more deterministic code.
+
+151
+00:06:03,120 --> 00:06:04,639
+Now we have multiple pass fill
+
+152
+00:06:04,639 --> 00:06:06,479
+statements routing back into our build
+
+153
+00:06:06,479 --> 00:06:08,400
+agent. Your codeex, your cloud code,
+
+154
+00:06:08,400 --> 00:06:10,160
+your pi coding agent, whatever your
+
+155
+00:06:10,160 --> 00:06:12,560
+agent harness is. This is the foundation
+
+156
+00:06:12,560 --> 00:06:14,960
+of what it means to build with agents.
+
+157
+00:06:14,960 --> 00:06:17,440
+Now you have three actors in this.
+
+158
+00:06:17,440 --> 00:06:20,479
+Engineers, agents, and raw code. You
+
+159
+00:06:20,479 --> 00:06:22,319
+have to leverage them all in the right
+
+160
+00:06:22,319 --> 00:06:24,240
+location at the right time. Here we're
+
+161
+00:06:24,240 --> 00:06:25,840
+adding a code formatter. It doesn't
+
+162
+00:06:25,840 --> 00:06:27,520
+matter what language you're in. linting
+
+163
+00:06:27,520 --> 00:06:29,600
+your code, formatting your code, type
+
+164
+00:06:29,600 --> 00:06:31,919
+check your code, and then keep scaling
+
+165
+00:06:31,919 --> 00:06:35,600
+up the validation loops to run back into
+
+166
+00:06:35,600 --> 00:06:37,840
+your agents. Once again, you'll see here
+
+167
+00:06:37,840 --> 00:06:40,319
+these conditions is what makes up what
+
+168
+00:06:40,319 --> 00:06:42,319
+is called the loop. But there's a lot
+
+169
+00:06:42,319 --> 00:06:44,720
+more going on here. This is really a
+
+170
+00:06:44,720 --> 00:06:47,360
+workflow of how information travels
+
+171
+00:06:47,360 --> 00:06:50,080
+within a system. Okay, keep scaling it
+
+172
+00:06:50,080 --> 00:06:53,039
+up. What comes next? We can add more
+
+173
+00:06:53,039 --> 00:06:55,440
+code. A very valuable piece of code here
+
+174
+00:06:55,440 --> 00:06:58,479
+is testing your code. So test. Now we
+
+175
+00:06:58,479 --> 00:07:00,479
+take all these results, feed it back
+
+176
+00:07:00,479 --> 00:07:02,479
+into our build agent over and over and
+
+177
+00:07:02,479 --> 00:07:05,599
+over until the results all pass. And
+
+178
+00:07:05,599 --> 00:07:07,520
+that gives us our final engineering
+
+179
+00:07:07,520 --> 00:07:09,440
+review. You'll notice a pattern here.
+
+180
+00:07:09,440 --> 00:07:12,080
+You and I always show up at the ends.
+
+181
+00:07:12,080 --> 00:07:13,680
+These are the two constraints of a
+
+182
+00:07:13,680 --> 00:07:16,000
+gentic engineering. Prompting, also
+
+183
+00:07:16,000 --> 00:07:18,479
+known as planning, and reviewing, also
+
+184
+00:07:18,479 --> 00:07:20,960
+known as validation. If you're a gent
+
+185
+00:07:20,960 --> 00:07:22,960
+engineering at scale properly, you're
+
+186
+00:07:22,960 --> 00:07:25,120
+showing up at the beginning and the end
+
+187
+00:07:25,120 --> 00:07:27,440
+with a few exceptions. Your AI developer
+
+188
+00:07:27,440 --> 00:07:29,680
+workflows start simple like this, but
+
+189
+00:07:29,680 --> 00:07:31,919
+they should continue to grow. Real
+
+190
+00:07:31,919 --> 00:07:33,840
+engineering work looks a lot more
+
+191
+00:07:33,840 --> 00:07:35,280
+complex than this, [music] right? What
+
+192
+00:07:35,280 --> 00:07:38,759
+do we do next?
+
+193
+00:07:40,720 --> 00:07:43,840
+We can scale all of our testing, all of
+
+194
+00:07:43,840 --> 00:07:45,520
+our validation, all of our linting, all
+
+195
+00:07:45,520 --> 00:07:47,759
+of our type checking into a single test
+
+196
+00:07:47,759 --> 00:07:50,000
+agent. So now we're scaling our compute
+
+197
+00:07:50,000 --> 00:07:52,319
+to scale our impact. We're adding
+
+198
+00:07:52,319 --> 00:07:54,800
+compute to add confidence. Now you can
+
+199
+00:07:54,800 --> 00:07:57,360
+imagine we've handed this test agent all
+
+200
+00:07:57,360 --> 00:07:59,759
+the things we want to do to test. And if
+
+201
+00:07:59,759 --> 00:08:01,360
+something goes wrong, we send the
+
+202
+00:08:01,360 --> 00:08:03,199
+context back to the build agent. If it
+
+203
+00:08:03,199 --> 00:08:06,080
+passes, the engineer reviews and then we
+
+204
+00:08:06,080 --> 00:08:08,080
+can ship the deliverable. We can ship
+
+205
+00:08:08,080 --> 00:08:09,520
+the code. All right. So notice a couple
+
+206
+00:08:09,520 --> 00:08:11,599
+themes working here. As you scale up
+
+207
+00:08:11,599 --> 00:08:14,080
+your developer workflows, you add agents
+
+208
+00:08:14,080 --> 00:08:16,000
+and you add code. But what you don't
+
+209
+00:08:16,000 --> 00:08:18,720
+want to add is more engineering effort
+
+210
+00:08:18,720 --> 00:08:21,199
+outside of building the system that
+
+211
+00:08:21,199 --> 00:08:22,720
+builds the system. Let's keep scaling
+
+212
+00:08:22,720 --> 00:08:25,120
+this up. Let's add planning to the
+
+213
+00:08:25,120 --> 00:08:26,639
+workflow. You're very familiar with
+
+214
+00:08:26,639 --> 00:08:28,560
+these ideas, right? We're building
+
+215
+00:08:28,560 --> 00:08:31,280
+workflows. These are all steps that you
+
+216
+00:08:31,280 --> 00:08:33,680
+and I, the engineer, used to take and
+
+217
+00:08:33,680 --> 00:08:36,240
+used to execute ourself, right? We would
+
+218
+00:08:36,240 --> 00:08:38,240
+plan work, we would build the work, we
+
+219
+00:08:38,240 --> 00:08:40,080
+would test the work, we would then have
+
+220
+00:08:40,080 --> 00:08:41,760
+another engineer review the work, and
+
+221
+00:08:41,760 --> 00:08:43,760
+then we would finally ship it into
+
+222
+00:08:43,760 --> 00:08:45,600
+production. All right? It's a developer
+
+223
+00:08:45,600 --> 00:08:47,600
+workflow and all we've done here is
+
+224
+00:08:47,600 --> 00:08:50,640
+added AI to it. The loops is just one
+
+225
+00:08:50,640 --> 00:08:52,000
+piece of it. You can call it loop
+
+226
+00:08:52,000 --> 00:08:54,080
+engineering but it's inaccurate and it's
+
+227
+00:08:54,080 --> 00:08:55,920
+not encapsulating the whole picture. If
+
+228
+00:08:55,920 --> 00:08:57,200
+we have loop engineering, we need to
+
+229
+00:08:57,200 --> 00:08:58,560
+have condition engineering and then we
+
+230
+00:08:58,560 --> 00:09:00,000
+need to have function engineering and
+
+231
+00:09:00,000 --> 00:09:02,000
+then we need to have a word plus
+
+232
+00:09:02,000 --> 00:09:03,760
+engineering for every type of control
+
+233
+00:09:03,760 --> 00:09:05,519
+flow inside of the software development
+
+234
+00:09:05,519 --> 00:09:07,360
+life cycle which is going to go on
+
+235
+00:09:07,360 --> 00:09:10,800
+forever. Okay. So a very popular pattern
+
+236
+00:09:10,800 --> 00:09:13,200
+is to push each one of your agents into
+
+237
+00:09:13,200 --> 00:09:14,800
+their own work tree. This creates
+
+238
+00:09:14,800 --> 00:09:16,880
+isolation. This creates parallelism.
+
+239
+00:09:16,880 --> 00:09:19,519
+This lets you do more work in parallel.
+
+240
+00:09:19,519 --> 00:09:21,120
+And there's a nice side effect here
+
+241
+00:09:21,120 --> 00:09:22,959
+where the agents don't trip over each
+
+242
+00:09:22,959 --> 00:09:24,880
+other. So, guess what we're going to do?
+
+243
+00:09:24,880 --> 00:09:26,640
+We're going to write another prompt. And
+
+244
+00:09:26,640 --> 00:09:28,160
+this time, we're going to write a prompt
+
+245
+00:09:28,160 --> 00:09:31,040
+into a piece of code that's going to
+
+246
+00:09:31,040 --> 00:09:33,440
+build our work trees. All right. So,
+
+247
+00:09:33,440 --> 00:09:34,959
+here we have a deterministic piece of
+
+248
+00:09:34,959 --> 00:09:37,040
+code that's going to kick off multiple
+
+249
+00:09:37,040 --> 00:09:38,959
+work trees based on the prompt. And then
+
+250
+00:09:38,959 --> 00:09:41,279
+we're going to execute several different
+
+251
+00:09:41,279 --> 00:09:44,480
+agents running in line. So we have once
+
+252
+00:09:44,480 --> 00:09:47,680
+again scaled our compute to scale our
+
+253
+00:09:47,680 --> 00:09:49,760
+impact. We have multiple work trees
+
+254
+00:09:49,760 --> 00:09:52,959
+running our plan, build, test, review,
+
+255
+00:09:52,959 --> 00:09:56,640
+merge, ship pipeline, our developer
+
+256
+00:09:56,640 --> 00:09:58,959
+workflow. The workflow you and I used to
+
+257
+00:09:58,959 --> 00:10:02,240
+go through as engineers building by
+
+258
+00:10:02,240 --> 00:10:05,519
+hand. Now we have AI, hence AI developer
+
+259
+00:10:05,519 --> 00:10:07,600
+workflows. And this is really important
+
+260
+00:10:07,600 --> 00:10:09,839
+to think through. This is where you
+
+261
+00:10:09,839 --> 00:10:11,519
+should focus in your engineering time.
+
+262
+00:10:11,519 --> 00:10:14,160
+How can I combine the three actors of
+
+263
+00:10:14,160 --> 00:10:17,440
+value creation, engineers, agents, and
+
+264
+00:10:17,440 --> 00:10:20,800
+code to create workflows that execute
+
+265
+00:10:20,800 --> 00:10:23,519
+large amounts of work on my behalf, on
+
+266
+00:10:23,519 --> 00:10:25,200
+behalf of my company, on behalf of your
+
+267
+00:10:25,200 --> 00:10:27,440
+users and products? That's the name of
+
+268
+00:10:27,440 --> 00:10:29,519
+the game. Okay, so great, we have work
+
+269
+00:10:29,519 --> 00:10:32,160
+trees. Work trees are um like I like to
+
+270
+00:10:32,160 --> 00:10:34,079
+say, a great place to start, not a great
+
+271
+00:10:34,079 --> 00:10:35,440
+place to end. There are a lot of
+
+272
+00:10:35,440 --> 00:10:37,519
+problems with work trees. We can do one
+
+273
+00:10:37,519 --> 00:10:40,079
+better by giving our agents each their
+
+274
+00:10:40,079 --> 00:10:42,880
+own sandbox. Okay? So instead of
+
+275
+00:10:42,880 --> 00:10:44,880
+spinning up work trees, we're now giving
+
+276
+00:10:44,880 --> 00:10:47,680
+every single agent their own computer,
+
+277
+00:10:47,680 --> 00:10:49,600
+right? Their own agent sandbox to
+
+278
+00:10:49,600 --> 00:10:51,360
+operate. Because once you do this, you
+
+279
+00:10:51,360 --> 00:10:54,000
+have full isolation. You yourself can
+
+280
+00:10:54,000 --> 00:10:56,480
+jump into the sandbox to look at the
+
+281
+00:10:56,480 --> 00:10:58,079
+work, look at the result, look at the
+
+282
+00:10:58,079 --> 00:11:00,240
+web page, look at the tests, look at the
+
+283
+00:11:00,240 --> 00:11:02,240
+application, whatever you need to do, do
+
+284
+00:11:02,240 --> 00:11:04,320
+your review. And then of course once all
+
+285
+00:11:04,320 --> 00:11:06,720
+the work comes back in you merge and you
+
+286
+00:11:06,720 --> 00:11:09,440
+ship. So once again notice the three
+
+287
+00:11:09,440 --> 00:11:11,360
+actors of value creation working
+
+288
+00:11:11,360 --> 00:11:14,240
+together. And notice how your ability to
+
+289
+00:11:14,240 --> 00:11:16,720
+create these AI developer workflows is
+
+290
+00:11:16,720 --> 00:11:19,680
+your ability to scale your impact with
+
+291
+00:11:19,680 --> 00:11:22,160
+agents. It's designing these AI
+
+292
+00:11:22,160 --> 00:11:24,320
+developer workflows that is the most
+
+293
+00:11:24,320 --> 00:11:26,399
+value accreative thing an engineer can
+
+294
+00:11:26,399 --> 00:11:29,040
+do. Hence the term I like to say on the
+
+295
+00:11:29,040 --> 00:11:30,959
+channel all the time. You want to be
+
+296
+00:11:30,959 --> 00:11:33,839
+building the system that builds the
+
+297
+00:11:33,839 --> 00:11:35,839
+system. Okay? As you can see here,
+
+298
+00:11:35,839 --> 00:11:37,839
+you'll start to see similarities in
+
+299
+00:11:37,839 --> 00:11:39,120
+these workflows with a lot of work
+
+300
+00:11:39,120 --> 00:11:40,640
+you've seen, a lot of work that you've
+
+301
+00:11:40,640 --> 00:11:42,480
+done, and hopefully work that you're
+
+302
+00:11:42,480 --> 00:11:44,240
+building into your teams, your
+
+303
+00:11:44,240 --> 00:11:46,640
+co-workers, your business, your tools
+
+304
+00:11:46,640 --> 00:11:48,640
+themselves. Okay? We're just getting
+
+305
+00:11:48,640 --> 00:11:51,519
+started, [laughter] right? Uh real work
+
+306
+00:11:51,519 --> 00:11:53,760
+gets more and more complex. And this is
+
+307
+00:11:53,760 --> 00:11:56,000
+the art and science of agentic
+
+308
+00:11:56,000 --> 00:12:00,920
+engineering. So, let's keep scaling it.
+
+309
+00:12:02,800 --> 00:12:04,880
+A very common thing to do as you
+
+310
+00:12:04,880 --> 00:12:07,519
+continue to progress is to set up a
+
+311
+00:12:07,519 --> 00:12:09,600
+conbon board, some type of ticket
+
+312
+00:12:09,600 --> 00:12:12,240
+system. Input comes from all over your
+
+313
+00:12:12,240 --> 00:12:13,440
+organization, right? It comes from
+
+314
+00:12:13,440 --> 00:12:14,720
+support, it comes from product, and it
+
+315
+00:12:14,720 --> 00:12:16,480
+comes from engineers, right? So now
+
+316
+00:12:16,480 --> 00:12:17,920
+things get interesting because now we
+
+317
+00:12:17,920 --> 00:12:20,880
+have a new unit, a new wrapper around
+
+318
+00:12:20,880 --> 00:12:22,480
+our code, right? We have some type of
+
+319
+00:12:22,480 --> 00:12:24,320
+ticketing system. And so once again,
+
+320
+00:12:24,320 --> 00:12:25,760
+like there's this really important
+
+321
+00:12:25,760 --> 00:12:28,079
+delineation that I make inside of
+
+322
+00:12:28,079 --> 00:12:30,560
+tactical agentic coding. And it is this
+
+323
+00:12:30,560 --> 00:12:33,519
+idea of the agentic layer. The agents,
+
+324
+00:12:33,519 --> 00:12:36,160
+the prompts, the skills, the system
+
+325
+00:12:36,160 --> 00:12:39,360
+prompts that wrap your application are
+
+326
+00:12:39,360 --> 00:12:41,360
+the thing to be focused on right now.
+
+327
+00:12:41,360 --> 00:12:43,040
+Because when you put those together with
+
+328
+00:12:43,040 --> 00:12:45,360
+your code, with your system, with your
+
+329
+00:12:45,360 --> 00:12:47,519
+entire team and your organization, you
+
+330
+00:12:47,519 --> 00:12:49,839
+are agentic engineering. Agentic
+
+331
+00:12:49,839 --> 00:12:51,920
+engineering is not just about the
+
+332
+00:12:51,920 --> 00:12:54,160
+agents. Spoiler alert, it's about your
+
+333
+00:12:54,160 --> 00:12:56,480
+team and most importantly your users and
+
+334
+00:12:56,480 --> 00:12:58,959
+putting together the most valuable stack
+
+335
+00:12:58,959 --> 00:13:01,920
+of the actors of value creation. Okay,
+
+336
+00:13:01,920 --> 00:13:03,680
+so conbon board, right? Let's let's jump
+
+337
+00:13:03,680 --> 00:13:04,800
+into this. What does this look like?
+
+338
+00:13:04,800 --> 00:13:06,800
+Okay, so for most teams, your tickets
+
+339
+00:13:06,800 --> 00:13:09,279
+are then analyzed by your engineer who
+
+340
+00:13:09,279 --> 00:13:10,480
+actually knows what's going on and
+
+341
+00:13:10,480 --> 00:13:12,320
+they'll translate that into a mid to
+
+342
+00:13:12,320 --> 00:13:14,399
+low-level prompt that you'll then pass
+
+343
+00:13:14,399 --> 00:13:17,200
+into another full workflow, another
+
+344
+00:13:17,200 --> 00:13:19,519
+agent sandbox. But some advanced teams
+
+345
+00:13:19,519 --> 00:13:21,760
+if you're teaching your organization how
+
+346
+00:13:21,760 --> 00:13:23,600
+to write prompts well enough and as
+
+347
+00:13:23,600 --> 00:13:25,519
+models become more capable uh you can
+
+348
+00:13:25,519 --> 00:13:27,600
+skip your engineer input prompt here
+
+349
+00:13:27,600 --> 00:13:29,200
+right because your engineer's job should
+
+350
+00:13:29,200 --> 00:13:31,120
+be building the system we act on the
+
+351
+00:13:31,120 --> 00:13:33,040
+meta layer we act on the layer that can
+
+352
+00:13:33,040 --> 00:13:35,680
+compound across our organization okay so
+
+353
+00:13:35,680 --> 00:13:38,000
+advanced teams can skip the engineering
+
+354
+00:13:38,000 --> 00:13:40,639
+prompt if this step is done properly all
+
+355
+00:13:40,639 --> 00:13:42,480
+right but so you know this is code right
+
+356
+00:13:42,480 --> 00:13:44,320
+conbon boards it's just code there are
+
+357
+00:13:44,320 --> 00:13:46,000
+no agents there then we enter the meat
+
+358
+00:13:46,000 --> 00:13:48,399
+of our workflow where we run code to
+
+359
+00:13:48,399 --> 00:13:50,320
+move that ticket into planning. Guess
+
+360
+00:13:50,320 --> 00:13:52,320
+what happens next? Our agents take over
+
+361
+00:13:52,320 --> 00:13:54,320
+the pipeline. We'll have a scout agent
+
+362
+00:13:54,320 --> 00:13:56,240
+look for all the code, look for all the
+
+363
+00:13:56,240 --> 00:13:57,760
+tickets, look for all the documentation,
+
+364
+00:13:57,760 --> 00:13:59,360
+look for previous spec files, and then
+
+365
+00:13:59,360 --> 00:14:01,519
+it'll hand that to a plan agent. Right?
+
+366
+00:14:01,519 --> 00:14:03,600
+So, we're splitting up our searching and
+
+367
+00:14:03,600 --> 00:14:05,360
+our planning between two agents here.
+
+368
+00:14:05,360 --> 00:14:07,440
+Once again, scaling compute, scaling
+
+369
+00:14:07,440 --> 00:14:09,040
+impact. And after that happens, you
+
+370
+00:14:09,040 --> 00:14:11,279
+know, plan phase is complete. So, we run
+
+371
+00:14:11,279 --> 00:14:13,279
+code to update our ticket to move
+
+372
+00:14:13,279 --> 00:14:15,600
+context to do some specific work inside
+
+373
+00:14:15,600 --> 00:14:17,600
+of our sandbox. And then of course our
+
+374
+00:14:17,600 --> 00:14:19,680
+build agent kicks off. And you know what
+
+375
+00:14:19,680 --> 00:14:21,279
+happens from here. You've done it a
+
+376
+00:14:21,279 --> 00:14:23,440
+million times yourself. And now with
+
+377
+00:14:23,440 --> 00:14:26,079
+agents, your build agent moves it into
+
+378
+00:14:26,079 --> 00:14:27,600
+testing after it's done. And then your
+
+379
+00:14:27,600 --> 00:14:30,560
+test agent tests, right? This individual
+
+380
+00:14:30,560 --> 00:14:32,720
+loop, which is just one part of the
+
+381
+00:14:32,720 --> 00:14:35,279
+developer workflow, executes until the
+
+382
+00:14:35,279 --> 00:14:37,120
+result passes. And then we're going to
+
+383
+00:14:37,120 --> 00:14:39,279
+run our CI/CD. And guess what can happen
+
+384
+00:14:39,279 --> 00:14:42,160
+here? This can pass or it can fail and
+
+385
+00:14:42,160 --> 00:14:43,519
+go right back to the build agent to
+
+386
+00:14:43,519 --> 00:14:45,440
+resolve the issues. All right. And then
+
+387
+00:14:45,440 --> 00:14:47,440
+we get outside the sandbox. Engineer
+
+388
+00:14:47,440 --> 00:14:48,959
+reviews the code. You know what this
+
+389
+00:14:48,959 --> 00:14:51,600
+looks like now? Fail, pass, ship. Right?
+
+390
+00:14:51,600 --> 00:14:54,399
+So you can see this is much more than
+
+391
+00:14:54,399 --> 00:14:56,160
+just prompt engineering. It's much more
+
+392
+00:14:56,160 --> 00:14:57,760
+than context engineering. It's much more
+
+393
+00:14:57,760 --> 00:14:59,040
+than harness engineering. It's much more
+
+394
+00:14:59,040 --> 00:15:00,959
+than loop engineering. This is about how
+
+395
+00:15:00,959 --> 00:15:04,480
+teams move as an organism with all the
+
+396
+00:15:04,480 --> 00:15:07,199
+actors inside. Okay? And if you're a
+
+397
+00:15:07,199 --> 00:15:09,600
+small solo dev shop, same deal, right?
+
+398
+00:15:09,600 --> 00:15:11,920
+It's about how you and your agents work
+
+399
+00:15:11,920 --> 00:15:15,199
+together with code to generate valuable
+
+400
+00:15:15,199 --> 00:15:17,120
+results. But this isn't the end. The
+
+401
+00:15:17,120 --> 00:15:19,760
+future of engineering is vast. Okay,
+
+402
+00:15:19,760 --> 00:15:21,360
+let's keep pushing this. What happens
+
+403
+00:15:21,360 --> 00:15:23,199
+next? Let's let's imagine another
+
+404
+00:15:23,199 --> 00:15:25,600
+scenario here. Imagine you have a
+
+405
+00:15:25,600 --> 00:15:28,480
+support crisis. Production is down.
+
+406
+00:15:28,480 --> 00:15:31,440
+Okay, production has crashed. So, what
+
+407
+00:15:31,440 --> 00:15:33,279
+AI developer workflow do you have
+
+408
+00:15:33,279 --> 00:15:35,839
+planned in your organization right now
+
+409
+00:15:35,839 --> 00:15:37,920
+when production goes down? How are you
+
+410
+00:15:37,920 --> 00:15:40,880
+leveraging engineers, agents, and code
+
+411
+00:15:40,880 --> 00:15:42,800
+to resolve this issue and to stop your
+
+412
+00:15:42,800 --> 00:15:45,040
+business from leaking cash as your
+
+413
+00:15:45,040 --> 00:15:47,199
+production system is down? Let's walk
+
+414
+00:15:47,199 --> 00:15:49,120
+through it, okay? Because we've thought
+
+415
+00:15:49,120 --> 00:15:51,040
+through this, right? We've designed,
+
+416
+00:15:51,040 --> 00:15:53,279
+we've architected the AI developer
+
+417
+00:15:53,279 --> 00:15:55,040
+workflow to account for this situation.
+
+418
+00:15:55,040 --> 00:15:56,880
+Support files a ticket. In our case
+
+419
+00:15:56,880 --> 00:15:58,800
+here, this goes right to Slack. It goes
+
+420
+00:15:58,800 --> 00:16:00,160
+right to Teams, goes right to your
+
+421
+00:16:00,160 --> 00:16:01,360
+communication channel, and one of your
+
+422
+00:16:01,360 --> 00:16:03,040
+cracked engineers picks this up
+
+423
+00:16:03,040 --> 00:16:04,959
+immediately. What do they do? They
+
+424
+00:16:04,959 --> 00:16:07,839
+prompt a scout agent that routes right
+
+425
+00:16:07,839 --> 00:16:10,800
+into a hot fix agent. Your hot fix agent
+
+426
+00:16:10,800 --> 00:16:13,519
+has a specialized set of mental memory.
+
+427
+00:16:13,519 --> 00:16:16,160
+It's an agent expert that knows and is
+
+428
+00:16:16,160 --> 00:16:18,639
+prioritized to get things fixed. It's
+
+429
+00:16:18,639 --> 00:16:20,320
+not doing things the right way. It's not
+
+430
+00:16:20,320 --> 00:16:21,680
+doing things the fancy way. It's not
+
+431
+00:16:21,680 --> 00:16:23,360
+optimizing anything. It's getting the
+
+432
+00:16:23,360 --> 00:16:25,680
+fix out ASAP and nothing else. This is a
+
+433
+00:16:25,680 --> 00:16:28,480
+surgical hotfix agent, a custom agent
+
+434
+00:16:28,480 --> 00:16:30,079
+that you have specialized, that you've
+
+435
+00:16:30,079 --> 00:16:32,320
+templated your engineering into. Now,
+
+436
+00:16:32,320 --> 00:16:34,000
+what happens here? Human in the loop.
+
+437
+00:16:34,000 --> 00:16:35,519
+This is a hot fix. We need to know the
+
+438
+00:16:35,519 --> 00:16:37,199
+solution is going to work. So you put in
+
+439
+00:16:37,199 --> 00:16:39,120
+human effort, right? You use engineering
+
+440
+00:16:39,120 --> 00:16:41,120
+effort to approve or reject. This
+
+441
+00:16:41,120 --> 00:16:43,839
+creates a single loop. All right? If we
+
+442
+00:16:43,839 --> 00:16:45,440
+approve, guess what happens? We're going
+
+443
+00:16:45,440 --> 00:16:47,920
+to build up a bunch of sandboxes to run
+
+444
+00:16:47,920 --> 00:16:49,759
+the solution in parallel. And guess
+
+445
+00:16:49,759 --> 00:16:52,399
+what? We're using multiple sandboxes. I
+
+446
+00:16:52,399 --> 00:16:54,320
+want the first fastest agent that has
+
+447
+00:16:54,320 --> 00:16:56,320
+the solution to win. Okay? Whatever your
+
+448
+00:16:56,320 --> 00:16:57,759
+compute budget is, you'll scale this up.
+
+449
+00:16:57,759 --> 00:16:59,040
+You'll scale this down. If you're in a
+
+450
+00:16:59,040 --> 00:17:00,800
+production system that's complex, you
+
+451
+00:17:00,800 --> 00:17:02,800
+might want three, five, 10 agents
+
+452
+00:17:02,800 --> 00:17:04,480
+running and racing toward a solution in
+
+453
+00:17:04,480 --> 00:17:06,240
+their own agent sandbox, you don't care.
+
+454
+00:17:06,240 --> 00:17:07,760
+You have the compute, you've done the
+
+455
+00:17:07,760 --> 00:17:09,280
+agentic engineering to scale your
+
+456
+00:17:09,280 --> 00:17:11,120
+impact. And guess what happens here? You
+
+457
+00:17:11,120 --> 00:17:12,880
+already know what happens. It runs its
+
+458
+00:17:12,880 --> 00:17:15,120
+individual loop in their sandbox. And
+
+459
+00:17:15,120 --> 00:17:17,600
+then it passes or fails. If it fails, it
+
+460
+00:17:17,600 --> 00:17:19,280
+goes right back to your hot fix agent
+
+461
+00:17:19,280 --> 00:17:21,600
+and to you to resolve. And of course, if
+
+462
+00:17:21,600 --> 00:17:23,520
+it's all successful, you the engineer
+
+463
+00:17:23,520 --> 00:17:25,679
+validate it and you get the hot fix
+
+464
+00:17:25,679 --> 00:17:28,319
+shipped ASAP. Okay. A question for you
+
+465
+00:17:28,319 --> 00:17:30,160
+and your organization. Do you have an
+
+466
+00:17:30,160 --> 00:17:32,799
+agentic workflow for production crashes?
+
+467
+00:17:32,799 --> 00:17:35,600
+Can you get that resolved in record time
+
+468
+00:17:35,600 --> 00:17:38,480
+using the three actors of value creation
+
+469
+00:17:38,480 --> 00:17:41,440
+in the age of agents? Engineers, agents,
+
+470
+00:17:41,440 --> 00:17:44,160
+and code. All three. Okay, this
+
+471
+00:17:44,160 --> 00:17:46,559
+continues to scale and scale and scale.
+
+472
+00:17:46,559 --> 00:17:49,200
+Let's push these workflows further.
+
+473
+00:17:49,200 --> 00:17:51,520
+After some point, what you get is a
+
+474
+00:17:51,520 --> 00:17:55,240
+structure like this.
+
+475
+00:17:57,600 --> 00:17:59,200
+And this is what really starts turning
+
+476
+00:17:59,200 --> 00:18:02,000
+into a software factory. Okay, you'll
+
+477
+00:18:02,000 --> 00:18:04,160
+see here we have many different types of
+
+478
+00:18:04,160 --> 00:18:07,280
+specialized agent sandbox workflows.
+
+479
+00:18:07,280 --> 00:18:09,600
+Some are for chores, one is for a bug,
+
+480
+00:18:09,600 --> 00:18:11,679
+one is for a feature, one is for this
+
+481
+00:18:11,679 --> 00:18:13,440
+hot fix that we just walked through. And
+
+482
+00:18:13,440 --> 00:18:15,760
+you get the idea here, right? Any
+
+483
+00:18:15,760 --> 00:18:18,000
+specialized AI developer workflow you
+
+484
+00:18:18,000 --> 00:18:21,360
+need can be built and routed to thanks
+
+485
+00:18:21,360 --> 00:18:24,720
+to your routing system. Okay, this is
+
+486
+00:18:24,720 --> 00:18:26,559
+the art and science of agentic
+
+487
+00:18:26,559 --> 00:18:28,799
+engineering, right? This is all of it
+
+488
+00:18:28,799 --> 00:18:30,880
+put together. The loops are just one
+
+489
+00:18:30,880 --> 00:18:32,880
+small piece of this picture. I hope you
+
+490
+00:18:32,880 --> 00:18:35,440
+can see that. Now, in all this is a
+
+491
+00:18:35,440 --> 00:18:38,720
+great level of prompt context harness
+
+492
+00:18:38,720 --> 00:18:41,039
+engineering. There are a million ways to
+
+493
+00:18:41,039 --> 00:18:43,039
+do this. There are a million different
+
+494
+00:18:43,039 --> 00:18:45,360
+multi- aent orchestration patterns to
+
+495
+00:18:45,360 --> 00:18:49,120
+build into this. The key here is this.
+
+496
+00:18:49,120 --> 00:18:51,440
+is that you have the right combination
+
+497
+00:18:51,440 --> 00:18:54,240
+at the right time to push engineering
+
+498
+00:18:54,240 --> 00:18:57,120
+work through end to end with agents with
+
+499
+00:18:57,120 --> 00:18:59,919
+code with engineers. Okay, I know I'm
+
+500
+00:18:59,919 --> 00:19:01,520
+repeating myself. I'm doing it on
+
+501
+00:19:01,520 --> 00:19:04,640
+purpose. Most success in any domain is
+
+502
+00:19:04,640 --> 00:19:06,960
+about doing a few things and saying a
+
+503
+00:19:06,960 --> 00:19:09,200
+few things and focusing on a few things
+
+504
+00:19:09,200 --> 00:19:11,520
+over and over and over. Let's walk
+
+505
+00:19:11,520 --> 00:19:14,559
+through a full software factory. You can
+
+506
+00:19:14,559 --> 00:19:16,320
+imagine how this looks, right? Let's
+
+507
+00:19:16,320 --> 00:19:18,720
+keep with a conbon ticket example. Now,
+
+508
+00:19:18,720 --> 00:19:20,400
+anyone can file a ticket. This is a
+
+509
+00:19:20,400 --> 00:19:22,240
+feature. This is a bug. This is a chore.
+
+510
+00:19:22,240 --> 00:19:24,640
+Advanced teams are going to skip wasting
+
+511
+00:19:24,640 --> 00:19:26,640
+engineering time transferring your
+
+512
+00:19:26,640 --> 00:19:28,799
+conbon ticket into a low-level or
+
+513
+00:19:28,799 --> 00:19:31,120
+mid-level engineering breakdown of what
+
+514
+00:19:31,120 --> 00:19:32,480
+needs to happen. Advanced teams are
+
+515
+00:19:32,480 --> 00:19:33,919
+going to go right to kicking off a
+
+516
+00:19:33,919 --> 00:19:35,840
+software factory. The moment your conbon
+
+517
+00:19:35,840 --> 00:19:37,520
+ticket lands, once the factory starts,
+
+518
+00:19:37,520 --> 00:19:39,039
+it's going to mark that ticket in
+
+519
+00:19:39,039 --> 00:19:41,280
+progress and move it. And now we have a
+
+520
+00:19:41,280 --> 00:19:43,520
+factory router agent. This could just be
+
+521
+00:19:43,520 --> 00:19:46,080
+a simple LLM call. This could be some
+
+522
+00:19:46,080 --> 00:19:48,799
+deterministic code. The exact nodes are
+
+523
+00:19:48,799 --> 00:19:50,880
+up to you to decide, but you get the
+
+524
+00:19:50,880 --> 00:19:52,640
+idea here. I'm going to throw a factory
+
+525
+00:19:52,640 --> 00:19:55,039
+agent here to intake the results. Do a
+
+526
+00:19:55,039 --> 00:19:56,880
+quick look at the codebase, understand
+
+527
+00:19:56,880 --> 00:19:59,120
+what AI developer workflow we need to
+
+528
+00:19:59,120 --> 00:20:01,440
+execute for the system. First though,
+
+529
+00:20:01,440 --> 00:20:03,600
+we're going to set up a sandbox. We're
+
+530
+00:20:03,600 --> 00:20:05,520
+not limiting our agents anymore. We know
+
+531
+00:20:05,520 --> 00:20:07,440
+that agents are going to continue to
+
+532
+00:20:07,440 --> 00:20:09,679
+expand. This is what the CPU crunch is
+
+533
+00:20:09,679 --> 00:20:11,760
+all about. CPUs are getting wiped off
+
+534
+00:20:11,760 --> 00:20:14,160
+the board outside of scaling RL and
+
+535
+00:20:14,160 --> 00:20:16,080
+other ML engineering related work. Agent
+
+536
+00:20:16,080 --> 00:20:17,919
+sandboxes are going to, I can guarantee
+
+537
+00:20:17,919 --> 00:20:20,080
+you this, be the majority of computers
+
+538
+00:20:20,080 --> 00:20:21,919
+out there in the world. You and I will
+
+539
+00:20:21,919 --> 00:20:23,600
+be using fewer and fewer devices while
+
+540
+00:20:23,600 --> 00:20:25,520
+our agents continue to scale up and use
+
+541
+00:20:25,520 --> 00:20:26,960
+more sandboxes. Okay, but set up the
+
+542
+00:20:26,960 --> 00:20:28,960
+sandbox. After that, our agent has
+
+543
+00:20:28,960 --> 00:20:31,280
+already decided what type of workflow we
+
+544
+00:20:31,280 --> 00:20:33,360
+need to get the job done at the best
+
+545
+00:20:33,360 --> 00:20:35,360
+price, at the best performance, and at
+
+546
+00:20:35,360 --> 00:20:37,760
+the right speed. Because as you likely
+
+547
+00:20:37,760 --> 00:20:39,760
+know, you're not going to run your hot
+
+548
+00:20:39,760 --> 00:20:41,679
+fix AI developer workflow or your
+
+549
+00:20:41,679 --> 00:20:43,280
+feature AI developer workflow where
+
+550
+00:20:43,280 --> 00:20:44,720
+you're scaling out your very best
+
+551
+00:20:44,720 --> 00:20:46,559
+agents. Maybe your build agent is a
+
+552
+00:20:46,559 --> 00:20:48,400
+workhorse model, but your planner and
+
+553
+00:20:48,400 --> 00:20:49,600
+your scouters are going to be
+
+554
+00:20:49,600 --> 00:20:51,440
+state-of-the-art model so nothing gets
+
+555
+00:20:51,440 --> 00:20:53,360
+missed. Of course, there's a whole slew
+
+556
+00:20:53,360 --> 00:20:55,120
+of multi- aent orchestration work that
+
+557
+00:20:55,120 --> 00:20:56,559
+can happen here. But the whole point is
+
+558
+00:20:56,559 --> 00:20:58,480
+you're not going to deploy your heavy AI
+
+559
+00:20:58,480 --> 00:21:00,880
+developer workflows for a chore, right?
+
+560
+00:21:00,880 --> 00:21:02,720
+for your chore. Throw a single agent at
+
+561
+00:21:02,720 --> 00:21:04,799
+this with a workhorse model, maybe even
+
+562
+00:21:04,799 --> 00:21:06,799
+a lightweight model. Build it, run the
+
+563
+00:21:06,799 --> 00:21:08,880
+lint, run the CI/CD, engineer reviews
+
+564
+00:21:08,880 --> 00:21:10,400
+it, and ship it out. We'll talk about
+
+565
+00:21:10,400 --> 00:21:12,799
+ZTE in a second, but the best teams are
+
+566
+00:21:12,799 --> 00:21:14,480
+going to start dropping off engineering
+
+567
+00:21:14,480 --> 00:21:17,200
+review because they've built the best
+
+568
+00:21:17,200 --> 00:21:18,960
+system possible that they know is going
+
+569
+00:21:18,960 --> 00:21:21,360
+to execute for them. But every single
+
+570
+00:21:21,360 --> 00:21:24,000
+unique workflow is unique for a reason,
+
+571
+00:21:24,000 --> 00:21:25,679
+right? There are multiple workflows you
+
+572
+00:21:25,679 --> 00:21:27,120
+want to build out here, multiple AI
+
+573
+00:21:27,120 --> 00:21:28,799
+developer workflows you should be
+
+574
+00:21:28,799 --> 00:21:30,880
+building out, not just one. I'll give my
+
+575
+00:21:30,880 --> 00:21:32,720
+recommendation some really, really great
+
+576
+00:21:32,720 --> 00:21:34,320
+practices you can use when building
+
+577
+00:21:34,320 --> 00:21:36,080
+these out in a moment here. But the
+
+578
+00:21:36,080 --> 00:21:37,679
+general rule of thumb is just to start
+
+579
+00:21:37,679 --> 00:21:39,600
+simple. Once you start scaling this up,
+
+580
+00:21:39,600 --> 00:21:41,840
+what you're going to end up with is a
+
+581
+00:21:41,840 --> 00:21:44,159
+software factory. A software factory
+
+582
+00:21:44,159 --> 00:21:46,880
+that can operate your application as
+
+583
+00:21:46,880 --> 00:21:48,720
+well. And if you're doing it right,
+
+584
+00:21:48,720 --> 00:21:50,480
+better than you and your engineering
+
+585
+00:21:50,480 --> 00:21:52,480
+team. This is why all your effort, all
+
+586
+00:21:52,480 --> 00:21:54,720
+of your effort goes into this. Now, the
+
+587
+00:21:54,720 --> 00:21:57,919
+agentic layer, right? This is the al the
+
+588
+00:21:57,919 --> 00:22:00,960
+agentic layer, not the app layer. The
+
+589
+00:22:00,960 --> 00:22:03,600
+app layer is for your agents. The the
+
+590
+00:22:03,600 --> 00:22:06,080
+best engineering teams never touch the
+
+591
+00:22:06,080 --> 00:22:08,080
+product themselves. Okay, I know this
+
+592
+00:22:08,080 --> 00:22:09,679
+might be like controversial. Some
+
+593
+00:22:09,679 --> 00:22:10,880
+engineers are going to hate hearing
+
+594
+00:22:10,880 --> 00:22:13,760
+this, but the best teams are doing meta
+
+595
+00:22:13,760 --> 00:22:16,080
+work on the agentic layer. They're
+
+596
+00:22:16,080 --> 00:22:18,559
+building the system that builds the
+
+597
+00:22:18,559 --> 00:22:20,480
+system. That is the central thesis
+
+598
+00:22:20,480 --> 00:22:22,880
+inside of tactical agentic coding.
+
+599
+00:22:22,880 --> 00:22:24,400
+Thousands of engineers know that and
+
+600
+00:22:24,400 --> 00:22:26,000
+you're going to figure it out too sooner
+
+601
+00:22:26,000 --> 00:22:27,679
+or later. Okay, that doesn't mean you
+
+602
+00:22:27,679 --> 00:22:29,520
+can't jump into the app to do work. But
+
+603
+00:22:29,520 --> 00:22:31,840
+when you have a successful product
+
+604
+00:22:31,840 --> 00:22:34,159
+scaled with users, the name of the game
+
+605
+00:22:34,159 --> 00:22:37,440
+is this. Building a software factory
+
+606
+00:22:37,440 --> 00:22:40,000
+that operates everything better than you
+
+607
+00:22:40,000 --> 00:22:42,240
+alone could, better than code alone
+
+608
+00:22:42,240 --> 00:22:44,080
+could, and better than agents alone
+
+609
+00:22:44,080 --> 00:22:46,400
+could. Right? Three actors of value
+
+610
+00:22:46,400 --> 00:22:49,039
+creation, agents, engineers, code. Where
+
+611
+00:22:49,039 --> 00:22:50,559
+does that all lead us? It leads us to
+
+612
+00:22:50,559 --> 00:22:52,880
+the simple conclusion that it's not a
+
+613
+00:22:52,880 --> 00:22:54,880
+loop you're after. It's an AI developer
+
+614
+00:22:54,880 --> 00:22:56,880
+workflow. Okay, you might be, you know,
+
+615
+00:22:56,880 --> 00:22:58,640
+listening to this and thinking, but you
+
+616
+00:22:58,640 --> 00:23:00,559
+you drew a million loops. Like, isn't
+
+617
+00:23:00,559 --> 00:23:02,480
+this a loop? Fine. If you want to call
+
+618
+00:23:02,480 --> 00:23:04,320
+it a loop, I don't really care. I think
+
+619
+00:23:04,320 --> 00:23:06,080
+a loop is too constrained. If you're
+
+620
+00:23:06,080 --> 00:23:07,200
+going to call it a loop, we're going to
+
+621
+00:23:07,200 --> 00:23:09,120
+need if engineer, we're going to need
+
+622
+00:23:09,120 --> 00:23:10,320
+throw engineering. We're going to need
+
+623
+00:23:10,320 --> 00:23:11,600
+exception engineering, right? We're
+
+624
+00:23:11,600 --> 00:23:12,880
+going to need to name all these things
+
+625
+00:23:12,880 --> 00:23:14,640
+engineering. This is a developer
+
+626
+00:23:14,640 --> 00:23:16,640
+workflow. This used to be what engineers
+
+627
+00:23:16,640 --> 00:23:18,720
+did. Engineers used to decide if
+
+628
+00:23:18,720 --> 00:23:20,080
+something was a chore, if something was
+
+629
+00:23:20,080 --> 00:23:22,000
+a bug. We used to write the plan, we
+
+630
+00:23:22,000 --> 00:23:24,480
+used to execute it, so on and so forth.
+
+631
+00:23:24,480 --> 00:23:26,559
+But now we have a new tool and that's
+
+632
+00:23:26,559 --> 00:23:28,799
+all it is. It's a new tool. We have
+
+633
+00:23:28,799 --> 00:23:32,080
+agents to work with that gives us AI
+
+634
+00:23:32,080 --> 00:23:34,720
+developer workflows. Okay. So at the
+
+635
+00:23:34,720 --> 00:23:36,880
+highest levels of agentic engineering,
+
+636
+00:23:36,880 --> 00:23:39,039
+you're building software factories that
+
+637
+00:23:39,039 --> 00:23:41,039
+execute the right work and the right
+
+638
+00:23:41,039 --> 00:23:43,039
+combination of engineers, agents, and
+
+639
+00:23:43,039 --> 00:23:45,679
+code across your organization. Once you
+
+640
+00:23:45,679 --> 00:23:46,960
+really start to scale it up, you're
+
+641
+00:23:46,960 --> 00:23:49,120
+going to add your other teammates,
+
+642
+00:23:49,120 --> 00:23:50,559
+right? Your other team members from
+
+643
+00:23:50,559 --> 00:23:52,720
+other cross cutting concerns inside of
+
+644
+00:23:52,720 --> 00:23:54,320
+your business. But at the core of it,
+
+645
+00:23:54,320 --> 00:23:56,640
+the engineers are responsible for the
+
+646
+00:23:56,640 --> 00:23:58,720
+code. Okay? I think a lot of orgs are
+
+647
+00:23:58,720 --> 00:24:00,640
+going to have a a problem with this once
+
+648
+00:24:00,640 --> 00:24:02,640
+they start scaling in and adding other
+
+649
+00:24:02,640 --> 00:24:04,400
+team members, right? Especially ones
+
+650
+00:24:04,400 --> 00:24:06,559
+that can't write clear tickets for the
+
+651
+00:24:06,559 --> 00:24:08,159
+life of them. You've seen this a million
+
+652
+00:24:08,159 --> 00:24:09,440
+times, right? It's the most painful
+
+653
+00:24:09,440 --> 00:24:11,440
+thing when your product manager, your
+
+654
+00:24:11,440 --> 00:24:14,480
+your CTO, your your tech lead [laughter]
+
+655
+00:24:14,480 --> 00:24:16,480
+just writes a ticket and you have
+
+656
+00:24:16,480 --> 00:24:17,919
+to translate it, right? So there's
+
+657
+00:24:17,919 --> 00:24:19,760
+there's a lot of like, you know, people
+
+658
+00:24:19,760 --> 00:24:21,520
+organizational level work to be done
+
+659
+00:24:21,520 --> 00:24:23,360
+here. But you at the end of the day, you
+
+660
+00:24:23,360 --> 00:24:25,279
+know, you the engineer plus the agents
+
+661
+00:24:25,279 --> 00:24:27,440
+plus the code making up the AI developer
+
+662
+00:24:27,440 --> 00:24:29,919
+workflow. This is what it's all about.
+
+663
+00:24:29,919 --> 00:24:31,840
+This is where value is going to be
+
+664
+00:24:31,840 --> 00:24:35,360
+created at absurd levels, at absurd
+
+665
+00:24:35,360 --> 00:24:37,440
+scales. Because once you get this right,
+
+666
+00:24:37,440 --> 00:24:40,240
+here's the dirty secret of all software,
+
+667
+00:24:40,240 --> 00:24:41,919
+right? You already know it. Once you get
+
+668
+00:24:41,919 --> 00:24:43,039
+this right, you set up the right
+
+669
+00:24:43,039 --> 00:24:44,799
+guardrails, the right harness, right?
+
+670
+00:24:44,799 --> 00:24:46,880
+Again, prompt, context, harness
+
+671
+00:24:46,880 --> 00:24:48,880
+engineering, all of it. Once you do this
+
+672
+00:24:48,880 --> 00:24:51,200
+right, you have a repeatable workflow
+
+673
+00:24:51,200 --> 00:24:53,200
+that you can run tens, hundreds, and
+
+674
+00:24:53,200 --> 00:24:54,960
+thousands of times, delivering
+
+675
+00:24:54,960 --> 00:24:57,840
+consistent results to you over and over
+
+676
+00:24:57,840 --> 00:25:00,080
+and over again if you template your
+
+677
+00:25:00,080 --> 00:25:03,200
+engineering into the fabric of your AI
+
+678
+00:25:03,200 --> 00:25:05,279
+developer workflows. Okay? And so I've
+
+679
+00:25:05,279 --> 00:25:06,559
+been pushing against out of the box
+
+680
+00:25:06,559 --> 00:25:08,880
+agents for a long time. Um, you know,
+
+681
+00:25:08,880 --> 00:25:11,200
+specialization is the name of the game.
+
+682
+00:25:11,200 --> 00:25:12,880
+What is a product? What is a company?
+
+683
+00:25:12,880 --> 00:25:14,960
+Right? Unless you're a big tech giant,
+
+684
+00:25:14,960 --> 00:25:18,080
+like a product in a company is a a set
+
+685
+00:25:18,080 --> 00:25:20,080
+of people in technology that solve a
+
+686
+00:25:20,080 --> 00:25:22,480
+specific problem for a specific avatar
+
+687
+00:25:22,480 --> 00:25:24,080
+for a specific user for a specific
+
+688
+00:25:24,080 --> 00:25:26,320
+customer. By very definition is
+
+689
+00:25:26,320 --> 00:25:30,080
+specialization, right? Your expertise is
+
+690
+00:25:30,080 --> 00:25:32,400
+the most valuable thing you have now.
+
+691
+00:25:32,400 --> 00:25:33,919
+And you can template that into your
+
+692
+00:25:33,919 --> 00:25:36,159
+engineering. You can template that into
+
+693
+00:25:36,159 --> 00:25:38,159
+your AI developer workflows. All right,
+
+694
+00:25:38,159 --> 00:25:40,960
+this is the greatest leverage point of
+
+695
+00:25:40,960 --> 00:25:43,200
+agentic coding. It's building out these
+
+696
+00:25:43,200 --> 00:25:45,200
+full AI developer workflows that puts it
+
+697
+00:25:45,200 --> 00:25:48,000
+all together. Okay, and so you know once
+
+698
+00:25:48,000 --> 00:25:51,039
+again we are pushing away from vibe
+
+699
+00:25:51,039 --> 00:25:53,039
+coding. This is not vibe coding. Vibe
+
+700
+00:25:53,039 --> 00:25:54,720
+coding is not knowing how the system
+
+701
+00:25:54,720 --> 00:25:56,799
+works and it's not looking at how the
+
+702
+00:25:56,799 --> 00:25:58,799
+system works. Okay, agentic engineering
+
+703
+00:25:58,799 --> 00:26:01,679
+is knowing your system works so well you
+
+704
+00:26:01,679 --> 00:26:03,840
+don't have to look. And that is because
+
+705
+00:26:03,840 --> 00:26:06,320
+you the engineer have moved up a layer.
+
+706
+00:26:06,320 --> 00:26:07,919
+You're meta-engineering. You're
+
+707
+00:26:07,919 --> 00:26:10,480
+compounding an advantage by optimizing
+
+708
+00:26:10,480 --> 00:26:13,360
+the three actors of agentic engineering
+
+709
+00:26:13,360 --> 00:26:16,240
+engineer code agents into the right
+
+710
+00:26:16,240 --> 00:26:18,000
+developer workflow at the right time at
+
+711
+00:26:18,000 --> 00:26:19,919
+the right performance at the right price
+
+712
+00:26:19,919 --> 00:26:22,400
+with the right speed. And after time
+
+713
+00:26:22,400 --> 00:26:23,840
+you'll realize something really
+
+714
+00:26:23,840 --> 00:26:26,000
+important is that you'll be building AI
+
+715
+00:26:26,000 --> 00:26:28,480
+developer workflows into your products
+
+716
+00:26:28,480 --> 00:26:30,159
+for your customers right with your
+
+717
+00:26:30,159 --> 00:26:33,039
+customers as nodes and then as mentioned
+
+718
+00:26:33,039 --> 00:26:35,120
+with your companies every user that can
+
+719
+00:26:35,120 --> 00:26:36,640
+prompt into the system and receive
+
+720
+00:26:36,640 --> 00:26:38,400
+results out the system right you have to
+
+721
+00:26:38,400 --> 00:26:40,720
+design this system it's just another
+
+722
+00:26:40,720 --> 00:26:43,720
+system
+
+723
+00:26:45,760 --> 00:26:47,919
+so I've written hundreds and probably
+
+724
+00:26:47,919 --> 00:26:49,440
+thousands of these AI developer
+
+725
+00:26:49,440 --> 00:26:50,880
+workflows by now. So, let me give you
+
+726
+00:26:50,880 --> 00:26:52,559
+the oil of everything I've learned so
+
+727
+00:26:52,559 --> 00:26:54,240
+far with what I've seen and what I've
+
+728
+00:26:54,240 --> 00:26:56,159
+recommended to engineers as they're
+
+729
+00:26:56,159 --> 00:26:58,799
+building out their ADWs. Um, first off,
+
+730
+00:26:58,799 --> 00:27:00,400
+keep it simple. When you start building
+
+731
+00:27:00,400 --> 00:27:02,320
+these out, start with the simplest
+
+732
+00:27:02,320 --> 00:27:04,640
+workflow you can think of, right? And
+
+733
+00:27:04,640 --> 00:27:05,919
+typically that looks something like
+
+734
+00:27:05,919 --> 00:27:07,440
+this, right? After you get an agent
+
+735
+00:27:07,440 --> 00:27:08,880
+running, you prompt back and forth and
+
+736
+00:27:08,880 --> 00:27:10,240
+you're babysitting your agent. Everyone
+
+737
+00:27:10,240 --> 00:27:12,320
+knows what this looks like. Just let it
+
+738
+00:27:12,320 --> 00:27:13,919
+lent your code. You know, to be clear,
+
+739
+00:27:13,919 --> 00:27:15,760
+so that you can really feel this.
+
+740
+00:27:15,760 --> 00:27:17,600
+Separate this out. I'm not saying write
+
+741
+00:27:17,600 --> 00:27:19,600
+a skill, have your agent build, and then
+
+742
+00:27:19,600 --> 00:27:22,000
+at the bottom of the skill, run lint.
+
+743
+00:27:22,000 --> 00:27:24,960
+Separate this out. Use an agent SDK, run
+
+744
+00:27:24,960 --> 00:27:27,360
+a build agent, do work, and then run a
+
+745
+00:27:27,360 --> 00:27:29,200
+llinter. And when the llinter fails,
+
+746
+00:27:29,200 --> 00:27:30,960
+pass that back into the build agent with
+
+747
+00:27:30,960 --> 00:27:32,559
+the same session ID. You have to
+
+748
+00:27:32,559 --> 00:27:34,559
+separate your code and your agents.
+
+749
+00:27:34,559 --> 00:27:36,320
+Otherwise, you just have an agent
+
+750
+00:27:36,320 --> 00:27:38,080
+calling code. That's not what we want.
+
+751
+00:27:38,080 --> 00:27:40,640
+We want separation of concerns all the
+
+752
+00:27:40,640 --> 00:27:42,080
+way through. If that doesn't make sense
+
+753
+00:27:42,080 --> 00:27:43,760
+to you right now, don't worry. It'll
+
+754
+00:27:43,760 --> 00:27:45,440
+make sense once you start building it.
+
+755
+00:27:45,440 --> 00:27:48,000
+This is not a big skill where you run a
+
+756
+00:27:48,000 --> 00:27:49,840
+hundred different nodes of workflows.
+
+757
+00:27:49,840 --> 00:27:52,240
+There are massive testing, massive
+
+758
+00:27:52,240 --> 00:27:54,720
+validation problems with doing that. And
+
+759
+00:27:54,720 --> 00:27:56,320
+then what do you do after that? You add
+
+760
+00:27:56,320 --> 00:27:58,399
+a couple nodes, right? Start solving
+
+761
+00:27:58,399 --> 00:28:00,559
+real problems. Run your type checker,
+
+762
+00:28:00,559 --> 00:28:02,640
+run your llinter. If things go wrong,
+
+763
+00:28:02,640 --> 00:28:04,320
+funnel it back into your build agent.
+
+764
+00:28:04,320 --> 00:28:05,760
+What you'll notice here is that you're
+
+765
+00:28:05,760 --> 00:28:08,480
+starting to build a larger unit, a
+
+766
+00:28:08,480 --> 00:28:10,880
+larger system that operates without you.
+
+767
+00:28:10,880 --> 00:28:13,039
+You show the beginning and the end. the
+
+768
+00:28:13,039 --> 00:28:14,480
+two constraints of agent coding,
+
+769
+00:28:14,480 --> 00:28:16,159
+planning and reviewing, and your system
+
+770
+00:28:16,159 --> 00:28:18,399
+does everything else. Okay? And then
+
+771
+00:28:18,399 --> 00:28:19,840
+once you get to a certain point, you'll
+
+772
+00:28:19,840 --> 00:28:21,520
+start separating out your agents. You'll
+
+773
+00:28:21,520 --> 00:28:23,760
+start specializing your agents. Maybe
+
+774
+00:28:23,760 --> 00:28:25,039
+you want to separate your front end and
+
+775
+00:28:25,039 --> 00:28:26,880
+your back end. Maybe you want building
+
+776
+00:28:26,880 --> 00:28:29,600
+and testing. Again, the key here is just
+
+777
+00:28:29,600 --> 00:28:31,760
+that you separate the context out so
+
+778
+00:28:31,760 --> 00:28:33,600
+that your context can move between
+
+779
+00:28:33,600 --> 00:28:36,159
+individual agents and code. When you're
+
+780
+00:28:36,159 --> 00:28:38,559
+starting, remember KISS, keep it simple,
+
+781
+00:28:38,559 --> 00:28:40,640
+stupid. You can absolutely start with
+
+782
+00:28:40,640 --> 00:28:43,520
+pure skill-based workflows where it's
+
+783
+00:28:43,520 --> 00:28:45,520
+all one skill outside of the prompt and
+
+784
+00:28:45,520 --> 00:28:47,039
+the review. But as soon as you start
+
+785
+00:28:47,039 --> 00:28:48,559
+productionizing, as soon as you run to
+
+786
+00:28:48,559 --> 00:28:50,640
+get serious about your AWS, you must
+
+787
+00:28:50,640 --> 00:28:53,039
+separate code out of the skills because
+
+788
+00:28:53,039 --> 00:28:54,960
+that's still your agent running it,
+
+789
+00:28:54,960 --> 00:28:56,480
+right? You have to be super super clear
+
+790
+00:28:56,480 --> 00:28:58,320
+about those steps so that you can set up
+
+791
+00:28:58,320 --> 00:29:00,559
+the proper guard rails and information
+
+792
+00:29:00,559 --> 00:29:03,039
+flows in your AI developer workflows. My
+
+793
+00:29:03,039 --> 00:29:04,960
+next really big piece of advice here is
+
+794
+00:29:04,960 --> 00:29:07,600
+design your ADWs by doing the work
+
+795
+00:29:07,600 --> 00:29:09,919
+yourself first. For a lot of engineers,
+
+796
+00:29:09,919 --> 00:29:11,760
+this will sound insanely painful, but
+
+797
+00:29:11,760 --> 00:29:13,760
+you can like, you know, use your agent
+
+798
+00:29:13,760 --> 00:29:16,080
+in the terminal. Run the build workflow.
+
+799
+00:29:16,080 --> 00:29:17,520
+Do the testing, right? You can still use
+
+800
+00:29:17,520 --> 00:29:18,720
+your agent for that. I'm not saying do
+
+801
+00:29:18,720 --> 00:29:20,159
+it by hand. That would be a waste of
+
+802
+00:29:20,159 --> 00:29:21,760
+time now. But what I am saying is
+
+803
+00:29:21,760 --> 00:29:23,440
+whatever workflow you're setting up, run
+
+804
+00:29:23,440 --> 00:29:26,399
+it end to end. Step into each node
+
+805
+00:29:26,399 --> 00:29:28,399
+yourself. run the pass, run the
+
+806
+00:29:28,399 --> 00:29:30,240
+condition, watch the functions get
+
+807
+00:29:30,240 --> 00:29:32,559
+executed, do the review, and then do the
+
+808
+00:29:32,559 --> 00:29:34,559
+ship to production and then start
+
+809
+00:29:34,559 --> 00:29:37,279
+writing this all as a combination of
+
+810
+00:29:37,279 --> 00:29:39,200
+agents, engineers, and code. And I
+
+811
+00:29:39,200 --> 00:29:40,640
+recommend you take something like
+
+812
+00:29:40,640 --> 00:29:42,159
+mermaid. And you know, by the way, this
+
+813
+00:29:42,159 --> 00:29:45,200
+is like a adaptation of mermaid diagram.
+
+814
+00:29:45,200 --> 00:29:47,679
+I had an agent create using a plan build
+
+815
+00:29:47,679 --> 00:29:50,000
+test AI developer workflow in one shot.
+
+816
+00:29:50,000 --> 00:29:52,320
+I created a animated application which
+
+817
+00:29:52,320 --> 00:29:55,120
+is of course based on a mermaid diagram.
+
+818
+00:29:55,120 --> 00:29:56,399
+Okay, so shout out to mermaid. Shout out
+
+819
+00:29:56,399 --> 00:29:58,159
+to mermaid.live. But that's my second
+
+820
+00:29:58,159 --> 00:30:00,080
+piece of advice, right? Walk through it
+
+821
+00:30:00,080 --> 00:30:02,559
+all yourself first. Sit down pencil and
+
+822
+00:30:02,559 --> 00:30:04,880
+a piece of paper or use mermaid or use
+
+823
+00:30:04,880 --> 00:30:07,200
+whatever. Really sit down and like write
+
+824
+00:30:07,200 --> 00:30:09,840
+out your workflow. And then lastly, make
+
+825
+00:30:09,840 --> 00:30:11,760
+sure you're not just using agents,
+
+826
+00:30:11,760 --> 00:30:13,840
+right? Use agents and code. As I
+
+827
+00:30:13,840 --> 00:30:15,600
+mentioned, you can always start with
+
+828
+00:30:15,600 --> 00:30:18,080
+agents and skills, but as soon as you
+
+829
+00:30:18,080 --> 00:30:19,360
+start hitting production, as soon as you
+
+830
+00:30:19,360 --> 00:30:21,039
+want to get serious, move some of that
+
+831
+00:30:21,039 --> 00:30:23,120
+skill work into code. This is not just
+
+832
+00:30:23,120 --> 00:30:24,480
+about token cost. This is about
+
+833
+00:30:24,480 --> 00:30:26,559
+performance, reliability, and speed.
+
+834
+00:30:26,559 --> 00:30:28,720
+Again, everyone in their AI psychosis
+
+835
+00:30:28,720 --> 00:30:31,679
+has like forgotten that speed costs zero
+
+836
+00:30:31,679 --> 00:30:34,159
+tokens. There's no hallucination. It
+
+837
+00:30:34,159 --> 00:30:36,080
+does the exact same thing every time.
+
+838
+00:30:36,080 --> 00:30:38,159
+And it literally runs at the speed of
+
+839
+00:30:38,159 --> 00:30:41,039
+light. So, don't overleverage on agents.
+
+840
+00:30:41,039 --> 00:30:44,080
+Okay? Balance it out with actual code,
+
+841
+00:30:44,080 --> 00:30:46,159
+right? Code execution. And yes, there's
+
+842
+00:30:46,159 --> 00:30:47,840
+information orchestration. There is this
+
+843
+00:30:47,840 --> 00:30:50,159
+is what context engineering is. You're
+
+844
+00:30:50,159 --> 00:30:52,159
+going to need a place for all the
+
+845
+00:30:52,159 --> 00:30:55,120
+results in between each step. Yes, it's
+
+846
+00:30:55,120 --> 00:30:56,080
+going to take some time. Yes, it's going
+
+847
+00:30:56,080 --> 00:30:57,679
+to be a little knowing. Yes, during the
+
+848
+00:30:57,679 --> 00:30:59,120
+process, you'll wonder, I should just
+
+849
+00:30:59,120 --> 00:31:00,799
+throw this all in the skill. You'll be
+
+850
+00:31:00,799 --> 00:31:02,559
+wrong down the road. I can guarantee you
+
+851
+00:31:02,559 --> 00:31:04,240
+that. I've been there. Don't waste your
+
+852
+00:31:04,240 --> 00:31:05,840
+time doing other engineers have
+
+853
+00:31:05,840 --> 00:31:07,919
+already done wrong. Separate it out as
+
+854
+00:31:07,919 --> 00:31:09,840
+you scale this. Okay, so that's the big
+
+855
+00:31:09,840 --> 00:31:12,960
+third tip. Use agents and code. Okay,
+
+856
+00:31:12,960 --> 00:31:15,279
+because agents plus code beats either
+
+857
+00:31:15,279 --> 00:31:17,600
+alone, especially when you start really
+
+858
+00:31:17,600 --> 00:31:20,559
+scaling these into legitimately large AI
+
+859
+00:31:20,559 --> 00:31:23,120
+developer workflows that do serious work
+
+860
+00:31:23,120 --> 00:31:25,120
+for you and your organization. Why?
+
+861
+00:31:25,120 --> 00:31:26,559
+Because you're going to need to test
+
+862
+00:31:26,559 --> 00:31:28,399
+this node. You're going to need to test
+
+863
+00:31:28,399 --> 00:31:30,240
+plan into build. You're going to need to
+
+864
+00:31:30,240 --> 00:31:32,080
+test plan into build and to update the
+
+865
+00:31:32,080 --> 00:31:34,159
+status and to testing and to fail. This
+
+866
+00:31:34,159 --> 00:31:36,880
+is all still a system you the engineer
+
+867
+00:31:36,880 --> 00:31:39,279
+are responsible for. So keep using great
+
+868
+00:31:39,279 --> 00:31:41,039
+classic engineering patterns,
+
+869
+00:31:41,039 --> 00:31:44,159
+isolatable, decoupled, single interface,
+
+870
+00:31:44,159 --> 00:31:47,120
+right? All that stuff matters probably
+
+871
+00:31:47,120 --> 00:31:49,200
+even more, right? It matters even more
+
+872
+00:31:49,200 --> 00:31:51,039
+now because once you do it right and you
+
+873
+00:31:51,039 --> 00:31:52,720
+set up your AI developer workflow, it
+
+874
+00:31:52,720 --> 00:31:54,880
+gets multiplied hundreds and thousands
+
+875
+00:31:54,880 --> 00:31:57,120
+of times and your agents plus your code
+
+876
+00:31:57,120 --> 00:31:59,120
+can drive the outcomes for you. Okay?
+
+877
+00:31:59,120 --> 00:32:00,960
+So, you know, let's step away from the
+
+878
+00:32:00,960 --> 00:32:02,640
+vibes a little bit and let's step out
+
+879
+00:32:02,640 --> 00:32:04,480
+away from the AI psychosis a little bit
+
+880
+00:32:04,480 --> 00:32:05,760
+because if we're going to do serious
+
+881
+00:32:05,760 --> 00:32:08,399
+agentic engineering, you need to know
+
+882
+00:32:08,399 --> 00:32:10,399
+what's going to happen in your system.
+
+883
+00:32:10,399 --> 00:32:11,840
+So, if you made it to the end here, I
+
+884
+00:32:11,840 --> 00:32:13,200
+want to just say thank you for trusting
+
+885
+00:32:13,200 --> 00:32:14,480
+me. For everyone that's been with the
+
+886
+00:32:14,480 --> 00:32:16,480
+channel for a while, for years now, you
+
+887
+00:32:16,480 --> 00:32:18,000
+know, big shout out to you. I appreciate
+
+888
+00:32:18,000 --> 00:32:19,919
+you trusting me and following along this
+
+889
+00:32:19,919 --> 00:32:21,519
+massive journey of Agentic Engineering
+
+890
+00:32:21,519 --> 00:32:23,760
+that we're on. Um, if you want more, I
+
+891
+00:32:23,760 --> 00:32:24,960
+recommend you check out
+
+892
+00:32:24,960 --> 00:32:27,360
+agenticengineer.com, specifically
+
+893
+00:32:27,360 --> 00:32:30,080
+tactical agentic coding. As I mentioned,
+
+894
+00:32:30,080 --> 00:32:32,000
+I've been pretty early to a lot of these
+
+895
+00:32:32,000 --> 00:32:34,000
+ideas. In tactical agent coding, you're
+
+896
+00:32:34,000 --> 00:32:36,159
+going to hear a lot of what I just said
+
+897
+00:32:36,159 --> 00:32:38,720
+really broken down step by step across
+
+898
+00:32:38,720 --> 00:32:41,039
+eight lessons and then six additional
+
+899
+00:32:41,039 --> 00:32:44,000
+upgradable lessons if you're interested.
+
+900
+00:32:44,000 --> 00:32:45,840
+Okay, so the big idea here is AI
+
+901
+00:32:45,840 --> 00:32:47,679
+developer workflows. It's building
+
+902
+00:32:47,679 --> 00:32:49,519
+systems that build systems. We're not
+
+903
+00:32:49,519 --> 00:32:51,440
+touching the application layer anymore.
+
+904
+00:32:51,440 --> 00:32:53,519
+We're touching the agentic system, the
+
+905
+00:32:53,519 --> 00:32:56,000
+agentic layer that builds it on our
+
+906
+00:32:56,000 --> 00:32:57,919
+behalf. Okay? So, if you want to pay to
+
+907
+00:32:57,919 --> 00:32:59,200
+play, you want to get a big advantage
+
+908
+00:32:59,200 --> 00:33:01,760
+that again thousands of engineers that
+
+909
+00:33:01,760 --> 00:33:03,440
+you know of and have heard of at
+
+910
+00:33:03,440 --> 00:33:05,360
+companies you know the names of, they
+
+911
+00:33:05,360 --> 00:33:07,039
+are in here and they have gotten the
+
+912
+00:33:07,039 --> 00:33:08,480
+advantage and they are getting the
+
+913
+00:33:08,480 --> 00:33:10,000
+advantage, right? It's tactical agent
+
+914
+00:33:10,000 --> 00:33:11,360
+coding is the first eight lessons you
+
+915
+00:33:11,360 --> 00:33:13,360
+can upgrade to agentic horizon to get
+
+916
+00:33:13,360 --> 00:33:15,600
+some upgradeable ideas. really big idea
+
+917
+00:33:15,600 --> 00:33:16,960
+there is of course multi- aent
+
+918
+00:33:16,960 --> 00:33:19,120
+orchestration but agent experts is
+
+919
+00:33:19,120 --> 00:33:21,200
+turning out to be a massively banger
+
+920
+00:33:21,200 --> 00:33:23,919
+idea a massively important idea for
+
+921
+00:33:23,919 --> 00:33:25,600
+engineering in the age of agents if you
+
+922
+00:33:25,600 --> 00:33:27,120
+want to build true specialists that
+
+923
+00:33:27,120 --> 00:33:29,519
+outperform out of the box agent anyway
+
+924
+00:33:29,519 --> 00:33:32,240
+lots more in there's a very clear 30-day
+
+925
+00:33:32,240 --> 00:33:34,559
+refund before you start lesson 4. So if
+
+926
+00:33:34,559 --> 00:33:36,159
+you don't like my style or you're not
+
+927
+00:33:36,159 --> 00:33:38,240
+getting the core of it it's fine I don't
+
+928
+00:33:38,240 --> 00:33:39,600
+want you in here if you don't want to be
+
+929
+00:33:39,600 --> 00:33:41,760
+30-day refund before you start lesson 4.
+
+930
+00:33:41,760 --> 00:33:42,720
+This is going to be linked in the
+
+931
+00:33:42,720 --> 00:33:44,320
+description for you. Also, I recommend
+
+932
+00:33:44,320 --> 00:33:46,399
+if you vibe with the ideas here, if you
+
+933
+00:33:46,399 --> 00:33:48,080
+understand the ideas and you don't want
+
+934
+00:33:48,080 --> 00:33:49,919
+to jump in the tactical agent coding
+
+935
+00:33:49,919 --> 00:33:51,760
+right away, check out this blog. I'll
+
+936
+00:33:51,760 --> 00:33:53,360
+link in the description as well,
+
+937
+00:33:53,360 --> 00:33:55,200
+thinking in threads. It covers a lot of
+
+938
+00:33:55,200 --> 00:33:58,159
+the same ideas we've been discussing 99%
+
+939
+00:33:58,159 --> 00:33:59,919
+of everything I do here on this channel.
+
+940
+00:33:59,919 --> 00:34:01,919
+It's all free. It's out there for you to
+
+941
+00:34:01,919 --> 00:34:04,080
+understand and master agentic
+
+942
+00:34:04,080 --> 00:34:05,760
+engineering. If you made it to the end,
+
+943
+00:34:05,760 --> 00:34:07,840
+do me a favor, like this video, leave a
+
+944
+00:34:07,840 --> 00:34:09,760
+comment, and share it with your coworker
+
+945
+00:34:09,760 --> 00:34:11,760
+before your competition sends it to
+
+946
+00:34:11,760 --> 00:34:13,760
+theirs. You know where to find me every
+
+947
+00:34:13,760 --> 00:34:16,639
+single Monday. Stay focused and keep
+
+948
+00:34:16,639 --> 00:34:19,280
+building.
