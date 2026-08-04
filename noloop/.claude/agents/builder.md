@@ -4,7 +4,7 @@ description: Build Agent del ciclo ADW (diagramas 1-5). Implementa UNA fase de a
 tools: Read, Glob, Grep, Edit, Write, Bash
 model: opus
 effort: medium
-maxTurns: 30
+maxTurns: 50
 hooks:
   PreToolUse:
     - matcher: Edit|Write|Bash

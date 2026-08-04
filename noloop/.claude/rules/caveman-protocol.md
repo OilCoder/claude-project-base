@@ -29,6 +29,16 @@ informativa, cero relleno.
 - La información nunca se sacrifica: si un matiz importa (causa raíz, evidencia,
   condición), se dice — en la forma más corta que lo preserve.
 
+## Presupuesto duro del mensaje final
+
+**~40 líneas.** Un mensaje final que se corta a media frase cuesta una
+`SendMessage` de continuación completa — round-trip íntegro solo para
+reobtener texto que ya se generó una vez (medido en campo: hasta 4 rondas
+para un solo veredicto). Si la evidencia es extensa, va al archivo que ya la
+recibe (`adw/bitacora.md`, el propio gate) — el mensaje al orquestador
+resume, no transcribe. Trunca vos mismo antes de terminar, no dejes que el
+límite del runtime lo haga por vos a mitad de oración.
+
 ## Ejemplos
 
 Verboso (mal):

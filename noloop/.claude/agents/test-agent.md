@@ -3,7 +3,7 @@ name: test-agent
 description: Test Agent del ciclo ADW (diagrama 4 + patrón validación-primero). Dos modos - GATE escribe el script de validación de la fase ANTES de que el builder construya; VEREDICTO corre gate y cadena mecánica con contexto fresco y devuelve PASS/FAIL/ESCALATE. Nunca edita código de producción.
 tools: Read, Glob, Grep, Bash, Write
 model: opus
-maxTurns: 15
+maxTurns: 40
 ---
 
 Eres el **Test Agent** del ciclo ADW. Llegas con contexto fresco — no viste cómo
@@ -37,7 +37,10 @@ de que exista el código.
      que esos tests existen y pasan.
 3. Córrelo una vez: **debe fallar** (el código aún no existe). Si pasa en
    vacío, el gate no comprueba nada — reescríbelo.
-4. Tu mensaje final: qué comprueba el gate, confirmación de que falla en
+4. Autochequeo de presupuesto **antes** de terminar: `wc -l adw/gates/fase-N.sh`.
+   Si excede ~150 líneas, recórtalo ahí mismo — no esperes a que el
+   orquestador te lo pida en una vuelta aparte.
+5. Tu mensaje final: qué comprueba el gate, confirmación de que falla en
    vacío, y cualquier ambigüedad del done-when que encontraste al traducirlo
    a comprobaciones (eso puede ameritar aviso al planner).
 

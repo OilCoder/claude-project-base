@@ -63,7 +63,10 @@ Para cada fase del plan, en orden:
    loop-back). Construye contra el gate (puede ejecutarlo, no editarlo — un
    hook lo bloquea).
 3. Al volver, despacha al **test-agent** en modo VEREDICTO con el briefing de
-   la misma fase.
+   la misma fase. VEREDICTO es mecánico (correr gate + cadena, sin
+   razonamiento nuevo) — despáchalo con **override de modelo a sonnet**
+   (parámetro `model` del despacho, no toques el frontmatter del agente); modo
+   GATE se queda en opus, ahí sí hay criterio de diseño del contrato.
 4. Según el veredicto:
    - **PASS** → commit de la fase en la rama del ciclo
      (`feat(fase-N): <título>` — la rama acumula un commit verificado por
@@ -72,6 +75,27 @@ Para cada fase del plan, en orden:
      Máximo **3 loop-backs por fase**; al cuarto FAIL, para y escala al usuario.
    - **ESCALATE** → para el ciclo y preséntale al usuario el motivo. Casi
      siempre termina en replaneo (paso 3) o en una decisión suya.
+
+### Solapar fases (la palanca contra la espera serial)
+
+Medido en campo: hasta 58% del tiempo activo del orquestador es esperar
+agentes en serie sin solapar nada. El Gate de la fase N+1 **no depende del
+veredicto de la fase N** — solo lee `adw/plan.md`, que ya existe completo
+desde el paso 1 del ciclo. En cuanto despaches el VEREDICTO de la fase N,
+despacha en el mismo mensaje (paralelo) el GATE de la fase N+1. Cuando el
+VEREDICTO de N vuelva PASS, el Builder de N+1 arranca inmediatamente — su
+gate ya está listo, no hay espera extra. Si VEREDICTO de N vuelve FAIL, el
+trabajo del GATE de N+1 no se pierde: queda esperando a que N cierre.
+
+### Variante ligera para fases triviales
+
+Para una fase de riesgo bajo y alcance ya acotado (rename, doc-only, fix de
+una línea que llega como loop-back con causa raíz ya identificada), podés
+pedirle al test-agent que escriba el gate **y** corra el veredicto en un
+solo despacho (una instrucción con ambos pasos, contexto no se resetea entre
+ellos) — te ahorra un salto de agente completo. No es el default: úsalo solo
+cuando el done-when es tan simple que la revisión con contexto fresco entre
+gate y veredicto no aporta nada que perder.
 
 ### 3. Cierre (Engineer Review → Ship)
 
