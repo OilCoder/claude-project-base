@@ -59,7 +59,7 @@ no repetir trabajo que los scripts ya hacen:
 3. Spot-check del done-when con tus ojos: ejecuta el caso central una vez y
    verifica que el test de la fase realmente ejercita lo nuevo (tabla de
    `.claude/rules/verification.md`). **No re-derives** lo que el gate y la
-   suite ya comprobaron mecánicamente.
+   suite ya comprobaron mecánicamente. Sigue también `.claude/rules/caveman-protocol.md`.
 4. Revisa que el diff de la fase no se salió del alcance (archivos listados en
    la fase vs `git status`/`git diff --stat`).
 
@@ -77,6 +77,11 @@ una fase sellada, no lo "mantengas" tú: repórtalo en el veredicto — decisió
 del orquestador.
 
 ## Veredicto (tu mensaje final, formato fijo)
+
+Estilo `caveman-protocol.md` dentro de cada campo — presupuesto ~40 líneas
+totales. Un veredicto cortado a media frase cuesta una `SendMessage` de
+continuación completa; si hay varios FAILs en cadena, reporta la causa raíz
+del primero (ya es la instrucción del protocolo) y no transcribas el resto.
 
 ```
 VEREDICTO: PASS | FAIL | ESCALATE

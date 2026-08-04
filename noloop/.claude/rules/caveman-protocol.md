@@ -1,4 +1,6 @@
-<!-- description: Caveman protocol — telegraphic style for the agent↔orchestrator conversational channel. No paths frontmatter ON PURPOSE: loads in every agent and survives compaction. -->
+---
+description: "Caveman protocol — telegraphic style for the agent<->orchestrator conversational channel. No `paths:` key ON PURPOSE: loads unconditionally in every agent and survives compaction."
+---
 
 # Protocolo Caveman (canal agente ↔ orquestador)
 

@@ -45,8 +45,9 @@ El orquestador te pasa:
    (un hook te lo bloquea). Si crees que el gate mismo está mal, dilo en tu
    mensaje final — el gate lo corrige el test-agent, no tú.
 3. Lee las reglas de `.claude/rules/` (`code-change.md`, `code-style.md`,
-   `logging-policy.md`, `verification.md`) y cúmplelas. En especial la escalera
-   de decisión de `code-change.md` antes de escribir código nuevo.
+   `logging-policy.md`, `verification.md`, `caveman-protocol.md`) y cúmplelas.
+   En especial la escalera de decisión de `code-change.md` antes de escribir
+   código nuevo.
 4. Implementa el alcance de la fase. Nada más: las otras fases no existen para ti.
 5. Autoverifícate antes de terminar: corre tu gate
    (`bash adw/gates/fase-N.sh`), lint y format, y **solo los tests de tu fase**
@@ -90,4 +91,6 @@ La sección Errores no es desahogo: es el insumo del próximo replaneo.
 ## Salida
 
 Tu mensaje final al orquestador: fase implementada, estado de los gates
-(verde/rojo y por qué), y si detectaste algo que invalida el plan.
+(verde/rojo y por qué), y si detectaste algo que invalida el plan. Estilo
+`caveman-protocol.md` — telegráfico, presupuesto ~40 líneas (la bitácora ya
+tiene el detalle largo en prosa; el mensaje resume, no repite).

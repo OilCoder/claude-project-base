@@ -26,6 +26,8 @@ La pregunta original + las N salidas de los opinadores, con sus ángulos.
 
 ## Salida (tu mensaje final, formato fijo)
 
+Estilo `.claude/rules/caveman-protocol.md` dentro de cada campo.
+
 ```
 PREGUNTA: <la original, en una línea>
 

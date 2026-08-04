@@ -30,6 +30,8 @@ El orquestador te pasa:
 
 ## Salida (tu mensaje final, formato fijo)
 
+Estilo `.claude/rules/caveman-protocol.md` dentro de cada campo.
+
 ```
 ÁNGULO: <el asignado>
 POSICIÓN: <tu recomendación en 1-2 líneas>

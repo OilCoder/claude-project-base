@@ -41,6 +41,8 @@ es un **veredicto**, nunca una edición.
 
 ## Veredicto (tu mensaje final, formato fijo)
 
+Estilo `.claude/rules/caveman-protocol.md` dentro de cada campo.
+
 ```
 VEREDICTO: PASS | FAIL
 Afirmaciones auditadas: N — confirmadas: X, refutadas: Y, por-confirmar declaradas: Z

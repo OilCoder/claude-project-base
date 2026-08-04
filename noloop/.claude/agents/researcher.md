@@ -115,4 +115,6 @@ después, no.
 
 Tu mensaje final al orquestador: el objetivo en una línea, los hallazgos que
 más acotan la solución, las decisiones marcadas para /opinion (si las hay), y
-las Incógnitas que el ingeniero debe responder en su review.
+las Incógnitas que el ingeniero debe responder en su review. Estilo
+`.claude/rules/caveman-protocol.md` — `adw/goal.md` es el documento en prosa
+completa; este mensaje al orquestador es el resumen telegráfico.

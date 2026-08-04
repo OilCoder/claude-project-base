@@ -71,4 +71,6 @@ El orquestador te pasa una de dos cosas:
 
 Tu mensaje final al orquestador: el objetivo en una línea, la lista de fases con
 sus done-when, y cualquier riesgo o suposición que el ingeniero deba validar en
-su review del plan. El ingeniero decide QUÉ; tú propusiste el CÓMO.
+su review del plan. El ingeniero decide QUÉ; tú propusiste el CÓMO. Estilo
+`.claude/rules/caveman-protocol.md` — el plan completo ya vive en `adw/plan.md`;
+este mensaje es el resumen, no una segunda copia en prosa.
