@@ -1,5 +1,5 @@
 ---
-paths: [".claude/settings.json", ".claude/settings.local.json", ".claude/hooks/**"]
+paths: [".claude/settings.json", ".claude/settings.local.json", ".claude/settings.template.json", ".claude/hooks/**"]
 ---
 
 # Hooks — política de detección
@@ -32,3 +32,10 @@ case "$cmd" in
   *"git reset --hard"*|*"rm -rf "*) echo "BLOCKED: ..." >&2; exit 2 ;;
 esac
 ```
+
+**Nota**: `.claude/settings.template.json` de este repo usaba el campo `if` en su bloque
+`PreToolUse:Bash` — el bug no vivía solo en despliegues de campo, vivía también en la
+semilla que cada despliegue nuevo copia. Corregido: la implementación de referencia es
+`.claude/hooks/check-dangerous-bash.sh`, referenciada desde `settings.template.json` sin
+campo `if`. Cualquier guardia nueva de comando peligroso se agrega ahí, no como entrada
+`if` nueva.
