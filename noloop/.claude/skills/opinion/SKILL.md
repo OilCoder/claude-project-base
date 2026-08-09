@@ -1,13 +1,14 @@
 ---
 name: opinion
-description: Patrón fusion para decisiones - N opinadores Opus independientes en paralelo (ángulos distintos, sin verse) + un fusionador que contrasta en consenso/divergencias/descartado. Use when the user faces a technical or design decision and wants multiple perspectives ("/opinion <pregunta>", "dame perspectivas", "¿X o Y?", "no sé qué elegir").
+description: Patrón fusion para decisiones - N opinadores fable independientes en paralelo (ángulos distintos, sin verse) + un fusionador que contrasta en consenso/divergencias/descartado. Use when the user faces a technical or design decision and wants multiple perspectives ("/opinion <pregunta>", "dame perspectivas", "¿X o Y?", "no sé qué elegir").
 ---
 
 # Patrón fusion — protocolo del orquestador
 
 Un nodo de decisión: en vez de una respuesta de un agente, N perspectivas
 independientes contrastadas. Se usa para decisiones, no para rutina — cada
-invocación cuesta N+1 despliegues de Opus.
+invocación cuesta N+1 despliegues de fable (más Opus si se descarga en el
+fusionador, ver más abajo).
 
 ## Rails del orquestador
 
@@ -33,6 +34,16 @@ verdad** — ángulos que siempre coinciden no aportan contraste.
 
 Despacha N agentes **opinion** en un solo mensaje, cada uno con la pregunta
 y su ángulo.
+
+**Alternativa Codex (prioridad 3, la de menor impacto de las tres)**: si
+`/mcp` muestra `codex` conectado, uno de los N ángulos puede ser Codex en vez
+de un segundo agente `opinion` Claude — despacho directo tuyo a
+`mcp__codex__codex` con `sandbox: "read-only"` fijo, pasándole la pregunta y
+el ángulo con el mismo formato de salida de `agents/opinion.md`. **Sustituye,
+no suma**: dos opinadores Claude (`fable`) con ángulos distintos siguen
+siendo la misma familia de modelo pensando dos veces — cambiar uno por Codex
+da divergencia real al mismo costo de despachos, no divergencia extra a
+costo extra. Si Codex no está conectado, los N son Claude como siempre.
 
 ### 2b. Réplicas (opcional, si hay divergencia que lo amerite)
 

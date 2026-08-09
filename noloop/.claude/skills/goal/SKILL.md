@@ -29,6 +29,14 @@ discrepar de verdad (p.ej. "aprovecha lo que el repo ya tiene" vs "la
 solución idónea del dominio aunque sea nueva"). Cada uno devuelve su informe
 de hallazgos, sin escribir goal.md.
 
+**Alternativa Codex (prioridad 2)**: si `/mcp` muestra `codex` conectado, uno
+de los dos researchers puede ser Codex en vez de Claude — despacho directo
+tuyo a `mcp__codex__codex` con `sandbox: "read-only"` fijo, mismo ángulo y
+misma idea del ingeniero, pidiéndole el formato de informe de
+`agents/researcher.md`. El **otro researcher se queda siempre en Claude** —
+nunca los dos en Codex a la vez: si Codex falla o no está conectado, el
+patrón writer/reviewer de la pareja no se cae.
+
 ### 2. Conciliación (tuya)
 
 Contrasta los dos informes con tu conocimiento del proyecto:
@@ -54,6 +62,19 @@ decide tú con el contraste.
 ### 3. Verificación (Verifier, el candado del módulo)
 
 Con `adw/goal.md` redactado, despacha al agente **verifier**.
+
+**Alternativa Codex (prioridad 1 de las tres opcionales del sistema)**: si
+`/mcp` muestra `codex` conectado, podés correr esta auditoría con Codex en
+vez del agente Claude — despacho directo tuyo a `mcp__codex__codex` con
+`sandbox: "read-only"` fijo (nunca `workspace-write`), pasándole en el prompt
+el procedimiento y el formato de veredicto exactos de `agents/verifier.md`
+(Codex no lee frontmatter de agentes Claude, así que el contrato viaja en el
+prompt, no por referencia). Es el punto de mayor apalancamiento para una
+segunda familia de modelo: `adw/goal.md` se sella una vez por objetivo y
+cualquier afirmación que el Verifier deje pasar se hereda en cada ciclo
+`/adw` posterior. Si Codex no está conectado, o preferís mantener el candado
+en Claude, despacha al agente `verifier` como siempre — el patrón funciona
+igual sin él.
 
 - **PASS** → sigue al review.
 - **FAIL** → redespacha al researcher redactor con el veredicto completo
