@@ -87,15 +87,27 @@ VEREDICTO de N vuelva PASS, el Builder de N+1 arranca inmediatamente — su
 gate ya está listo, no hay espera extra. Si VEREDICTO de N vuelve FAIL, el
 trabajo del GATE de N+1 no se pierde: queda esperando a que N cierre.
 
-### Variante ligera para fases triviales
+### Variante ligera — default para fases de riesgo bajo
 
-Para una fase de riesgo bajo y alcance ya acotado (rename, doc-only, fix de
-una línea que llega como loop-back con causa raíz ya identificada), podés
-pedirle al test-agent que escriba el gate **y** corra el veredicto en un
-solo despacho (una instrucción con ambos pasos, contexto no se resetea entre
-ellos) — te ahorra un salto de agente completo. No es el default: úsalo solo
-cuando el done-when es tan simple que la revisión con contexto fresco entre
-gate y veredicto no aporta nada que perder.
+Medido en campo: builder + test-agent son el 83% de los despachos de una
+sesión típica — la palanca más grande del presupuesto semanal, por delante
+de cualquier otra optimización del sistema. Por eso esto deja de ser la
+excepción: es el **default para toda fase que el plan marque como riesgo
+bajo** (rename, doc-only, fix de una línea, loop-back con causa raíz ya
+identificada, o cualquier fase cuyo done-when es tan simple que la revisión
+con contexto fresco entre gate y veredicto no aporta nada que perder).
+
+**Mecánica (sin cambios)**: pedile al test-agent que escriba el gate **y**
+corra el veredicto en un solo despacho — una instrucción con ambos pasos,
+contexto no se resetea entre ellos — te ahorra un salto de agente completo.
+
+**Usa el ciclo completo de 3 saltos** (gate → builder → veredicto con
+contexto fresco, cada uno su propio despacho) **cuando el plan marque la
+fase como riesgo medio o alto**: toca lógica de negocio, cambia una interfaz
+pública, o el done-when es lo bastante ambiguo como para que la revisión
+independiente sin sesgo del autor valga su costo. Ante la duda, sube de
+nivel — el rigor completo existe por algo, y el planner puede subestimar el
+riesgo de una fase que parecía simple hasta que se trocea.
 
 ### 3. Cierre (Engineer Review → Ship)
 

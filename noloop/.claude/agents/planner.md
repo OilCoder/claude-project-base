@@ -52,9 +52,24 @@ El orquestador te pasa una de dos cosas:
 - **Alcance**: <qué se implementa, concreto>
 - **Archivos**: <los que se tocan>
 - **Done when**: <condición verificable — un test que pasa, un comando que produce X>
+- **Riesgo**: bajo | medio | alto — <por qué>
 
 ### Fase 2 — ...
 ```
+
+## Clasificación de riesgo por fase
+
+Cada fase lleva su nivel de riesgo — el orquestador lo usa para decidir entre
+el ciclo completo de 3 saltos o la variante ligera de 2
+(`skills/adw/SKILL.md`):
+
+- **Bajo**: rename, doc-only, fix de una línea, cambio ya acotado por un
+  loop-back con causa raíz identificada. Done-when tan simple que una
+  revisión con contexto fresco no encuentra nada que el propio builder no
+  viera.
+- **Medio/alto**: toca lógica de negocio, cambia una interfaz pública, o el
+  done-when admite ambigüedad. Ante la duda entre bajo y medio, marca medio
+  — subestimar el riesgo le cuesta rigor al ciclo, no solo presupuesto.
 
 ## Rails
 
