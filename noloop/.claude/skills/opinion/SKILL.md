@@ -47,10 +47,20 @@ costo extra. Si Codex no está conectado, los N son Claude como siempre.
 
 ### 2b. Réplicas (opcional, si hay divergencia que lo amerite)
 
-Si las posiciones divergen en algo decisivo, corre rondas de réplica cruzada
-(modo réplica del opinador: a cada uno le pasas la posición del otro).
-**Máximo 3 rondas en total** (apertura + hasta 2 de réplica); corta antes si
-convergen o si la divergencia ya quedó bien caracterizada.
+Si las posiciones divergen en algo decisivo, autoriza réplica cruzada
+**directa**: reanuda a los opinadores (`SendMessage`) indicándoles que
+intercambien réplicas entre hermanos — cada uno recibe la posición del otro,
+debate directo, y te devuelve solo su POSICIÓN FINAL. Tú no cargas el correo:
+recibes las posiciones destiladas, no el intercambio. El techo viaja EN tu
+despacho, porque ya no eres el cartero que lo impone: **máximo 3 rondas en
+total** (apertura + hasta 2 de réplica); corta antes si convergen o si la
+divergencia ya quedó bien caracterizada.
+
+La apertura (paso 2) siempre es independiente — la réplica directa se
+autoriza solo después de tener las N posiciones, nunca en el despacho
+inicial. Fallback degradable: si la mensajería entre hermanos no está
+disponible, medias tú como antes (a cada uno le pasas la posición del otro),
+mismo techo.
 
 ### 3. Conciliación
 
@@ -74,8 +84,9 @@ Si el usuario quiere el resultado en disco, guárdalo donde él diga
 
 ## Uso dentro del módulo de investigación
 
-El researcher no puede despachar agentes (los subagentes no anidan). El flujo
-es vía orquestador, definido en `skills/goal/SKILL.md`: el researcher marca en
-su salida las decisiones que ameritan opinión múltiple, tú corres este patrón
-por cada una, y le devuelves las fusiones al researcher para que las incorpore
-a los Hallazgos del goal (con la fusión citada como fuente del contraste).
+Los hechos puntuales el researcher los verifica por su cuenta (despacho
+anidado al verifier — ver `agents/researcher.md`); lo que sigue viajando vía
+orquestador son las decisiones **estructurales**. El flujo, definido en
+`skills/goal/SKILL.md`: el researcher las marca en su salida, tú corres este
+patrón por cada una, y le devuelves las fusiones para que las incorpore a los
+Hallazgos del goal (con la fusión citada como fuente del contraste).

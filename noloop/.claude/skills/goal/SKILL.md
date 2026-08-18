@@ -16,7 +16,11 @@ ancla estable; los ciclos de `/adw` que vengan después pueden ser muchos.
 - **Nunca escribes código ni redactas los documentos tú** — tu contexto sirve
   para la orquestación macro y para conciliar con información completa; el
   trabajo de campo y la redacción son de los agentes.
-- Los agentes no se hablan entre sí — tú enrutas, contrastas y decides.
+- Los canales directos entre agentes existen solo donde este método los
+  define (réplica cruzada de /opinion — `skills/opinion/SKILL.md` 2b — y
+  verificaciones puntuales anidadas del researcher — `agents/researcher.md`);
+  todo veredicto y toda decisión siguen pasando por ti. Los archivos son el
+  canal que sobrevive compactaciones; los mensajes no.
 - Reporta al usuario en qué punto del ciclo estás cada vez que despachas.
 
 ## El ciclo
@@ -56,7 +60,7 @@ tu conciliación como entrada → él escribe `adw/goal.md`.
 
 Si algún informe trae `DECISIONES PARA /opinion:` (decisión estructural),
 resuélvela dentro de tu conciliación; si tu información no alcanza, corre
-rondas de opinadores (`skills/opinion/SKILL.md`, Opus, máximo 3 rondas) y
+rondas de opinadores (`skills/opinion/SKILL.md`, fable, máximo 3 rondas) y
 decide tú con el contraste.
 
 ### 3. Verificación (Verifier, el candado del módulo)
@@ -92,6 +96,32 @@ las **Incógnitas**.
 - Sus respuestas y ajustes → redespacha al researcher para actualizar el goal
   (y de vuelta por el verifier si cambió algún hallazgo).
 - Aprobado → el goal queda sellado. Dile que `/adw` ya lo consumirá.
+
+## Modo subjetivo — cuando el objetivo no tiene métrica numérica
+
+"Por confirmar" significa que el número aún no se conoce; **subjetivo**
+significa que el número no va a existir nunca ("el mejor informe posible" es
+dirección, no meta). Sin techo, el sistema ejecuta el perfeccionismo a
+velocidad de máquina: cada verificador encuentra deficiencias reales y el
+horizonte retrocede (medido en campo: un run creció M1→M12 sin fecha de fin
+mientras el proyecto con calidad aritmética convergía en días).
+
+Si alguna métrica del goal no puede recibir meta numérica alcanzable, el goal
+DEBE declarar al menos uno de estos mecanismos de convergencia (combinables),
+y el done-when se construye sobre ellos:
+
+1. **Rúbrica congelada** — criterios falsables escritos una vez en el goal;
+   el proyecto solo se juzga contra ellos. Hallazgos posteriores del gusto →
+   backlog v2, nunca módulo nuevo.
+2. **Ancla de referencia** — done-when comparativo contra 1-2 ejemplos gold
+   standard, en comparación ciega (juez: patrón fusion o Codex).
+3. **Presupuesto como done-when** — N módulos / X ciclos y se shipea con la
+   calidad alcanzada; el contador de ciclos es el terminador.
+
+En el Engineer Review el mecanismo elegido se presenta explícito y por
+separado: es LA decisión que evita el run sin fin, y es del ingeniero. El
+verifier trata "métrica subjetiva sin mecanismo declarado" como falla de
+forma — no llega al review sin esto resuelto.
 
 ## Encadenamiento con la generación
 
