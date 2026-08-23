@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herramientas // claude-project-base</title>
+<meta name="description" content="Flujogramas de /adw y /goal, y el mapa de piezas de cada sistema.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{color-scheme:dark}
+  *{box-sizing:border-box}
+  body { margin: 0; background: #05070d; color: #c9d6e8; font-family: 'Share Tech Mono', monospace; font-size: 16px; line-height: 1.6;
+    background-image: linear-gradient(rgba(0,240,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,.035) 1px, transparent 1px);
+    background-size: 44px 44px; }
+  a { color: #00f0ff; text-decoration: none; } a:hover { text-shadow: 0 0 8px #00f0ff; }
+  ::selection{background:#ff2ea6;color:#000}
+  .disp { font-family: 'Orbitron', sans-serif; }
+  .code { color: #00f0ff; background: rgba(0,240,255,.07); border: 1px solid rgba(0,240,255,.18); padding: 2px 8px; font-size: 11px; white-space: nowrap; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #1b2438; font-size: 12px; }
+  .rol { color: #7787a0; font-size: 11px; text-align: right; }
+  nav.tabs { position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 14px 40px; border-bottom: 1px solid #1b2438; background: rgba(5,7,13,.95); backdrop-filter: blur(6px); }
+  nav.tabs .brand { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; color: #00f0ff; margin-right: 28px; }
+  nav.tabs .brand i { color: #ff2ea6; font-style: normal; }
+  nav.tabs a { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #7787a0; padding: 8px 18px; }
+  nav.tabs a:hover { color: #00f0ff; text-shadow: none; }
+  nav.tabs a.on { color: #05070d; }
+  footer { border-top: 1px solid #1b2438; padding: 30px 40px 50px; margin-top: 60px; font-size: 12px; color: #7787a0; display: flex; flex-wrap: wrap; gap: 8px 30px; justify-content: space-between; }
+  footer b { color: #00f0ff; font-weight: 400; }
+  @media (max-width: 860px){
+    div[style*="grid-template-columns"]{display:block !important}
+    div[style*="grid-template-columns"] > div{margin-bottom:12px}
+    div[style*="justify-content: center"][style*="display: flex"]{flex-wrap:wrap; gap:10px}
+    nav.tabs{padding:10px 16px}
+  }
+</style>
+</head>
+<body>
+<nav class="tabs">
+  <span class="brand">CLAUDE<i>::</i>PROJECT<i>::</i>BASE</span>
+  <a href="index.html">PORTADA</a>
+  <a href="clasico.html">01 CLÁSICO</a>
+  <a href="noloop.html">02 NO-LOOP</a>
+  <a href="hibrido.html">03 HÍBRIDO</a>
+  <a class="on" href="herramientas.html" style="background:#5cff8f">HERRAMIENTAS</a>
+</nav>
+
+<div style="max-width: 1120px; margin: 0 auto; padding: 50px 40px 0 40px">
+    <div style="font-size: 12px; color: #7787a0; letter-spacing: 3px; text-transform: uppercase">// herramienta 1 de 3 · compartida por 02 y 03</div>
+    <h1 class="disp" style="font-weight: 900; font-size: 40px; color: #eaf6ff; margin: 12px 0 6px 0; letter-spacing: 2px; text-transform: uppercase; text-shadow: 3px -2px 0 rgba(0,240,255,.5)">FLUJOGRAMA DE /ADW</h1>
+    <div class="disp" style="font-weight: 500; color: #00f0ff; letter-spacing: 4px; font-size: 14px; text-transform: uppercase">el ciclo completo — con el único punto donde 02 y 03 se separan</div>
+
+    <div style="margin-top: 36px; background: #020409; border: 1px solid #1b2438; padding: 30px 34px">
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 10px; letter-spacing: 2px; color: #7787a0; text-align: right">QUIÉN</div>
+        <div class="disp" style="font-size: 10px; letter-spacing: 2px; color: #7787a0">QUÉ PASA</div>
+        <div class="disp" style="font-size: 10px; letter-spacing: 2px; color: #7787a0">QUÉ CÓDIGO ACTÚA</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center; margin-top: 14px">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #ffe95c; padding: 8px 0; text-align: center">TÚ</div>
+        <div style="border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 12px 16px; font-size: 13px">Das la tarea: <span style="color:#ffe95c">"/adw construye X"</span> — con el goal ya sellado como norte</div>
+        <div><span class="code">skills/adw/SKILL.md</span><div style="font-size: 11px; color: #7787a0; margin-top: 4px">el protocolo completo del ciclo</div></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #00f0ff; padding: 8px 0; text-align: center">ORCHESTRATOR</div>
+        <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.06); padding: 12px 16px; font-size: 13px">Abre un <b style="color:#fff; font-weight:400">debate de estrategia</b>: dos agentes opinion proponen cómo partir el trabajo, desde ángulos distintos, y él concilia la mejor</div>
+        <div><span class="code">agents/opinion.md</span> <span class="code">agents/fusion.md</span></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #ff2ea6; padding: 8px 0; text-align: center">PLANNER</div>
+        <div style="border: 1px solid #ff2ea6; background: rgba(255,46,166,.05); padding: 12px 16px; font-size: 13px">Convierte la estrategia en <b style="color:#fff; font-weight:400">fases pequeñas</b>, cada una con su "terminado cuando…" — y TÚ apruebas el plan antes de que nadie construya</div>
+        <div><span class="code">agents/planner.md</span> → <span class="code">adw/plan.md</span></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #ff2ea6; padding: 8px 0; text-align: center">TEST-AGENT</div>
+        <div style="border: 1px solid #ff2ea6; background: rgba(255,46,166,.05); padding: 12px 16px; font-size: 13px">Por cada fase, escribe el <b style="color:#fff; font-weight:400">examen ANTES que el código</b>, comprueba que en vacío suspende, y se sella bajo llave en git</div>
+        <div><span class="code">agents/test-agent.md</span> → <span class="code">adw/gates/phase-N.sh</span></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="border: 2px dashed #ffe95c; padding: 18px; position: relative; margin: 4px 0">
+        <div class="disp" style="position: absolute; top: -10px; left: 16px; background: #020409; color: #ffe95c; font-size: 10px; letter-spacing: 3px; padding: 0 8px">◢ AQUÍ SE SEPARAN LOS DOS SISTEMAS</div>
+        <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: stretch">
+          <div style="display: flex; align-items: center"><div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #00f0ff; padding: 8px 0; text-align: center; width: 100%">BUILDER</div></div>
+          <div style="display: flex; gap: 14px">
+            <div style="border: 1px solid #ff2ea6; background: rgba(255,46,166,.06); padding: 12px 14px; flex: 1; font-size: 12px">
+              <span class="disp" style="color: #ff2ea6; font-size: 11px; letter-spacing: 1px">EN 02 · NO-LOOP</span>
+              <div style="color: #c9d6e8; margin-top: 5px">un agente de Claude programa la fase, con las reglas cargadas y el candado del examen activo</div>
+            </div>
+            <div style="border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 12px 14px; flex: 1; font-size: 12px">
+              <span class="disp" style="color: #ffe95c; font-size: 11px; letter-spacing: 1px">EN 03 · HÍBRIDO</span>
+              <div style="color: #c9d6e8; margin-top: 5px">la escalera de motores: tu GPU ($0) → nube → si ambos fallan, PARA y te pregunta. Con fases independientes: olas en paralelo</div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; justify-content: center; gap: 6px">
+            <span class="code">02: agents/builder.md</span>
+            <span class="code">03: scripts/run-builder.sh</span>
+            <span class="code">03: scripts/wave-manager.py</span>
+          </div>
+        </div>
+        <div style="font-size: 11px; color: #7787a0; margin-top: 10px; text-align: center">…y es lo ÚNICO que cambia: el examen, el juez y todo el control de calidad son idénticos en ambos.</div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #ff2ea6; padding: 8px 0; text-align: center">TEST-AGENT</div>
+        <div style="border: 1px solid #ff2ea6; background: rgba(255,46,166,.05); padding: 12px 16px; font-size: 13px">Llega con ojos frescos: verifica que el examen no fue tocado, lo corre, corre toda la batería (limpieza, formato, tests) y revisa que nadie se salió de su carril</div>
+        <div><span class="code">agents/test-agent.md</span><div style="font-size: 11px; color: #7787a0; margin-top: 4px">modo VEREDICTO — el mismo archivo, otro sombrero</div></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 20px; margin-top: 16px">
+        <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #5cff8f; background: rgba(92,255,143,.05); padding: 10px 18px; width: 330px">
+          <div class="disp" style="font-size: 13px; color: #5cff8f; letter-spacing: 1px">APRUEBA</div>
+          <div style="font-size: 12px; color: #7787a0">→ commit sellado; siguiente fase</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #ff3b5c; background: rgba(255,59,92,.05); padding: 10px 18px; width: 400px">
+          <div class="disp" style="font-size: 13px; color: #ff3b5c; letter-spacing: 1px">SUSPENDE</div>
+          <div style="font-size: 12px; color: #7787a0">→ el builder reintenta con la causa exacta (máx. 3 vueltas; luego se te escala)</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #ffe95c; padding: 8px 0; text-align: center">TÚ</div>
+        <div style="border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 12px 16px; font-size: 13px">Con todas las fases en verde: <b style="color:#fff; font-weight:400">review final</b> — ves el objetivo cumplido, el diff y las métricas contra el goal. Si apruebas, merge; si no, se replanifica sin perder la rama</div>
+        <div><div style="font-size: 11px; color: #7787a0">todo el ciclo vivió en una rama git propia — descartar también es barato</div></div>
+      </div>
+
+    </div>
+
+    <div style="border-top: 1px solid #1b2438; margin: 56px 0 0 0"></div>
+  </div>
+
+<div style="max-width: 1120px; margin: 0 auto; padding: 50px 40px 0 40px">
+    <div style="font-size: 12px; color: #7787a0; letter-spacing: 3px; text-transform: uppercase">// antes de construir nada</div>
+    <h1 class="disp" style="font-weight: 900; font-size: 40px; color: #eaf6ff; margin: 12px 0 6px 0; letter-spacing: 2px; text-transform: uppercase; text-shadow: 3px -2px 0 rgba(92,255,143,.5)">CÓMO NACE EL GOAL</h1>
+    <div class="disp" style="font-weight: 500; color: #5cff8f; letter-spacing: 4px; font-size: 14px; text-transform: uppercase">de una idea difusa a un objetivo que se puede fallar</div>
+
+    <div style="margin-top: 22px; border: 1px solid #5cff8f; background: rgba(92,255,143,.04); padding: 16px 22px; position: relative">
+      <div class="disp" style="position: absolute; top: -9px; left: 14px; background: #05070d; color: #5cff8f; font-size: 10px; letter-spacing: 3px; padding: 0 8px">◢ POR QUÉ EXISTE</div>
+      <p style="margin: 0; font-size: 14px">"Quiero mejorar X" no dirige nada. El módulo <span class="code">/goal</span> convierte esa idea difusa en
+      <b style="color:#fff; font-weight:400">un objetivo investigado y medible</b> ANTES de planificar: se investiga una vez, y todo el ciclo hereda ese norte.</p>
+    </div>
+
+    <div style="margin-top: 40px; background: #020409; border: 1px solid #1b2438; padding: 30px 34px">
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 10px; letter-spacing: 2px; color: #7787a0; text-align: right">QUIÉN</div>
+        <div class="disp" style="font-size: 10px; letter-spacing: 2px; color: #7787a0">QUÉ PASA</div>
+        <div class="disp" style="font-size: 10px; letter-spacing: 2px; color: #7787a0">QUÉ CÓDIGO ACTÚA</div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center; margin-top: 14px">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #ffe95c; padding: 8px 0; text-align: center">TÚ</div>
+        <div style="border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 12px 16px; font-size: 13px">Traes la idea, como te salga: <span style="color:#ffe95c">"/goal quiero lograr X pero no sé bien cómo"</span></div>
+        <div><span class="code">skills/goal/SKILL.md</span><div style="font-size: 11px; color: #7787a0; margin-top: 4px">define todo el protocolo de este flujo</div></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #00f0ff; padding: 8px 0; text-align: center">ORCHESTRATOR</div>
+        <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.06); padding: 12px 16px; font-size: 13px">Despacha <b style="color:#fff; font-weight:400">dos researchers a la vez</b>, cada uno con un ángulo distinto — y no se ven entre sí, para que no se contagien la opinión</div>
+        <div><span class="code">la sesión principal</span><div style="font-size: 11px; color: #7787a0; margin-top: 4px">orquesta y enruta; no investiga él</div></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: stretch">
+        <div style="display: flex; align-items: center"><div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #ff2ea6; padding: 8px 0; text-align: center; width: 100%">RESEARCHERS</div></div>
+        <div style="border: 1px solid #ff2ea6; background: rgba(255,46,166,.05); padding: 14px 16px">
+          <div style="display: flex; gap: 14px">
+            <div style="border: 1px dashed #ff2ea6; padding: 10px 14px; flex: 1; font-size: 12px"><span class="disp" style="color: #ff2ea6; font-size: 11px; letter-spacing: 1px">RESEARCHER A</span><div style="color: #7787a0; margin-top: 4px">ángulo 1 — lee el repo y busca en la web</div></div>
+            <div style="border: 1px dashed #ff2ea6; padding: 10px 14px; flex: 1; font-size: 12px"><span class="disp" style="color: #ff2ea6; font-size: 11px; letter-spacing: 1px">RESEARCHER B</span><div style="color: #7787a0; margin-top: 4px">ángulo 2 — mismo trabajo, otra perspectiva</div></div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px; border-top: 1px dashed #1b2438; padding-top: 12px">
+            <svg width="30" height="20" viewBox="0 0 30 20"><line x1="15" y1="2" x2="15" y2="10" stroke="#7787a0" stroke-width="2"></line><path d="M9 9 L15 18 L21 9 Z" fill="#7787a0"></path></svg>
+            <div style="font-size: 12px; color: #c9d6e8">Cada researcher puede llamar a un <b style="color:#5cff8f; font-weight:400">VERIFIER</b>: un agente aparte que comprueba que las fuentes y afirmaciones sean reales — <span style="color:#7787a0">nada de referencias inventadas</span></div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; justify-content: center; gap: 6px">
+          <span class="code">agents/researcher.md</span>
+          <span class="code">agents/verifier.md</span>
+          <div style="font-size: 11px; color: #7787a0">el researcher tiene permiso de despachar SOLO al verifier</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #00f0ff; padding: 8px 0; text-align: center">ORCHESTRATOR</div>
+        <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.06); padding: 12px 16px; font-size: 13px"><b style="color:#fff; font-weight:400">Concilia</b> los hallazgos de ambos: donde coinciden hay confianza, donde chocan hay una decisión que tomar — y la toma él, con el contexto completo del proyecto</div>
+        <div><span class="code">la sesión principal</span><div style="font-size: 11px; color: #7787a0; margin-top: 4px">conciliar es SU trabajo, no se delega</div></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #5cff8f; padding: 8px 0; text-align: center">EL DISCO</div>
+        <div style="border: 1px solid #5cff8f; background: rgba(92,255,143,.06); padding: 12px 16px; font-size: 13px">Se escribe el goal: <b style="color:#fff; font-weight:400">un resultado que se puede fallar</b> ("el visor abre un archivo .LAS y pinta 3 curvas en menos de 2s") con su "sabremos que funcionó cuando…". Si el objetivo no tiene número posible, se congela una <b style="color:#5cff8f; font-weight:400">rúbrica</b>: criterios fijos ANTES de construir, para que nadie mueva la portería después</div>
+        <div><span class="code">adw/goal.md</span><div style="font-size: 11px; color: #7787a0; margin-top: 4px">el ancla estable del proyecto — el plan cambia mil veces; esto no</div></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #ffe95c; padding: 8px 0; text-align: center">TÚ</div>
+        <div style="border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 12px 16px; font-size: 13px"><b style="color:#fff; font-weight:400">Revisas y apruebas</b> el goal. Es tu control de calidad: si el objetivo está mal, todo lo que se construya encima estará bien hecho… para el objetivo equivocado</div>
+        <div><div style="font-size: 11px; color: #7787a0">tu visto bueno, en la conversación</div></div>
+      </div>
+
+      <div style="display: flex; justify-content: center; padding: 6px 0"><svg width="20" height="34" viewBox="0 0 20 34"><line x1="10" y1="2" x2="10" y2="24" stroke="#7787a0" stroke-width="2"></line><path d="M3 22 L10 32 L17 22 Z" fill="#7787a0"></path></svg></div>
+
+      <div style="display: grid; grid-template-columns: 150px 1fr 300px; gap: 0 22px; align-items: center">
+        <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #05070d; background: #00f0ff; padding: 8px 0; text-align: center">/ADW</div>
+        <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.06); padding: 12px 16px; font-size: 13px">Con el goal sellado arranca <span style="color:#00f0ff">/adw</span>: el planificador lo hereda y trocea las fases — <b style="color:#fff; font-weight:400">el objetivo nunca se re-redacta, se hereda</b></div>
+        <div><span class="code">skills/adw/SKILL.md</span><div style="font-size: 11px; color: #7787a0; margin-top: 4px">→ ver pestañas 02 y 03: aquí empieza su proceso</div></div>
+      </div>
+
+    </div>
+
+    <div style="margin-top: 34px; border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 16px 22px; position: relative">
+      <div class="disp" style="position: absolute; top: -9px; left: 14px; background: #05070d; color: #ffe95c; font-size: 10px; letter-spacing: 3px; padding: 0 8px">◢ LA CLAVE</div>
+      <p style="margin: 0; font-size: 14px">Dos researchers que no se ven + un verifier de fuentes + la conciliación en manos del orchestrator, que tiene el contexto completo
+      = <b style="color:#ffe95c; font-weight:400">un objetivo en el que se puede confiar</b>. Se paga una vez por proyecto, y evita el error más caro de todos: construir rápido hacia el lugar equivocado.</p>
+    </div>
+  </div>
+
+    <div style="border-top: 1px solid #1b2438; margin: 56px 0 0 0"></div>
+  
+<div style="max-width: 1200px; margin: 0 auto; padding: 50px 40px 0 40px">
+    <div style="font-size: 12px; color: #7787a0; letter-spacing: 3px; text-transform: uppercase">// debajo del capó</div>
+    <h1 class="disp" style="font-weight: 900; font-size: 40px; color: #eaf6ff; margin: 12px 0 6px 0; letter-spacing: 2px; text-transform: uppercase; text-shadow: 3px -2px 0 rgba(0,240,255,.5)">EL CÓDIGO DE CADA SISTEMA</h1>
+    <div class="disp" style="font-weight: 500; color: #00f0ff; letter-spacing: 4px; font-size: 14px; text-transform: uppercase">todo vive en una carpeta .claude/ que se copia al proyecto</div>
+
+    <p style="margin-top: 20px; max-width: 860px; font-size: 14px">No hay programas externos ni servidores: cada método es <b style="color:#fff; font-weight:400">una carpeta <span class="code">.claude/</span></b> con
+    cuatro tipos de pieza — <span style="color:#00f0ff">skills</span> (protocolos que sigues con /comandos), <span style="color:#ff2ea6">agentes</span> (los roles del equipo),
+    <span style="color:#ffe95c">hooks</span> (vigilantes automáticos) y <span style="color:#5cff8f">scripts</span> (mecánica pura en bash/python). El 03 nació del 02: comparten casi todo.</p>
+
+    <div style="margin-top: 34px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px">
+
+      <div style="background: linear-gradient(180deg,#0b101c,#0e1524); border: 1px solid #1b2438; border-top: 3px solid #00f0ff; padding: 20px">
+        <div class="disp" style="font-size: 14px; letter-spacing: 2px; color: #00f0ff; text-transform: uppercase">01 · Clásico</div>
+        <div style="font-size: 11px; color: #7787a0; margin-bottom: 12px">carpeta <span class="code">clasico/.claude</span></div>
+        <div class="row"><span class="code">skills/setup</span><span class="rol">instala la base en un proyecto nuevo</span></div>
+        <div class="row"><span class="code">skills/blueprint</span><span class="rol">escribe el ancla del proyecto</span></div>
+        <div class="row"><span class="code">skills/checkpoint</span><span class="rol">tu único ritual: guarda todo</span></div>
+        <div class="row"><span class="code">skills/investigate</span><span class="rol">diagnóstico antes de abrir un ciclo</span></div>
+        <div class="row"><span class="code">agents/implementer</span><span class="rol">escribe código con las reglas cargadas</span></div>
+        <div class="row"><span class="code">agents/code-reviewer</span><span class="rol">revisa el diff con ojos frescos</span></div>
+        <div class="row" style="border-bottom: none"><span class="code">scripts/promptloop.sh</span><span class="rol">ejecuta el piso sin ti delante</span></div>
+      </div>
+
+      <div style="background: linear-gradient(180deg,#0b101c,#0e1524); border: 1px solid #1b2438; border-top: 3px solid #ff2ea6; padding: 20px">
+        <div class="disp" style="font-size: 14px; letter-spacing: 2px; color: #ff2ea6; text-transform: uppercase">02 · No-loop</div>
+        <div style="font-size: 11px; color: #7787a0; margin-bottom: 12px">carpeta <span class="code">noloop/.claude</span></div>
+        <div class="row"><span class="code">skills/adw</span><span class="rol">el protocolo del orchestrator</span></div>
+        <div class="row"><span class="code">skills/goal</span><span class="rol">→ ver flujograma de al lado</span></div>
+        <div class="row"><span class="code">skills/opinion</span><span class="rol">debate de perspectivas para decidir</span></div>
+        <div class="row"><span class="code">agents/planner</span><span class="rol">trocea el goal en fases</span></div>
+        <div class="row"><span class="code">agents/test-agent</span><span class="rol">gate Y verdict (2 modos)</span></div>
+        <div class="row"><span class="code">agents/builder</span><span class="rol">el builder (Claude programa)</span></div>
+        <div class="row"><span class="code">agents/researcher + verifier</span><span class="rol">investigan y verifican el goal</span></div>
+        <div class="row"><span class="code">hooks/adw-stop-gate.sh</span><span class="rol">la puerta que no abre en rojo</span></div>
+        <div class="row" style="border-bottom: none"><span class="code">hooks/adw-protect-gates.sh</span><span class="rol">el candado del examen</span></div>
+      </div>
+
+      <div style="background: linear-gradient(180deg,#0b101c,#0e1524); border: 1px solid #1b2438; border-top: 3px solid #ffe95c; padding: 20px">
+        <div class="disp" style="font-size: 14px; letter-spacing: 2px; color: #ffe95c; text-transform: uppercase">03 · Híbrido</div>
+        <div style="font-size: 11px; color: #7787a0; margin-bottom: 12px">carpeta <span class="code">adw-hybrid/.claude</span> — hereda casi todo del 02</div>
+        <div class="row"><span class="code">scripts/dispatch-builder.sh</span><span class="rol">prepara el contrato y llama al motor</span></div>
+        <div class="row"><span class="code">scripts/run-builder.sh</span><span class="rol">la escalera: GPU → nube → parar</span></div>
+        <div class="row"><span class="code">scripts/wave-manager.py</span><span class="rol">las olas: fases en paralelo con candados</span></div>
+        <div class="row"><span class="code">agents/builder-claude</span><span class="rol">último recurso — solo con tu permiso</span></div>
+        <div class="row"><span class="code">skills/adw/AGENTS.md</span><span class="rol">las reglas que lee el motor externo</span></div>
+        <div class="row"><span class="code">scripts/run-e2e.sh</span><span class="rol">prueba todo el sistema sin gastar nada</span></div>
+        <div class="row" style="border-bottom: none"><span class="code">scripts/run-wave-e2e.sh</span><span class="rol">prueba las olas, también gratis</span></div>
+      </div>
+    </div>
+
+    <div style="margin-top: 22px; border: 1px solid #5cff8f; background: rgba(92,255,143,.04); padding: 18px 22px; position: relative">
+      <div class="disp" style="position: absolute; top: -9px; left: 14px; background: #05070d; color: #5cff8f; font-size: 10px; letter-spacing: 3px; padding: 0 8px">◢ LO COMPARTIDO (02 ↔ 03)</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 12px">
+        <span class="code">skills/goal</span><span class="code">skills/opinion</span><span class="code">agents/planner</span><span class="code">agents/test-agent</span><span class="code">agents/researcher</span><span class="code">agents/verifier</span><span class="code">agents/opinion + fusion</span><span class="code">hooks/ (los 8)</span><span class="code">rules/ (las 7)</span>
+        <span style="color: #7787a0">— el 03 solo cambia QUIÉN escribe el código; todo el control de calidad es el mismo.</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 30px; background: #020409; border: 1px solid #1b2438; padding: 24px 28px">
+      <div class="disp" style="font-size: 12px; letter-spacing: 2px; color: #00f0ff; margin-bottom: 14px">CÓMO SE USA EN UN PROYECTO NUEVO</div>
+      <div style="display: flex; align-items: center; justify-content: center">
+        <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.06); padding: 12px 18px; text-align: center; width: 240px; font-size: 12px">elige método y copia su <span class="code">.claude/</span> a tu carpeta</div>
+        <svg width="50" height="20" viewBox="0 0 50 20" style="flex-shrink:0"><line x1="4" y1="10" x2="38" y2="10" stroke="#7787a0" stroke-width="2"></line><path d="M36 3 L46 10 L36 17 Z" fill="#7787a0"></path></svg>
+        <div style="border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 12px 18px; text-align: center; width: 240px; font-size: 12px">abre Claude Code AHÍ dentro (las piezas cargan de la raíz)</div>
+        <svg width="50" height="20" viewBox="0 0 50 20" style="flex-shrink:0"><line x1="4" y1="10" x2="38" y2="10" stroke="#7787a0" stroke-width="2"></line><path d="M36 3 L46 10 L36 17 Z" fill="#7787a0"></path></svg>
+        <div style="border: 1px solid #5cff8f; background: rgba(92,255,143,.06); padding: 12px 18px; text-align: center; width: 240px; font-size: 12px">teclea <span class="code">/goal</span> o <span class="code">/adw</span> — y la fábrica arranca</div>
+      </div>
+    </div>
+  </div>
+  
+  
+
+
+<footer>
+  <span><b>claude-project-base</b> // guía de operación — es · 2026</span>
+  <span>repo: <a href="https://github.com/OilCoder/claude-project-base">github.com/OilCoder/claude-project-base</a></span>
+  <span>doctrina: <b>el examen manda · nada se termina sin prueba</b></span>
+</footer>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No-loop // claude-project-base</title>
+<meta name="description" content="La fábrica con inspector: el examen se escribe antes que el producto.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{color-scheme:dark}
+  *{box-sizing:border-box}
+  body { margin: 0; background: #05070d; color: #c9d6e8; font-family: 'Share Tech Mono', monospace; font-size: 16px; line-height: 1.6;
+    background-image: linear-gradient(rgba(0,240,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,.035) 1px, transparent 1px);
+    background-size: 44px 44px; }
+  a { color: #00f0ff; text-decoration: none; } a:hover { text-shadow: 0 0 8px #00f0ff; }
+  ::selection{background:#ff2ea6;color:#000}
+  .disp { font-family: 'Orbitron', sans-serif; }
+  .code { color: #00f0ff; background: rgba(0,240,255,.07); border: 1px solid rgba(0,240,255,.18); padding: 2px 8px; font-size: 11px; white-space: nowrap; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #1b2438; font-size: 12px; }
+  .rol { color: #7787a0; font-size: 11px; text-align: right; }
+  nav.tabs { position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 14px 40px; border-bottom: 1px solid #1b2438; background: rgba(5,7,13,.95); backdrop-filter: blur(6px); }
+  nav.tabs .brand { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; color: #00f0ff; margin-right: 28px; }
+  nav.tabs .brand i { color: #ff2ea6; font-style: normal; }
+  nav.tabs a { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #7787a0; padding: 8px 18px; }
+  nav.tabs a:hover { color: #00f0ff; text-shadow: none; }
+  nav.tabs a.on { color: #05070d; }
+  footer { border-top: 1px solid #1b2438; padding: 30px 40px 50px; margin-top: 60px; font-size: 12px; color: #7787a0; display: flex; flex-wrap: wrap; gap: 8px 30px; justify-content: space-between; }
+  footer b { color: #00f0ff; font-weight: 400; }
+  @media (max-width: 860px){
+    div[style*="grid-template-columns"]{display:block !important}
+    div[style*="grid-template-columns"] > div{margin-bottom:12px}
+    div[style*="justify-content: center"][style*="display: flex"]{flex-wrap:wrap; gap:10px}
+    nav.tabs{padding:10px 16px}
+  }
+</style>
+</head>
+<body>
+<nav class="tabs">
+  <span class="brand">CLAUDE<i>::</i>PROJECT<i>::</i>BASE</span>
+  <a href="index.html">PORTADA</a>
+  <a href="clasico.html">01 CLÁSICO</a>
+  <a class="on" href="noloop.html" style="background:#ff2ea6">02 NO-LOOP</a>
+  <a href="hibrido.html">03 HÍBRIDO</a>
+  <a href="herramientas.html">HERRAMIENTAS</a>
+</nav>
+
+<div style="max-width: 1080px; margin: 0 auto; padding: 56px 40px 0 40px">
+    <div style="font-size: 12px; color: #7787a0; letter-spacing: 3px; text-transform: uppercase">// método 02 de 3</div>
+    <h1 class="disp" style="font-weight: 900; font-size: 44px; color: #eaf6ff; margin: 12px 0 6px 0; letter-spacing: 2px; text-transform: uppercase; text-shadow: 3px -2px 0 rgba(255,46,166,.5)">NO-LOOP</h1>
+    <div class="disp" style="font-weight: 500; color: #ff2ea6; letter-spacing: 4px; font-size: 14px; text-transform: uppercase">la fábrica con inspector: el examen se escribe antes que el producto</div>
+
+    <div style="margin-top: 24px; border: 1px solid #ff2ea6; background: rgba(255,46,166,.04); padding: 18px 22px; position: relative">
+      <div class="disp" style="position: absolute; top: -9px; left: 14px; background: #05070d; color: #ff2ea6; font-size: 10px; letter-spacing: 3px; padding: 0 8px">◢ EN UNA FRASE</div>
+      <p style="margin: 0; font-size: 15px">Dentro de Claude vive un <b style="color:#fff; font-weight:400">equipo de agentes con roles separados</b>:
+      el que reparte no programa, el que programa no se corrige a sí mismo, y el que juzga llega con ojos frescos.
+      Tú das la tarea, apruebas el plan, y la fábrica corre sola.</p>
+    </div>
+
+    <div style="margin-top: 44px">
+      <div style="font-size: 12px; letter-spacing: 4px; color: #ff2ea6; text-transform: uppercase">// el proceso</div>
+      <h2 class="disp" style="font-weight: 700; font-size: 22px; color: #eaf6ff; margin: 8px 0 16px 0; letter-spacing: 1px; text-transform: uppercase"><span style="color:#00f0ff">#</span> Una fase, de principio a fin</h2>
+
+      <div style="background: #020409; border: 1px solid #1b2438; padding: 30px 28px">
+        <div style="display: flex; justify-content: center; margin-bottom: 24px">
+          <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.08); padding: 10px 26px; text-align: center">
+            <div class="disp" style="font-size: 12px; letter-spacing: 2px; color: #00f0ff">ORCHESTRATOR</div>
+            <div style="font-size: 11px; color: #7787a0; margin-top: 3px">reparte el trabajo y decide — jamás toca el código</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: stretch; justify-content: center">
+          <div style="border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 14px 16px; text-align: center; width: 200px">
+            <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #ffe95c">1 · TEST-AGENT · GATE</div>
+            <div style="font-size: 11px; color: #7787a0; margin-top: 4px">escribe el EXAMEN de la fase antes de que exista el código — y comprueba que, en vacío, suspende</div>
+          </div>
+          <svg width="52" height="90" viewBox="0 0 52 90" style="flex-shrink:0"><line x1="4" y1="45" x2="40" y2="45" stroke="#7787a0" stroke-width="2"></line><path d="M38 38 L48 45 L38 52 Z" fill="#7787a0"></path></svg>
+          <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.06); padding: 14px 16px; text-align: center; width: 200px">
+            <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #00f0ff">2 · BUILDER</div>
+            <div style="font-size: 11px; color: #7787a0; margin-top: 4px">programa SOLO su fase, contra el examen — puede correrlo mil veces, editarlo jamás (un candado se lo impide)</div>
+          </div>
+          <svg width="52" height="90" viewBox="0 0 52 90" style="flex-shrink:0"><line x1="4" y1="45" x2="40" y2="45" stroke="#7787a0" stroke-width="2"></line><path d="M38 38 L48 45 L38 52 Z" fill="#7787a0"></path></svg>
+          <div style="border: 1px solid #ff2ea6; background: rgba(255,46,166,.06); padding: 14px 16px; text-align: center; width: 200px">
+            <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #ff2ea6">3 · TEST-AGENT · VERDICT</div>
+            <div style="font-size: 11px; color: #7787a0; margin-top: 4px">llega sin haber visto nada, corre el examen + toda la batería (estilo, formato, tests) y dicta veredicto</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 24px">
+          <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #5cff8f; background: rgba(92,255,143,.05); padding: 10px 18px; width: 330px">
+            <div class="disp" style="font-size: 13px; color: #5cff8f; letter-spacing: 1px">APRUEBA</div>
+            <div style="font-size: 12px; color: #7787a0">→ commit sellado, y a la siguiente fase</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; border: 1px solid #ff3b5c; background: rgba(255,59,92,.05); padding: 10px 18px; width: 380px">
+            <div class="disp" style="font-size: 13px; color: #ff3b5c; letter-spacing: 1px">SUSPENDE</div>
+            <div style="font-size: 12px; color: #7787a0">→ el builder recibe la causa exacta y reintenta (máx. 3 vueltas)</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #7787a0; margin-top: 10px">¿Por qué "el examen primero"? Porque un examen escrito después de estudiar siempre aprueba. Escrito antes, define qué significa "terminado" sin trampa posible.</div>
+    </div>
+
+    <div style="margin-top: 44px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+      <div style="background: linear-gradient(180deg,#0b101c,#0e1524); border: 1px solid #1b2438; border-top: 3px solid #ffe95c; padding: 20px">
+        <div class="disp" style="font-size: 13px; letter-spacing: 2px; color: #ffe95c; text-transform: uppercase; margin-bottom: 8px">Nadie se aprueba a sí mismo</div>
+        <p style="font-size: 13px; margin: 0">Quien escribe el código no escribe su examen ni dicta su veredicto. La separación de roles elimina el sesgo del autor — como en una obra de verdad.</p>
+      </div>
+      <div style="background: linear-gradient(180deg,#0b101c,#0e1524); border: 1px solid #1b2438; border-top: 3px solid #00f0ff; padding: 20px">
+        <div class="disp" style="font-size: 13px; letter-spacing: 2px; color: #00f0ff; text-transform: uppercase; margin-bottom: 8px">La puerta que no abre en rojo</div>
+        <p style="font-size: 13px; margin: 0">Un vigilante automático corre limpieza, formato y tests antes de dejar terminar cualquier turno. Si algo está en rojo, no se puede "dejar para luego".</p>
+      </div>
+      <div style="background: linear-gradient(180deg,#0b101c,#0e1524); border: 1px solid #1b2438; border-top: 3px solid #5cff8f; padding: 20px">
+        <div class="disp" style="font-size: 13px; letter-spacing: 2px; color: #5cff8f; text-transform: uppercase; margin-bottom: 8px">Memoria fuera de la cabeza</div>
+        <p style="font-size: 13px; margin: 0">El orchestrator apunta el estado en disco, no en su memoria de conversación. Puede olvidar todo (pasa, por diseño) y retomar exactamente donde iba.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px; border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 18px 22px; position: relative">
+      <div class="disp" style="position: absolute; top: -9px; left: 14px; background: #05070d; color: #ffe95c; font-size: 10px; letter-spacing: 3px; padding: 0 8px">◢ ÚSALO CUANDO</div>
+      <p style="margin: 0; font-size: 14px">La tarea es grande, se puede partir en fases y quieres que corra sola con garantías — incluso sin ti delante.
+      Todo vive <b style="color:#ffe95c; font-weight:400">dentro de Claude Code, sin programas externos</b>: solo hooks, skills y agentes.</p>
+    </div>
+  </div>
+  
+
+
+<footer>
+  <span><b>claude-project-base</b> // guía de operación — es · 2026</span>
+  <span>repo: <a href="https://github.com/OilCoder/claude-project-base">github.com/OilCoder/claude-project-base</a></span>
+  <span>doctrina: <b>el examen manda · nada se termina sin prueba</b></span>
+</footer>
+</body>
+</html>

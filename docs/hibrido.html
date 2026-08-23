@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Híbrido // claude-project-base</title>
+<meta name="description" content="La escalera de motores: GPU local, nube, y Claude solo con permiso.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{color-scheme:dark}
+  *{box-sizing:border-box}
+  body { margin: 0; background: #05070d; color: #c9d6e8; font-family: 'Share Tech Mono', monospace; font-size: 16px; line-height: 1.6;
+    background-image: linear-gradient(rgba(0,240,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,.035) 1px, transparent 1px);
+    background-size: 44px 44px; }
+  a { color: #00f0ff; text-decoration: none; } a:hover { text-shadow: 0 0 8px #00f0ff; }
+  ::selection{background:#ff2ea6;color:#000}
+  .disp { font-family: 'Orbitron', sans-serif; }
+  .code { color: #00f0ff; background: rgba(0,240,255,.07); border: 1px solid rgba(0,240,255,.18); padding: 2px 8px; font-size: 11px; white-space: nowrap; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px dashed #1b2438; font-size: 12px; }
+  .rol { color: #7787a0; font-size: 11px; text-align: right; }
+  nav.tabs { position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 14px 40px; border-bottom: 1px solid #1b2438; background: rgba(5,7,13,.95); backdrop-filter: blur(6px); }
+  nav.tabs .brand { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; color: #00f0ff; margin-right: 28px; }
+  nav.tabs .brand i { color: #ff2ea6; font-style: normal; }
+  nav.tabs a { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 2px; color: #7787a0; padding: 8px 18px; }
+  nav.tabs a:hover { color: #00f0ff; text-shadow: none; }
+  nav.tabs a.on { color: #05070d; }
+  footer { border-top: 1px solid #1b2438; padding: 30px 40px 50px; margin-top: 60px; font-size: 12px; color: #7787a0; display: flex; flex-wrap: wrap; gap: 8px 30px; justify-content: space-between; }
+  footer b { color: #00f0ff; font-weight: 400; }
+  @media (max-width: 860px){
+    div[style*="grid-template-columns"]{display:block !important}
+    div[style*="grid-template-columns"] > div{margin-bottom:12px}
+    div[style*="justify-content: center"][style*="display: flex"]{flex-wrap:wrap; gap:10px}
+    nav.tabs{padding:10px 16px}
+  }
+</style>
+</head>
+<body>
+<nav class="tabs">
+  <span class="brand">CLAUDE<i>::</i>PROJECT<i>::</i>BASE</span>
+  <a href="index.html">PORTADA</a>
+  <a href="clasico.html">01 CLÁSICO</a>
+  <a href="noloop.html">02 NO-LOOP</a>
+  <a class="on" href="hibrido.html" style="background:#ffe95c">03 HÍBRIDO</a>
+  <a href="herramientas.html">HERRAMIENTAS</a>
+</nav>
+
+<div style="max-width: 1080px; margin: 0 auto; padding: 56px 40px 0 40px">
+    <div style="font-size: 12px; color: #7787a0; letter-spacing: 3px; text-transform: uppercase">// método 03 de 3</div>
+    <h1 class="disp" style="font-weight: 900; font-size: 44px; color: #eaf6ff; margin: 12px 0 6px 0; letter-spacing: 2px; text-transform: uppercase; text-shadow: 3px -2px 0 rgba(255,233,92,.5)">HÍBRIDO</h1>
+    <div class="disp" style="font-weight: 500; color: #ffe95c; letter-spacing: 4px; font-size: 14px; text-transform: uppercase">la misma fábrica — pero el código lo escribe el motor más barato que apruebe</div>
+
+    <div style="margin-top: 24px; border: 1px solid #ffe95c; background: rgba(255,233,92,.04); padding: 18px 22px; position: relative">
+      <div class="disp" style="position: absolute; top: -9px; left: 14px; background: #05070d; color: #ffe95c; font-size: 10px; letter-spacing: 3px; padding: 0 8px">◢ EN UNA FRASE</div>
+      <p style="margin: 0; font-size: 15px">Es no-loop con un cambio de fondo: <b style="color:#fff; font-weight:400">Claude dirige y verifica, pero casi nunca programa</b>.
+      El código lo intenta primero un modelo corriendo gratis en tu propia tarjeta gráfica; si no aprueba el examen, sube un escalón.
+      El examen decide — nunca se paga un motor caro para lo que el barato ya resolvió.</p>
+    </div>
+
+    <div style="margin-top: 44px">
+      <div style="font-size: 12px; letter-spacing: 4px; color: #ff2ea6; text-transform: uppercase">// el proceso</div>
+      <h2 class="disp" style="font-weight: 700; font-size: 22px; color: #eaf6ff; margin: 8px 0 16px 0; letter-spacing: 1px; text-transform: uppercase"><span style="color:#00f0ff">#</span> La escalera de motores</h2>
+
+      <div style="background: #020409; border: 1px solid #1b2438; padding: 30px 28px">
+        <div style="display: flex; justify-content: center; margin-bottom: 22px">
+          <div style="border: 1px solid #ff2ea6; background: rgba(255,46,166,.07); padding: 10px 26px; text-align: center">
+            <div class="disp" style="font-size: 12px; letter-spacing: 2px; color: #ff2ea6">EXAMEN SELLADO</div>
+            <div style="font-size: 11px; color: #7787a0; margin-top: 3px">se escribe antes, se guarda bajo llave en git — es el mismo para todos los motores</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: stretch; justify-content: center">
+          <div style="border: 1px solid #5cff8f; background: rgba(92,255,143,.06); padding: 14px 16px; text-align: center; width: 224px">
+            <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #5cff8f">ESCALÓN 1 · TU GPU</div>
+            <div style="font-size: 11px; color: #7787a0; margin-top: 4px">un modelo abierto corre en tu propia máquina — cada línea cuesta <span style="color:#5cff8f">$0</span>. Tiene un intento + una corrección</div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 90px; flex-shrink: 0">
+            <div style="font-size: 10px; color: #ff3b5c; letter-spacing: 1px">SI SUSPENDE</div>
+            <svg width="52" height="20" viewBox="0 0 52 20"><line x1="4" y1="10" x2="40" y2="10" stroke="#7787a0" stroke-width="2"></line><path d="M38 3 L48 10 L38 17 Z" fill="#7787a0"></path></svg>
+          </div>
+          <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.06); padding: 14px 16px; text-align: center; width: 224px">
+            <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #00f0ff">ESCALÓN 2 · LA NUBE</div>
+            <div style="font-size: 11px; color: #7787a0; margin-top: 4px">Codex (tu suscripción de OpenAI) lo intenta desde el mismo punto de partida limpio</div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 90px; flex-shrink: 0">
+            <div style="font-size: 10px; color: #ff3b5c; letter-spacing: 1px">SI SUSPENDE</div>
+            <svg width="52" height="20" viewBox="0 0 52 20"><line x1="4" y1="10" x2="40" y2="10" stroke="#7787a0" stroke-width="2"></line><path d="M38 3 L48 10 L38 17 Z" fill="#7787a0"></path></svg>
+          </div>
+          <div style="border: 1px solid #ff3b5c; background: rgba(255,59,92,.06); padding: 14px 16px; text-align: center; width: 224px">
+            <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #ff3b5c">ESCALÓN 3 · SE DETIENE</div>
+            <div style="font-size: 11px; color: #7787a0; margin-top: 4px">el sistema PARA y te muestra la evidencia. Claude solo programa si tú lo autorizas para esa fase</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; margin-top: 22px">
+          <div style="display: flex; align-items: center; gap: 12px; border: 1px solid #5cff8f; padding: 10px 22px">
+            <svg width="20" height="20" viewBox="0 0 20 20"><path d="M3 11 L8 16 L17 4" fill="none" stroke="#5cff8f" stroke-width="3"></path></svg>
+            <div style="font-size: 13px; color: #5cff8f">En cuanto un escalón aprueba el examen, se acabó: el juez verifica y la fase se sella. Nadie más cobra.</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #7787a0; margin-top: 10px">Regla dura pedida por el operador: sin atajos silenciosos. Si el motor barato está caído, el sistema para y se arregla — no se salta a uno caro a escondidas.</div>
+    </div>
+
+    <div style="margin-top: 44px">
+      <div style="font-size: 12px; letter-spacing: 4px; color: #ff2ea6; text-transform: uppercase">// además</div>
+      <h2 class="disp" style="font-weight: 700; font-size: 22px; color: #eaf6ff; margin: 8px 0 16px 0; letter-spacing: 1px; text-transform: uppercase"><span style="color:#00f0ff">#</span> Olas: dos fases a la vez, sin choques</h2>
+      <div style="background: #020409; border: 1px solid #1b2438; padding: 26px 28px; display: flex; align-items: center; justify-content: center; gap: 26px">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; gap: 12px">
+            <div style="border: 1px solid #00f0ff; background: rgba(0,240,255,.06); padding: 8px 16px; font-size: 12px; color: #00f0ff; width: 210px; text-align: center">FASE A · sus propios archivos</div>
+            <svg width="44" height="16" viewBox="0 0 44 16"><line x1="2" y1="8" x2="32" y2="8" stroke="#7787a0" stroke-width="2"></line><path d="M30 2 L40 8 L30 14 Z" fill="#7787a0"></path></svg>
+            <div style="font-size: 11px; color: #7787a0">carril propio</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px">
+            <div style="border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 8px 16px; font-size: 12px; color: #ffe95c; width: 210px; text-align: center">FASE B · archivos distintos</div>
+            <svg width="44" height="16" viewBox="0 0 44 16"><line x1="2" y1="8" x2="32" y2="8" stroke="#7787a0" stroke-width="2"></line><path d="M30 2 L40 8 L30 14 Z" fill="#7787a0"></path></svg>
+            <div style="font-size: 11px; color: #7787a0">carril propio</div>
+          </div>
+        </div>
+        <svg width="56" height="60" viewBox="0 0 56 60"><path d="M4 12 C 28 12, 28 30, 44 30" fill="none" stroke="#7787a0" stroke-width="2"></path><path d="M4 48 C 28 48, 28 30, 44 30" fill="none" stroke="#7787a0" stroke-width="2"></path><path d="M42 23 L52 30 L42 37 Z" fill="#7787a0"></path></svg>
+        <div style="border: 1px solid #5cff8f; background: rgba(92,255,143,.06); padding: 12px 18px; text-align: center; width: 230px">
+          <div class="disp" style="font-size: 12px; letter-spacing: 1px; color: #5cff8f">SE INTEGRAN DE UNA EN UNA</div>
+          <div style="font-size: 11px; color: #7787a0; margin-top: 4px">con su examen tras cada unión — la velocidad nunca compra riesgo</div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #7787a0; margin-top: 10px">Solo corren en paralelo fases que no comparten ningún archivo — lo verifica una máquina, no una promesa. La GPU atiende de a una; la nube, hasta dos.</div>
+    </div>
+
+    <div style="margin-top: 44px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+      <div style="background: linear-gradient(180deg,#0b101c,#0e1524); border: 1px solid #1b2438; border-top: 3px solid #5cff8f; padding: 20px">
+        <div class="disp" style="font-size: 13px; letter-spacing: 2px; color: #5cff8f; text-transform: uppercase; margin-bottom: 8px">Medido, no prometido</div>
+        <p style="font-size: 13px; margin: 0">En la prueba de campo, la GPU de casa construyó una fase completa ella sola — a la primera, con el examen en verde y costo <b style="color:#5cff8f; font-weight:400">$0</b> en el motor. El sistema entero corre con dos baterías de prueba reproducibles.</p>
+      </div>
+      <div style="background: linear-gradient(180deg,#0b101c,#0e1524); border: 1px solid #1b2438; border-top: 3px solid #ff2ea6; padding: 20px">
+        <div class="disp" style="font-size: 13px; letter-spacing: 2px; color: #ff2ea6; text-transform: uppercase; margin-bottom: 8px">Dos IAs, un puente escrito</div>
+        <p style="font-size: 13px; margin: 0">Este método lo construyeron dos asistentes (Claude y Codex) coordinándose por archivos: cada decisión, objeción y revisión quedó escrita en <span style="color:#00f0ff">adw-hybrid/bridge/</span>. Puedes leer la conversación completa.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px; border: 1px solid #ffe95c; background: rgba(255,233,92,.05); padding: 18px 22px; position: relative">
+      <div class="disp" style="position: absolute; top: -9px; left: 14px; background: #05070d; color: #ffe95c; font-size: 10px; letter-spacing: 3px; padding: 0 8px">◢ ÚSALO CUANDO</div>
+      <p style="margin: 0; font-size: 14px">Quieres producir mucho código gastando lo mínimo: pagas suscripciones y tienes una GPU en casa — <b style="color:#ffe95c; font-weight:400">cada motor debe ganarse su turno</b>. Claude queda donde más rinde: dirigir, conciliar y verificar.</p>
+    </div>
+  </div>
+  
+
+
+<footer>
+  <span><b>claude-project-base</b> // guía de operación — es · 2026</span>
+  <span>repo: <a href="https://github.com/OilCoder/claude-project-base">github.com/OilCoder/claude-project-base</a></span>
+  <span>doctrina: <b>el examen manda · nada se termina sin prueba</b></span>
+</footer>
+</body>
+</html>
