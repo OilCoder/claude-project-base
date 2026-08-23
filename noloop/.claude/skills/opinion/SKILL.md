@@ -1,13 +1,14 @@
 ---
 name: opinion
-description: Patrón fusion para decisiones - N opinadores Opus independientes en paralelo (ángulos distintos, sin verse) + un fusionador que contrasta en consenso/divergencias/descartado. Use when the user faces a technical or design decision and wants multiple perspectives ("/opinion <pregunta>", "dame perspectivas", "¿X o Y?", "no sé qué elegir").
+description: Patrón fusion para decisiones - N opinadores fable independientes en paralelo (ángulos distintos, sin verse) + un fusionador que contrasta en consenso/divergencias/descartado. Use when the user faces a technical or design decision and wants multiple perspectives ("/opinion <pregunta>", "dame perspectivas", "¿X o Y?", "no sé qué elegir").
 ---
 
 # Patrón fusion — protocolo del orquestador
 
 Un nodo de decisión: en vez de una respuesta de un agente, N perspectivas
 independientes contrastadas. Se usa para decisiones, no para rutina — cada
-invocación cuesta N+1 despliegues de Opus.
+invocación cuesta N+1 despliegues de fable (más Opus si se descarga en el
+fusionador, ver más abajo).
 
 ## Rails del orquestador
 
@@ -34,12 +35,32 @@ verdad** — ángulos que siempre coinciden no aportan contraste.
 Despacha N agentes **opinion** en un solo mensaje, cada uno con la pregunta
 y su ángulo.
 
+**Alternativa Codex (prioridad 3, la de menor impacto de las tres)**: si
+`/mcp` muestra `codex` conectado, uno de los N ángulos puede ser Codex en vez
+de un segundo agente `opinion` Claude — despacho directo tuyo a
+`mcp__codex__codex` con `sandbox: "read-only"` fijo, pasándole la pregunta y
+el ángulo con el mismo formato de salida de `agents/opinion.md`. **Sustituye,
+no suma**: dos opinadores Claude (`fable`) con ángulos distintos siguen
+siendo la misma familia de modelo pensando dos veces — cambiar uno por Codex
+da divergencia real al mismo costo de despachos, no divergencia extra a
+costo extra. Si Codex no está conectado, los N son Claude como siempre.
+
 ### 2b. Réplicas (opcional, si hay divergencia que lo amerite)
 
-Si las posiciones divergen en algo decisivo, corre rondas de réplica cruzada
-(modo réplica del opinador: a cada uno le pasas la posición del otro).
-**Máximo 3 rondas en total** (apertura + hasta 2 de réplica); corta antes si
-convergen o si la divergencia ya quedó bien caracterizada.
+Si las posiciones divergen en algo decisivo, autoriza réplica cruzada
+**directa**: reanuda a los opinadores (`SendMessage`) indicándoles que
+intercambien réplicas entre hermanos — cada uno recibe la posición del otro,
+debate directo, y te devuelve solo su POSICIÓN FINAL. Tú no cargas el correo:
+recibes las posiciones destiladas, no el intercambio. El techo viaja EN tu
+despacho, porque ya no eres el cartero que lo impone: **máximo 3 rondas en
+total** (apertura + hasta 2 de réplica); corta antes si convergen o si la
+divergencia ya quedó bien caracterizada.
+
+La apertura (paso 2) siempre es independiente — la réplica directa se
+autoriza solo después de tener las N posiciones, nunca en el despacho
+inicial. Fallback degradable: si la mensajería entre hermanos no está
+disponible, medias tú como antes (a cada uno le pasas la posición del otro),
+mismo techo.
 
 ### 3. Conciliación
 
@@ -63,8 +84,9 @@ Si el usuario quiere el resultado en disco, guárdalo donde él diga
 
 ## Uso dentro del módulo de investigación
 
-El researcher no puede despachar agentes (los subagentes no anidan). El flujo
-es vía orquestador, definido en `skills/goal/SKILL.md`: el researcher marca en
-su salida las decisiones que ameritan opinión múltiple, tú corres este patrón
-por cada una, y le devuelves las fusiones al researcher para que las incorpore
-a los Hallazgos del goal (con la fusión citada como fuente del contraste).
+Los hechos puntuales el researcher los verifica por su cuenta (despacho
+anidado al verifier — ver `agents/researcher.md`); lo que sigue viajando vía
+orquestador son las decisiones **estructurales**. El flujo, definido en
+`skills/goal/SKILL.md`: el researcher las marca en su salida, tú corres este
+patrón por cada una, y le devuelves las fusiones para que las incorpore a los
+Hallazgos del goal (con la fusión citada como fuente del contraste).

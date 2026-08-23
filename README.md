@@ -39,11 +39,34 @@ Copiar el `.claude/` del método al proyecto destino:
 ```bash
 cp -r clasico/.claude  /ruta/al/proyecto/.claude   # o
 cp -r noloop/.claude   /ruta/al/proyecto/.claude
+cp noloop/.mcp.json    /ruta/al/proyecto/.mcp.json  # opcional, ver abajo
 ```
 
 (Para no-loop: renombrar `settings.template.json` a `settings.json` en el destino y,
 opcionalmente, definir los gates en `adw-gates.conf`; sin él se autodetectan —
 Python → ruff/pytest, JS → eslint/prettier. Para el clásico: correr `/setup`.)
+
+### Opcional: Codex vía MCP (no-loop)
+
+`noloop/.mcp.json` registra `codex mcp-server` como herramienta MCP. Habilita
+una segunda familia de modelo (OpenAI Codex, autenticado con tu suscripción
+ChatGPT) en tres puntos de solo lectura del sistema: `verifier` y un
+`researcher` en `/goal`, y un ángulo de `/opinion` — nunca en `builder` ni
+`test-agent`, que necesitan el enforcement de hooks que solo ve tool-calls
+nativas de Claude. Detalle y prioridad de cada punto en `skills/goal/SKILL.md`
+y `skills/opinion/SKILL.md`.
+
+Setup (una sola vez, fuera del repo):
+
+```bash
+npm install -g @openai/codex
+codex   # "Sign in with ChatGPT" — usa tu plan Plus/Pro, sin API key
+```
+
+Primera vez en cada proyecto: Claude Code pide aprobación interactiva de
+`.mcp.json` (corré `claude` a mano una vez y aceptá el trust dialog, o queda
+en "Pending approval"). Es opcional y degradable: sin `codex` instalado o sin
+`.mcp.json` copiado, todo el sistema sigue funcionando 100% con Claude.
 
 También puedes abrir Claude directamente dentro de `clasico/` o `noloop/` para
 trabajar sobre el método mismo.

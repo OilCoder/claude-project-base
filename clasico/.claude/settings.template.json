@@ -56,28 +56,7 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(rm -rf *)",
-            "command": "printf 'BLOCKED: rm -rf is restricted. Delete specific files instead, or ask the user for explicit approval.' >&2; exit 2"
-          },
-          {
-            "type": "command",
-            "if": "Bash(git push --force *)",
-            "command": "printf 'BLOCKED: force-push requires explicit user approval.' >&2; exit 2"
-          },
-          {
-            "type": "command",
-            "if": "Bash(git push -f *)",
-            "command": "printf 'BLOCKED: force-push requires explicit user approval.' >&2; exit 2"
-          },
-          {
-            "type": "command",
-            "if": "Bash(git reset --hard *)",
-            "command": "printf 'BLOCKED: git reset --hard discards uncommitted work. Ask the user before proceeding.' >&2; exit 2"
-          },
-          {
-            "type": "command",
-            "if": "Bash(git commit --no-verify *)",
-            "command": "printf 'BLOCKED: --no-verify skips pre-commit hooks. Fix the underlying issue instead.' >&2; exit 2"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-dangerous-bash.sh\""
           }
         ]
       }

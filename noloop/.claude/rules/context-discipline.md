@@ -51,6 +51,15 @@ El auto-compact llegará solo; el snapshot de PreCompact y el ritual
 post-compact te recuperan. Un estado.md impecable convierte el auto-compact de
 amenaza en molestia.
 
+**Tope de ventana (control de costo)**: `settings.json` fija
+`CLAUDE_CODE_AUTO_COMPACT_WINDOW=200000` — el auto-compact dispara a ~200k
+aunque el modelo ofrezca 1M. Razón medida en campo: cada turno re-paga el
+contexto entero como cache read; una sesión autónoma que escaló a 419k de
+mediana (picos 738k) costó más que sus 100 subagentes juntos. Con el tope,
+el ciclo compact→estado.md→ritual corre más seguido y eso es lo barato:
+compactar cuesta un turno, el contexto gordo cuesta TODOS los turnos. No
+subas el tope para "evitar interrupciones" — sube la calidad de estado.md.
+
 ## Ritual post-compact
 
 Lo primero tras cualquier compactación (el resumen de compactación es la

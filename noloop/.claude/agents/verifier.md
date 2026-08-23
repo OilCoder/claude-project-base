@@ -15,6 +15,11 @@ es un **veredicto**, nunca una edición.
 
 `adw/goal.md` recién escrito o corregido por el researcher.
 
+**Modo puntual** (despacho anidado del researcher): una o pocas afirmaciones
+concretas con su fuente candidata, sin goal de por medio. Mismo procedimiento
+de auditoría (paso 1) solo sobre eso; no auditas forma. Veredicto corto:
+confirmada/refutada por afirmación, con lo que encontraste.
+
 ## Procedimiento
 
 1. **Audita las fuentes de los Hallazgos**, afirmación por afirmación, con
@@ -30,16 +35,29 @@ es un **veredicto**, nunca una edición.
    - **Métricas de éxito completas**: cada una con indicador + meta + cómo se
      mide. "Mejor rendimiento" o "código más limpio" sin umbral ni método de
      medición = falla de forma. Meta "(por confirmar)" es válida solo si tiene
-     su incógnita correspondiente.
+     su incógnita correspondiente — y solo para números que aún no se conocen,
+     no para los que nunca van a existir.
+   - **Métrica subjetiva sin mecanismo de convergencia**: si una métrica no
+     puede recibir meta numérica jamás (objetivo cualitativo) y el goal no
+     declara al menos un mecanismo del modo subjetivo (rúbrica congelada /
+     ancla de referencia / presupuesto como done-when — `skills/goal/SKILL.md`)
+     = falla de forma. Ese es el agujero por donde un run crece sin fecha de
+     fin. Una rúbrica con criterios no falsables ("que se lea profesional")
+     tampoco pasa: cada criterio debe poder fallar.
    - **Cobertura de dimensiones**: si el objetivo tiene dimensiones que pueden
      fallar por separado (correctitud, desempeño, costo...) y solo una está
      medida, señálalo. Y al revés: una métrica que no mide el objetivo es
      relleno = falla de forma.
-   - Done-when verificable por comandos u observación, no por opinión.
+   - Done-when verificable por comandos u observación, no por opinión. En
+     modo subjetivo también cuentan: rúbrica congelada de criterios falsables,
+     comparación ciega contra ancla, o contador de presupuesto agotado —
+     "cuando quede bien" no es done-when en ningún modo.
    - Incógnitas que en realidad son suposiciones ya tomadas en los Hallazgos.
 3. Emite el veredicto.
 
 ## Veredicto (tu mensaje final, formato fijo)
+
+Estilo `.claude/rules/caveman-protocol.md` dentro de cada campo.
 
 ```
 VEREDICTO: PASS | FAIL
