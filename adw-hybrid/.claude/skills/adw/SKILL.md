@@ -127,6 +127,15 @@ Independence requires both explicit `depends_on` and pairwise-disjoint
    with `--no-ff`, followed by its sealed phase gate and the full lint, format,
    and test chain. A conflict is aborted and returned to planning. An integration
    gate failure stops with the failed merge preserved as evidence.
+7. After a passed wave, archive operational evidence and remove its worktrees:
+
+   ```bash
+   python3 .claude/skills/adw/scripts/wave-manager.py cleanup adw/waves/wave-N.json
+   ```
+
+   Cleanup refuses production changes, archives `.claude/adw-runs` under the
+   integration worktree, removes only passed phase worktrees, and preserves
+   their branches.
 
 Never run two Builders in one worktree, merge an unverified candidate, or edit
 the manifest non-atomically. Gates and verdicts may be concurrent; integration

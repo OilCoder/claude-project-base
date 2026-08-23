@@ -27,7 +27,8 @@ rules="$skill_dir/AGENTS.md"
 if [[ -f "$rules" && ! -f "$project/AGENTS.md" ]]; then
     cp "$rules" "$project/AGENTS.md"
     git -C "$project" add AGENTS.md
-    git -C "$project" -c user.name='adw-hybrid dispatcher' -c user.email='adw-hybrid@local'         commit -m "chore: seal builder rules (AGENTS.md)" >/dev/null
+    git -C "$project" -c user.name='adw-hybrid dispatcher' -c user.email='adw-hybrid@local' \
+        commit -m "chore: seal builder rules (AGENTS.md)" >/dev/null
 fi
 
 cp "$briefing" "$tmp_contract/spec.md"

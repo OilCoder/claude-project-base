@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -379,7 +380,31 @@ def cleanup(project: Path, path: Path, manifest: dict[str, Any]) -> None:
             continue
         worktree = project_path(project, phase["worktree"], "worktree")
         if worktree.exists():
+            if integration_status(worktree):
+                raise WaveError(f"refusing to remove dirty worktree: {phase['phase_id']}")
+            archive = (
+                project / ".claude/adw-runs/waves" / manifest["wave_id"] / phase["phase_id"]
+            )
+            runs = worktree / ".claude/adw-runs"
+            if runs.is_dir():
+                archive.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(runs, archive / "runs", dirs_exist_ok=True)
+                shutil.rmtree(runs)
+            for state_name in ("state.md", "log.md"):
+                state = worktree / "adw" / state_name
+                if state.exists() and git(worktree, "status", "--porcelain", "--", f"adw/{state_name}").stdout.strip():
+                    archive.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(state, archive / state_name)
+                    tracked = git(
+                        worktree, "ls-files", "--error-unmatch", f"adw/{state_name}",
+                        check=False,
+                    ).returncode == 0
+                    if tracked:
+                        git(worktree, "restore", "--worktree", "--", f"adw/{state_name}")
+                    else:
+                        state.unlink()
             git(project, "worktree", "remove", str(worktree))
+            phase["archived_artifacts"] = str(archive.relative_to(project))
         phase["worktree_removed"] = True
     git(project, "worktree", "prune")
     save_manifest(path, manifest)

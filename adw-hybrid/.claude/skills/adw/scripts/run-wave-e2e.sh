@@ -135,4 +135,19 @@ assert manifest["status"] == "passed"
 assert all(phase["integration_status"] == "passed" for phase in manifest["phases"])
 PY
 
-printf 'ADW wave manager E2E: PASS (two phases; local serial, cloud parallel, serial integration)\n'
+PATH="$FAKE_BIN:$PATH" python3 "$MANAGER" cleanup \
+    "$PROJECT/adw/waves/wave-1.json" --project "$PROJECT"
+for number in 1 2; do
+    [[ ! -e "$PROJECT/.claude/worktrees/wave-1-phase-${number}" ]]
+    git -C "$PROJECT" show-ref --verify --quiet \
+        "refs/heads/adw-wave/example/wave-1-phase-${number}"
+    [[ -d "$PROJECT/.claude/adw-runs/waves/wave-1/phase-${number}/runs" ]]
+done
+python3 - "$PROJECT/adw/waves/wave-1.json" <<'PY'
+import json, sys
+manifest = json.load(open(sys.argv[1], encoding="utf-8"))
+assert all(phase["worktree_removed"] is True for phase in manifest["phases"])
+assert all(phase["archived_artifacts"] for phase in manifest["phases"])
+PY
+
+printf 'ADW wave manager E2E: PASS (parallel build, serial integration, archived cleanup)\n'
