@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "200000",
+    "ADW_LOCAL_MODEL": "gpt-oss-64k:latest"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bash .claude/skills/adw/scripts/dispatch-builder.sh *)",
+      "Bash(python3 .claude/skills/adw/scripts/wave-manager.py *)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/adw-context-watch.sh\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/adw-precompact-snapshot.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/adw-stop-gate.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
