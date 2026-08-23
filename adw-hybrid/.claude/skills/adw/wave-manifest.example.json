@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "wave_id": "wave-1",
+  "cycle_branch": "adw/example",
+  "integration_head": "<commit>",
+  "created_at": "<ISO-8601>",
+  "updated_at": "<ISO-8601>",
+  "status": "planned",
+  "limits": {
+    "local": 0,
+    "cloud": 0,
+    "claude": 0
+  },
+  "gpu_snapshot": null,
+  "integrated_phases": [],
+  "phases": [
+    {
+      "phase_id": "phase-1",
+      "depends_on": [],
+      "owned_files": ["src/example.py"],
+      "base_commit": "<same as integration_head>",
+      "gate_commit": "<commit>",
+      "worktree": ".claude/worktrees/wave-1-phase-1",
+      "branch": "adw-wave/example/wave-1-phase-1",
+      "engine": null,
+      "builder_status": "pending",
+      "verdict": "pending",
+      "verified_commit": null,
+      "integration_status": "pending",
+      "loop_backs": 0,
+      "artifacts": null
+    }
+  ]
+}
