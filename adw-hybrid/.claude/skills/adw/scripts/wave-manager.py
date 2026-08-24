@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import shutil
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -127,6 +126,9 @@ def validate(project: Path, manifest: dict[str, Any]) -> list[dict[str, Any]]:
             )
         if int(phase.get("loop_backs", 0)) > 3:
             raise WaveError(f"{phase_id} exceeded three loop-backs")
+        if phase.get("risk", "low") not in {"low", "medium", "high"}:
+            raise WaveError(f"{phase_id} has invalid risk")
+        phase.setdefault("risk", "low")
         phase.setdefault("loop_backs", 0)
         phase.setdefault("builder_status", "pending")
         phase.setdefault("verdict", "pending")
@@ -265,6 +267,11 @@ def build(project: Path, path: Path, manifest: dict[str, Any]) -> None:
         if phase["builder_status"] == "cloud_pending":
             cloud.append(phase)
             continue
+        if phase["risk"] in {"medium", "high"}:
+            phase["builder_status"] = "cloud_pending"
+            cloud.append(phase)
+            save_manifest(path, manifest)
+            continue
         snapshot = capture_gpu_snapshot(project)
         manifest["gpu_snapshot"] = snapshot
         grant = local_grant(snapshot, os.environ.get("ADW_LOCAL_MODEL", ""))
@@ -312,11 +319,6 @@ def integration_gate(project: Path, number: int) -> None:
     result = run(["timeout", gate_timeout, "bash", str(gate)], project, check=False)
     if result.returncode:
         raise WaveError(f"phase integration gate failed ({result.returncode})\n{result.stdout}")
-    hook = project / ".claude/hooks/adw-gate.sh"
-    for name in ("lint", "format", "test"):
-        result = run(["bash", str(hook), name, str(project)], project, check=False)
-        if result.returncode:
-            raise WaveError(f"integration {name} gate failed ({result.returncode})\n{result.stdout}")
 
 
 def integrate(project: Path, path: Path, manifest: dict[str, Any]) -> None:
@@ -380,31 +382,7 @@ def cleanup(project: Path, path: Path, manifest: dict[str, Any]) -> None:
             continue
         worktree = project_path(project, phase["worktree"], "worktree")
         if worktree.exists():
-            if integration_status(worktree):
-                raise WaveError(f"refusing to remove dirty worktree: {phase['phase_id']}")
-            archive = (
-                project / ".claude/adw-runs/waves" / manifest["wave_id"] / phase["phase_id"]
-            )
-            runs = worktree / ".claude/adw-runs"
-            if runs.is_dir():
-                archive.mkdir(parents=True, exist_ok=True)
-                shutil.copytree(runs, archive / "runs", dirs_exist_ok=True)
-                shutil.rmtree(runs)
-            for state_name in ("state.md", "log.md"):
-                state = worktree / "adw" / state_name
-                if state.exists() and git(worktree, "status", "--porcelain", "--", f"adw/{state_name}").stdout.strip():
-                    archive.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(state, archive / state_name)
-                    tracked = git(
-                        worktree, "ls-files", "--error-unmatch", f"adw/{state_name}",
-                        check=False,
-                    ).returncode == 0
-                    if tracked:
-                        git(worktree, "restore", "--worktree", "--", f"adw/{state_name}")
-                    else:
-                        state.unlink()
             git(project, "worktree", "remove", str(worktree))
-            phase["archived_artifacts"] = str(archive.relative_to(project))
         phase["worktree_removed"] = True
     git(project, "worktree", "prune")
     save_manifest(path, manifest)

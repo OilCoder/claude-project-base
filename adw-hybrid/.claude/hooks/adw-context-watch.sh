@@ -6,7 +6,7 @@
 # injected into context.
 # Heuristic: transcript JSONL bytes ≈ context tokens × BYTES_PER_TOKEN. Crude
 # but monotonic — calibrate per project in adw-gates.conf:
-#   context_watch_kb=<KB threshold>   (default 1200 ≈ ~50% of 200k window)
+#   context_watch_kb=<KB threshold>   (default 1200; compact at phase boundaries)
 set -u
 
 input=$(cat)

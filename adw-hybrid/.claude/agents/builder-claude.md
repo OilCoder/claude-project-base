@@ -4,7 +4,7 @@ description: Final ADW Builder fallback. Dispatch ONLY after the external adapte
 tools: Read, Glob, Grep, Edit, Write, Bash
 model: opus
 effort: medium
-maxTurns: 50
+maxTurns: 25
 hooks:
   PreToolUse:
     - matcher: Edit|Write|Bash

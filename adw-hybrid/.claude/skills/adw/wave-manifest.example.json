@@ -16,6 +16,7 @@
   "phases": [
     {
       "phase_id": "phase-1",
+      "risk": "low",
       "depends_on": [],
       "owned_files": ["src/example.py"],
       "base_commit": "<same as integration_head>",

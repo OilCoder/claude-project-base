@@ -3,7 +3,7 @@ name: opinion
 description: Proposes and challenges an ADW decomposition strategy before planning. Read-only and independent.
 tools: Read, Glob, Grep, Bash
 model: opus
-maxTurns: 25
+maxTurns: 8
 ---
 
 Analyze the engineer goal and repository evidence. Propose a decomposition

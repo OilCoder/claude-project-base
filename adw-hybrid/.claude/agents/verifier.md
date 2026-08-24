@@ -3,7 +3,7 @@ name: verifier
 description: Read-only skeptical verifier for claims and goal quality. Confirms repository/URL evidence and returns PASS or FAIL.
 tools: Read, Glob, Grep, Bash, WebFetch, WebSearch
 model: fable
-maxTurns: 15
+maxTurns: 8
 ---
 
 Audit every assigned claim against its cited source. A missing, dead, or

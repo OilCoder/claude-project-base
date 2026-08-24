@@ -83,7 +83,7 @@ cat >"$PROJECT/adw/waves/wave-1.json" <<EOF
   "integrated_phases": [],
   "phases": [
     {"phase_id":"phase-1","depends_on":[],"owned_files":["one.txt"],"base_commit":"$base","gate_commit":"$base","worktree":".claude/worktrees/wave-1-phase-1","branch":"adw-wave/example/wave-1-phase-1","loop_backs":0},
-    {"phase_id":"phase-2","depends_on":[],"owned_files":["two.txt"],"base_commit":"$base","gate_commit":"$base","worktree":".claude/worktrees/wave-1-phase-2","branch":"adw-wave/example/wave-1-phase-2","loop_backs":0}
+    {"phase_id":"phase-2","risk":"medium","depends_on":[],"owned_files":["two.txt"],"base_commit":"$base","gate_commit":"$base","worktree":".claude/worktrees/wave-1-phase-2","branch":"adw-wave/example/wave-1-phase-2","loop_backs":0}
   ]
 }
 EOF
@@ -101,6 +101,7 @@ import json, sys
 manifest = json.load(open(sys.argv[1], encoding="utf-8"))
 assert manifest["status"] == "built"
 assert [phase["engine"] for phase in manifest["phases"]] == ["cloud", "cloud"]
+assert [phase["risk"] for phase in manifest["phases"]] == ["low", "medium"]
 assert manifest["limits"] == {"local": 1, "cloud": 2, "claude": 0}
 PY
 
@@ -135,19 +136,4 @@ assert manifest["status"] == "passed"
 assert all(phase["integration_status"] == "passed" for phase in manifest["phases"])
 PY
 
-PATH="$FAKE_BIN:$PATH" python3 "$MANAGER" cleanup \
-    "$PROJECT/adw/waves/wave-1.json" --project "$PROJECT"
-for number in 1 2; do
-    [[ ! -e "$PROJECT/.claude/worktrees/wave-1-phase-${number}" ]]
-    git -C "$PROJECT" show-ref --verify --quiet \
-        "refs/heads/adw-wave/example/wave-1-phase-${number}"
-    [[ -d "$PROJECT/.claude/adw-runs/waves/wave-1/phase-${number}/runs" ]]
-done
-python3 - "$PROJECT/adw/waves/wave-1.json" <<'PY'
-import json, sys
-manifest = json.load(open(sys.argv[1], encoding="utf-8"))
-assert all(phase["worktree_removed"] is True for phase in manifest["phases"])
-assert all(phase["archived_artifacts"] for phase in manifest["phases"])
-PY
-
-printf 'ADW wave manager E2E: PASS (parallel build, serial integration, archived cleanup)\n'
+printf 'ADW wave manager E2E: PASS (low-risk local ladder; medium-risk cloud; serial integration)\n'

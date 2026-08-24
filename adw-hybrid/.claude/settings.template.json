@@ -18,6 +18,11 @@
       "Bash(pwd)",
       "Bash(mkdir -p *)",
       "Bash(bash .claude/skills/adw/scripts/dispatch-builder.sh *)",
+      "Bash(bash .claude/skills/adw/scripts/dispatch-gate-codex.sh *)",
+      "Bash(bash .claude/skills/adw/scripts/check-doc-budgets.sh *)",
+      "Bash(bash .claude/skills/adw/scripts/check-candidate.sh *)",
+      "Bash(bash .claude/skills/goal/scripts/dispatch-goal-codex.sh *)",
+      "Bash(bash .claude/skills/opinion/scripts/dispatch-opinion-codex.sh *)",
       "Bash(python3 .claude/skills/adw/scripts/wave-manager.py *)"
     ],
     "deny": []
