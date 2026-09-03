@@ -77,6 +77,8 @@ test("written content is previewed: apply_patch names its files and shows the pa
   const write = renderer.feed(JSON.stringify({ type: "tool_use", part: { tool: "write", state: { status: "completed", input: { filePath: "/p/scripts/count-las.sh", content: "#!/bin/bash\nfind data -name '*.las' | wc -l" } } } })).map(stripAnsi)
   assert.equal(write[0], "▸ write  scripts/count-las.sh")
   assert.equal(write[2], "    find data -name '*.las' | wc -l")
+  const indented = renderer.feed(JSON.stringify({ type: "tool_use", part: { tool: "write", state: { status: "completed", input: { filePath: "/p/x.json", content: "{\n  \"a\": 1\n}" } } } })).map(stripAnsi)
+  assert.equal(indented[2], '      "a": 1', "preview keeps indentation")
   const quiet = createRenderer({ directory: "/p", previewLines: 0 })
   assert.equal(quiet.feed(JSON.stringify({ type: "tool_use", part: { tool: "write", state: { status: "completed", input: { filePath: "/p/a", content: "x" } } } })).length, 1)
 })

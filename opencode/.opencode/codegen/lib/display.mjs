@@ -64,6 +64,12 @@ function truncate(text, width) {
   return flat.length > width ? `${flat.slice(0, Math.max(0, width - 1))}…` : flat
 }
 
+// Preview rows keep their indentation; only the length is capped.
+function clip(text, width) {
+  const row = String(text).replace(/\s+$/, "")
+  return row.length > width ? `${row.slice(0, Math.max(0, width - 1))}…` : row
+}
+
 function relative(filePath, directory) {
   if (typeof filePath !== "string") return ""
   return directory && filePath.startsWith(`${directory}/`) ? filePath.slice(directory.length + 1) : filePath
@@ -182,7 +188,7 @@ export function createRenderer({
         const rows = [`${color("▸")} ${color(tool.padEnd(6))} ${truncate(detailText, textWidth - 10)}${tail ? `  ${tail}` : ""}`]
         if (writes && !failed && previewLines > 0) {
           for (const row of writtenPreview(tool, input, previewLines)) {
-            rows.push(dim(`    ${truncate(row.replaceAll(`${directory}/`, ""), textWidth - 4)}`))
+            rows.push(dim(`    ${clip(row.replaceAll(`${directory}/`, ""), textWidth - 4)}`))
           }
         }
         // A failed command shows the tail of its output so the reason is visible.
