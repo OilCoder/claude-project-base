@@ -30,9 +30,13 @@ if (agent === "planner") {
   const output = prompt.match(/Write the complete plan to (\\S+)\\./)[1]
   const plan = JSON.parse(fs.readFileSync(process.env.FAKE_PLAN_TEMPLATE, "utf8"))
   plan.base_revision = execFileSync("git", ["rev-parse", "HEAD"]).toString().trim()
+  // FAKE_PLAN_INVALID_FIRST: the first plan uses a wildcard the validator
+  // rejects; the retry (prompt carries the evidence) is clean.
+  const retry = /This is a retry/.test(prompt)
+  if (process.env.FAKE_PLAN_INVALID_FIRST && !retry) plan.phases[0].contracts[0].allowed_to_modify = ["lib/*.py"]
   fs.mkdirSync(path.dirname(output), { recursive: true })
   fs.writeFileSync(output, JSON.stringify(plan, null, 2))
-  log({ agent, prompt })
+  log({ agent, prompt, retry })
   done()
 } else if (agent === "builder") {
   const contract = JSON.parse(fs.readFileSync(".codegen-contract/contract.json", "utf8"))
@@ -230,6 +234,36 @@ test("a goal that still needs deliberation stops before planning", async () => {
     assert.equal(state.status, "DELIBERATION_REQUIRED")
     assert.equal(state.planner_calls, 0)
     await assert.rejects(readFile(path.join(tree.directory, "fake.log")))
+  } finally {
+    await rm(tree.directory, { recursive: true, force: true })
+  }
+})
+
+test("a plan the validator rejects is re-requested with evidence within the planner budget", async () => {
+  const tree = await project()
+  try {
+    const goalPath = path.join(tree.directory, ".codegen-goal/goal.json")
+    const goal = JSON.parse(await readFile(goalPath, "utf8"))
+    await writeFile(goalPath, JSON.stringify({ ...goal, budgets: { ...goal.budgets, max_planner_calls: 2 } }))
+    const result = await orchestrate(tree, ["--run-id", "r7"], { FAKE_PLAN_INVALID_FIRST: "1" })
+    assert.equal(result.code, 0, result.stderr)
+    const state = JSON.parse(result.stdout)
+    assert.equal(state.status, "COMPLETED")
+    assert.equal(state.planner_calls, 2)
+    assert.equal(state.plan_path, ".codegen-plan/r7-2.json")
+    const names = await events(tree, "r7")
+    assert.ok(names.includes("PLAN_RETRY"))
+    const evidence = JSON.parse(await readFile(path.join(tree.directory, ".codegen-plan/r7-1.evidence.json"), "utf8"))
+    assert.ok(evidence.errors.some((e) => e.includes("allowed_to_modify: lib/*.py")))
+    const planners = (await readLog(tree)).filter((entry) => entry.agent === "planner")
+    assert.deepEqual(planners.map((entry) => entry.retry), [false, true])
+    assert.ok(planners[1].prompt.includes("rejected by the deterministic validator"))
+
+    // With budget 1 the same failure stops the run.
+    await writeFile(goalPath, JSON.stringify({ ...goal, budgets: { ...goal.budgets, max_planner_calls: 1 } }))
+    const stopped = await orchestrate(tree, ["--run-id", "r8"], { FAKE_PLAN_INVALID_FIRST: "1" })
+    assert.equal(stopped.code, 1)
+    assert.equal(JSON.parse(stopped.stdout).status, "PLAN_FAILED")
   } finally {
     await rm(tree.directory, { recursive: true, force: true })
   }

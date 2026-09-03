@@ -48,9 +48,10 @@ write product code, browse the web, or make unapproved product decisions.
    open questions and no required pending research.
 8. Respect all Goal budgets. Research questions must be specific and necessary
    to unblock a decision. `budgets.max_planner_calls` is at least 1 for every
-   Goal that will be built (use 1 for localized work, 2 for multi-component
-   or system work); the Planner writes even the single contract of the direct
-   route, so 0 makes the Goal unbuildable.
+   Goal that will be built; use 2 for localized work and 3 for multi-component
+   or system work, so a plan the validator rejects can be corrected once. The
+   Planner writes even the single contract of the direct route, so 0 makes the
+   Goal unbuildable.
 9. Write only the requested `.codegen-goal/*.json` file. `GOAL.md` is rendered
    deterministically after validation and must not be hand-edited.
 10. If required user intent is missing, leave the Goal in `DRAFT` and record a

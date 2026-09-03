@@ -86,7 +86,7 @@ test("validator rejects cycles, unknown work classes, and unsafe paths", () => {
   assert.equal(result.valid, false)
   assert.match(result.errors.join("\n"), /dependency graph contains a cycle/)
   assert.match(result.errors.join("\n"), /unknown work_class invented-work/)
-  assert.match(result.errors.join("\n"), /unsupported path pattern \.\.\/secret/)
+  assert.match(result.errors.join("\n"), /unsupported path pattern in \w+: \.\.\/secret/)
 })
 
 test("path overlap is conservative for recursive directory patterns", () => {
@@ -109,4 +109,25 @@ test("validator accepts expected_baseline and final_verification, and can cap co
 
   const badFinal = { ...validPlan(), final_verification: { commands: [""] } }
   assert.ok(validatePlan(badFinal).errors.includes("final_verification.commands must be an array of commands"))
+})
+
+test("forbidden and read accept extension globs; allowed_to_modify stays exact; ext globs overlap exact paths", async () => {
+  const { validatePlan, pathPatternsOverlap } = await import("../.opencode/codegen/lib/plan-validation.mjs")
+  const { readFile } = await import("node:fs/promises")
+  const base = JSON.parse(await readFile(new URL("./fixtures/orchestrator-basic/plan-template.json", import.meta.url), "utf8"))
+  const plan = structuredClone(base)
+  const contract = plan.phases[0].contracts[0]
+  contract.forbidden = ["*.json", "**/*.md", "tests/**", "package.json"]
+  contract.read = ["*.py", "lib/alpha.py"]
+  let result = validatePlan(plan, { workClasses: new Set(["localized-low-risk-code-change"]) })
+  assert.deepEqual(result.errors.filter((e) => e.includes("unsupported")), [])
+  contract.allowed_to_modify = ["lib/*.py"]
+  result = validatePlan(plan, { workClasses: new Set(["localized-low-risk-code-change"]) })
+  assert.ok(result.errors.some((e) => e.includes("unsupported path pattern in allowed_to_modify: lib/*.py")), result.errors.join("\n"))
+  contract.allowed_to_modify = ["lib/alpha.py"]
+  contract.forbidden = ["*.py"]
+  result = validatePlan(plan, { workClasses: new Set(["localized-low-risk-code-change"]) })
+  assert.ok(result.errors.some((e) => e.includes("allowed path overlaps forbidden path")), result.errors.join("\n"))
+  assert.equal(pathPatternsOverlap("*.json", "scripts/count-las.sh"), false)
+  assert.equal(pathPatternsOverlap("scripts/count-las.sh", "*.sh"), true)
 })

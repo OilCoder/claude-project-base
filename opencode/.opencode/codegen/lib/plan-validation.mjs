@@ -11,11 +11,29 @@ function validPathPattern(value) {
   return SAFE_PATH.test(value) && !value.includes("*")
 }
 
+// `read` and `forbidden` are descriptive, so they also accept extension globs
+// ("*.json", "**/*.md"); `allowed_to_modify` stays exact because it is what
+// the orchestrator enforces and commits.
+const EXTENSION_GLOB = /^(?:\*\*\/)?\*\.[A-Za-z0-9_.-]+$/
+function validDescriptivePattern(value) {
+  return validPathPattern(value) || (nonEmptyString(value) && EXTENSION_GLOB.test(value))
+}
+
+function extensionOf(pattern) {
+  const match = EXTENSION_GLOB.test(pattern) ? pattern.match(/\*(\.[A-Za-z0-9_.-]+)$/) : null
+  return match ? match[1] : null
+}
+
 function patternPrefix(pattern) {
   return pattern.endsWith("/**") ? pattern.slice(0, -3) : pattern
 }
 
 export function pathPatternsOverlap(left, right) {
+  // An extension glob overlaps an exact path with that extension.
+  for (const [glob, other] of [[left, right], [right, left]]) {
+    const extension = extensionOf(glob)
+    if (extension) return !other.endsWith("/**") && !extensionOf(other) && other.endsWith(extension)
+  }
   const leftPrefix = patternPrefix(left)
   const rightPrefix = patternPrefix(right)
   if (!left.endsWith("/**") && !right.endsWith("/**")) return left === right
@@ -131,8 +149,13 @@ export function validatePlan(plan, { workClasses = null, maxContracts = null } =
       }
       if (contract?.requirements?.length === 0) errors.push(`${contractId}: requirements cannot be empty`)
       for (const field of ["read", "allowed_to_modify", "forbidden"]) {
+        const accepts = field === "allowed_to_modify" ? validPathPattern : validDescriptivePattern
         for (const pattern of contract?.[field] ?? []) {
-          if (!validPathPattern(pattern)) errors.push(`${contractId}: unsupported path pattern ${pattern}`)
+          if (!accepts(pattern)) {
+            errors.push(
+              `${contractId}: unsupported path pattern in ${field}: ${pattern} (use an exact path or dir/**${field === "allowed_to_modify" ? "" : "; *.ext is also accepted here"})`,
+            )
+          }
         }
       }
       for (const allowed of contract?.allowed_to_modify ?? []) {

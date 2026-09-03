@@ -151,20 +151,35 @@ export async function orchestrate({
     if ((routing.budgets?.planner_calls ?? goal.budgets.max_planner_calls) < 1 && routing.route !== "direct") {
       return stop("BUDGET_BLOCKED", "no planner budget")
     }
-    const output = `.codegen-plan/${runId}.json`
-    await emit("PLAN_REQUESTED", { output, max_contracts: maxContracts })
-    state.planner_calls += 1
-    const summary = await runners.planner({
-      directory,
-      objective: goal.objective,
-      goal: goalPath,
-      output,
-      minimumStatus,
-      maxContracts,
-    })
-    await emit("PLAN_GENERATED", { result: summary.result, output })
-    if (summary.result !== "PASS") {
-      return stop("PLAN_FAILED", summary.result, { validation: summary.validation ?? null })
+    // A plan the validator rejects is re-requested with the errors as
+    // evidence while the Goal's planner budget allows; any other failure stops.
+    const budget = routing.budgets?.planner_calls ?? goal.budgets.max_planner_calls
+    let evidence = null
+    let output = null
+    while (true) {
+      state.planner_calls += 1
+      output = `.codegen-plan/${runId}${state.planner_calls > 1 ? `-${state.planner_calls}` : ""}.json`
+      await emit("PLAN_REQUESTED", { output, max_contracts: maxContracts, attempt: state.planner_calls, evidence })
+      const summary = await runners.planner({
+        directory,
+        objective: goal.objective,
+        goal: goalPath,
+        output,
+        minimumStatus,
+        maxContracts,
+        evidence,
+      })
+      await emit("PLAN_GENERATED", { result: summary.result, output, attempt: state.planner_calls })
+      if (summary.result === "PASS") break
+      const retriable = summary.result === "PLAN_INVALID" && state.planner_calls < Math.max(1, budget)
+      if (!retriable) return stop("PLAN_FAILED", summary.result, { validation: summary.validation ?? null, attempts: state.planner_calls })
+      evidence = `.codegen-plan/${runId}-${state.planner_calls}.evidence.json`
+      await mkdir(path.dirname(path.resolve(directory, evidence)), { recursive: true })
+      await writeFile(
+        path.resolve(directory, evidence),
+        `${JSON.stringify({ attempt: state.planner_calls, rejected_plan: output, errors: summary.validation?.errors ?? [] }, null, 2)}\n`,
+      )
+      await emit("PLAN_RETRY", { attempt: state.planner_calls, evidence, errors: summary.validation?.errors ?? [] })
     }
     plan = JSON.parse(await readFile(path.resolve(directory, output), "utf8"))
     state.plan_path = output

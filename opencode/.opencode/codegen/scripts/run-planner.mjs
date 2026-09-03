@@ -28,7 +28,7 @@ async function main() {
   const args = parseArguments(process.argv.slice(2))
   if (!args.objective) {
     throw new Error(
-      "usage: run-planner.mjs --objective <text> [--goal <path>] [--output .codegen-plan/plan.json] [--max-contracts <n>]",
+      "usage: run-planner.mjs --objective <text> [--goal <path>] [--output .codegen-plan/plan.json] [--max-contracts <n>] [--evidence <rejected-plan-evidence.json>]",
     )
   }
   const directory = path.resolve(args.directory ?? process.cwd())
@@ -65,11 +65,19 @@ async function main() {
   const display = resolveDisplay(args)
   const roles = await agentRoles("planner")
   const maxContracts = args["max-contracts"] ? Number(args["max-contracts"]) : null
+  const evidencePath = args.evidence ? path.resolve(directory, args.evidence) : null
+  const evidence = evidencePath ? JSON.parse(await readFile(evidencePath, "utf8")) : null
   const prompt = [
     `Plan this objective: ${args.objective}`,
     ...(args.goal ? [`The sealed Goal with requirements, constraints, and acceptance criteria is at ${args.goal}; read it first.`] : []),
     `Write the complete plan to ${relativeOutput}.`,
     `Use only these work_class values: ${Object.keys(registry.routes).join(", ")}.`,
+    "Paths in allowed_to_modify are exact file paths or dir/**; read and forbidden also accept *.ext globs. Never use other wildcards.",
+    ...(evidence
+      ? [
+          `This is a retry. The previous plan (${path.relative(directory, evidencePath)}) was rejected by the deterministic validator with these errors: ${(evidence.errors ?? []).join("; ")}. Fix exactly those problems and keep everything else.`,
+        ]
+      : []),
     ...(maxContracts === 1
       ? ["This objective took the direct route: write exactly one phase containing exactly one contract."]
       : []),
@@ -93,7 +101,7 @@ async function main() {
           attempt: attemptNumber,
           model: configuration.model,
           context_tokens: configuration.context_tokens,
-          lines: [`objetivo  ${args.objective}`, ...(maxContracts === 1 ? ["ruta directa: un solo contrato"] : [])],
+          lines: [`objetivo  ${args.objective}`, ...(maxContracts === 1 ? ["ruta directa: un solo contrato"] : []), ...(evidence ? [`reintento: ${(evidence.errors ?? []).length} errores del plan anterior`] : [])],
         },
       })
       return {
