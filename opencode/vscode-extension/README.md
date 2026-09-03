@@ -15,3 +15,6 @@ node opencode/vscode-extension/install.mjs
 
 Then run "Developer: Reload Window". The command "Codegen: Show agent job
 spool" prints the watched directory and opens the extension's output channel.
+
+Each window claims only the jobs whose project lies inside its own workspace
+folders, so several VS Code windows can share the spool.

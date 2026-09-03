@@ -2,7 +2,7 @@
   "name": "codegen-agent-terminals",
   "displayName": "Codegen Agent Terminals",
   "description": "Opens one VS Code terminal per OpenCode codegen agent (CODEGEN_DISPLAY=vscode).",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "oilcoder",
   "license": "MIT",
   "engines": { "vscode": "^1.90.0" },

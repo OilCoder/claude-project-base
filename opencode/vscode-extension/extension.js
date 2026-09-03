@@ -17,6 +17,37 @@ function spoolDirectory() {
   return configured || path.join(os.homedir(), ".local/state/codegen/vscode-jobs")
 }
 
+// Only jobs whose project lives inside this window's workspace folders are
+// claimed, so several VS Code windows can share the spool without stealing
+// each other's agents.
+function ownsJob(job) {
+  const folders = (vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath)
+  if (folders.length === 0) return false
+  let directory = String(job.directory ?? "")
+  try {
+    directory = fs.realpathSync(directory)
+  } catch {
+    // keep the raw path
+  }
+  return folders.some((folder) => {
+    let root = folder
+    try {
+      root = fs.realpathSync(folder)
+    } catch {
+      // keep the raw path
+    }
+    return directory === root || directory.startsWith(`${root}${path.sep}`)
+  })
+}
+
+function readJob(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"))
+  } catch {
+    return null // still being written; retry on the next poll
+  }
+}
+
 function quote(value) {
   return `'${String(value).replace(/'/g, `'\\''`)}'`
 }
@@ -59,6 +90,7 @@ function recover(spool, output) {
     const taken = path.join(spool, entry)
     try {
       const job = JSON.parse(fs.readFileSync(taken, "utf8"))
+      if (!ownsJob(job)) continue
       if (job.done_file && fs.existsSync(job.done_file)) {
         fs.unlinkSync(taken)
         continue
@@ -81,6 +113,8 @@ function poll(spool, output) {
   for (const entry of entries) {
     if (!entry.endsWith(".job.json") || entry.endsWith(".taken.job.json")) continue
     const jobFile = path.join(spool, entry)
+    const pending = readJob(jobFile)
+    if (!pending || !ownsJob(pending)) continue
     const taken = jobFile.replace(/\.job\.json$/, ".taken.job.json")
     // Claim the job before the terminal starts so a second poll never opens it twice.
     try {
@@ -101,7 +135,7 @@ function activate(context) {
   const output = vscode.window.createOutputChannel("Codegen Agent Terminals")
   const spool = spoolDirectory()
   fs.mkdirSync(spool, { recursive: true })
-  output.appendLine(`watching ${spool}`)
+  output.appendLine(`watching ${spool} for ${(vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath).join(", ") || "(no workspace)"}`)
   recover(spool, output)
   const timer = setInterval(() => poll(spool, output), POLL_MS)
   context.subscriptions.push({ dispose: () => clearInterval(timer) })
