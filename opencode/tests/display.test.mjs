@@ -4,7 +4,7 @@ import path from "node:path"
 import test from "node:test"
 import { fileURLToPath } from "node:url"
 
-import { bar, compact, createRenderer, renderHeader, stripAnsi, wrap } from "../.opencode/codegen/lib/display.mjs"
+import { bar, compact, createRenderer, patchFiles, renderHeader, stripAnsi, wrap } from "../.opencode/codegen/lib/display.mjs"
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 
@@ -63,4 +63,20 @@ test("errors and failed commands are surfaced; the bar scales to the window", ()
   assert.equal(bar(50, 100, 10), "▇▇▇▇▇▁▁▁▁▁")
   assert.equal(bar(10, 0, 4), "····")
   assert.equal(stripAnsi(renderer.feed("not json")[0]), "not json")
+})
+
+test("written content is previewed: apply_patch names its files and shows the patch, capped", () => {
+  const patchText = ["*** Begin Patch", "*** Add File: /p/.codegen-goal/goal.json", ...Array.from({ length: 6 }, (_, i) => `+line ${i}`), "*** End Patch"].join("\n")
+  assert.deepEqual(patchFiles(patchText), ["/p/.codegen-goal/goal.json"])
+  const renderer = createRenderer({ directory: "/p", previewLines: 4 })
+  const lines = renderer.feed(JSON.stringify({ type: "tool_use", part: { tool: "apply_patch", state: { status: "completed", input: { patchText } } } })).map(stripAnsi)
+  assert.equal(lines[0], "▸ apply_patch .codegen-goal/goal.json")
+  assert.equal(lines[1], "    *** Add File: .codegen-goal/goal.json")
+  assert.equal(lines[2], "    +line 0")
+  assert.equal(lines.at(-1), "    … 3 líneas más")
+  const write = renderer.feed(JSON.stringify({ type: "tool_use", part: { tool: "write", state: { status: "completed", input: { filePath: "/p/scripts/count-las.sh", content: "#!/bin/bash\nfind data -name '*.las' | wc -l" } } } })).map(stripAnsi)
+  assert.equal(write[0], "▸ write  scripts/count-las.sh")
+  assert.equal(write[2], "    find data -name '*.las' | wc -l")
+  const quiet = createRenderer({ directory: "/p", previewLines: 0 })
+  assert.equal(quiet.feed(JSON.stringify({ type: "tool_use", part: { tool: "write", state: { status: "completed", input: { filePath: "/p/a", content: "x" } } } })).length, 1)
 })

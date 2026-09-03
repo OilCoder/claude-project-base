@@ -90,7 +90,36 @@ export function renderHeader(header, { width = 100 } = {}) {
   return [`┌${"─".repeat(box + 2)}`, ...rows.map((row) => `│ ${row}`), `└${"─".repeat(box + 2)}`]
 }
 
-export function createRenderer({ directory = "", contextTokens = 0, width = 100, detail = process.env.CODEGEN_VIEW_DETAIL === "1" } = {}) {
+// Files named by an apply_patch text: "*** Add File: path", "*** Update File: path".
+export function patchFiles(patchText) {
+  return [...String(patchText ?? "").matchAll(/^\*\*\* (?:Add|Update|Delete) File: (.+)$/gm)].map((match) => match[1].trim())
+}
+
+// The content an agent wrote, so the view shows what was produced and not
+// only that something was produced. Capped at `limit` lines.
+export function writtenPreview(tool, input, limit) {
+  let body = ""
+  if (tool === "apply_patch") {
+    body = String(input.patchText ?? "")
+      .split("\n")
+      .filter((row) => !/^\*\*\* (?:Begin|End) Patch/.test(row))
+      .join("\n")
+  } else if (tool === "write") body = String(input.content ?? "")
+  else if (tool === "edit") body = String(input.newString ?? input.new_string ?? "")
+  if (!body.trim()) return []
+  const rows = body.split("\n")
+  const shown = rows.slice(0, limit)
+  const rest = rows.length - shown.length
+  return rest > 0 ? [...shown, `… ${rest} líneas más`] : shown
+}
+
+export function createRenderer({
+  directory = "",
+  contextTokens = 0,
+  width = 100,
+  detail = process.env.CODEGEN_VIEW_DETAIL === "1",
+  previewLines = Number(process.env.CODEGEN_VIEW_PREVIEW ?? 40),
+} = {}) {
   const state = { steps: 0, cost: 0, total_tokens: 0, errors: 0, tools: 0 }
   const textWidth = Math.max(40, width - 2)
   let lastWasText = false
@@ -131,7 +160,10 @@ export function createRenderer({ directory = "", contextTokens = 0, width = 100,
         const tool = part.tool ?? "tool"
         let detailText = part.title ?? ""
         if (tool === "bash") detailText = input.command ?? detailText
-        else if (["read", "write", "edit", "glob", "list"].includes(tool)) {
+        else if (tool === "apply_patch") {
+          const files = patchFiles(input.patchText).map((file) => relative(file, directory))
+          detailText = files.join(", ") || "patch"
+        } else if (["read", "write", "edit", "glob", "list"].includes(tool)) {
           detailText = relative(input.filePath ?? input.path ?? part.title, directory) || input.pattern || ""
         } else if (tool === "grep") detailText = `${input.pattern ?? ""}  ${relative(input.path ?? "", directory)}`.trim()
         else if (tool === "webfetch") detailText = input.url ?? detailText
@@ -145,8 +177,14 @@ export function createRenderer({ directory = "", contextTokens = 0, width = 100,
         ]
           .filter(Boolean)
           .join(" ")
-        const color = failed ? red : tool === "write" || tool === "edit" ? yellow : cyan
+        const writes = tool === "write" || tool === "edit" || tool === "apply_patch"
+        const color = failed ? red : writes ? yellow : cyan
         const rows = [`${color("▸")} ${color(tool.padEnd(6))} ${truncate(detailText, textWidth - 10)}${tail ? `  ${tail}` : ""}`]
+        if (writes && !failed && previewLines > 0) {
+          for (const row of writtenPreview(tool, input, previewLines)) {
+            rows.push(dim(`    ${truncate(row.replaceAll(`${directory}/`, ""), textWidth - 4)}`))
+          }
+        }
         // A failed command shows the tail of its output so the reason is visible.
         if (failed) {
           const output = String(part.state?.output ?? part.state?.error ?? "").trim()
