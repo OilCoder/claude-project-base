@@ -98,9 +98,12 @@ export async function changedFilesSince(directory, rev) {
   return files.sort()
 }
 
-export async function commitPaths(directory, paths, message) {
+// `force` adds paths the project's .gitignore excludes: the sealed contract
+// and its Gate under .codegen-contract/ belong to the run, not the product,
+// and must travel with the worktree commit even when the project ignores them.
+export async function commitPaths(directory, paths, message, { force = false } = {}) {
   if (paths.length === 0) return null
-  await git(directory, ["add", "-A", "--", ...paths])
+  await git(directory, ["add", "-A", ...(force ? ["-f"] : []), "--", ...paths])
   const staged = await git(directory, ["diff", "--cached", "--quiet"], { allowFailure: true })
   if (staged.exitCode === 0) return null
   await git(directory, ["commit", "-q", "-m", message])

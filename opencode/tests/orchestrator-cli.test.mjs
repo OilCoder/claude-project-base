@@ -268,3 +268,18 @@ test("a plan the validator rejects is re-requested with evidence within the plan
     await rm(tree.directory, { recursive: true, force: true })
   }
 })
+
+test("a project that ignores .codegen-contract still gets sealed contracts committed in the worktree", async () => {
+  const tree = await project()
+  try {
+    await writeFile(path.join(tree.directory, ".gitignore"), "bin-fake/\nfake.log\n__pycache__/\n.codegen-goal/\n.codegen-plan/\n.codegen-contract/\n.codegen-run/\n")
+    await tree.git("-c", "user.name=t", "-c", "user.email=t@localhost", "commit", "-qam", "ignore contract dir")
+    const result = await orchestrate(tree, ["--run-id", "r9", "--concurrency", "2"])
+    assert.equal(result.code, 0, result.stderr)
+    const state = JSON.parse(result.stdout)
+    assert.equal(state.status, "COMPLETED")
+    assert.ok(state.waves.flatMap((wave) => wave.contracts).every((c) => c.status === "PASSED"))
+  } finally {
+    await rm(tree.directory, { recursive: true, force: true })
+  }
+})

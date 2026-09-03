@@ -242,7 +242,7 @@ export async function orchestrate({
         await writeFile(path.join(worktree, GATE_WRAPPER), gateScript(contract.verification.commands))
       }
       await writeFile(path.join(contractDirectory, "contract.json"), `${JSON.stringify(sealed, null, 2)}\n`)
-      await commitPaths(worktree, [".codegen-contract"], `codegen: seal ${contract.contract_id}`)
+      await commitPaths(worktree, [".codegen-contract"], `codegen: seal ${contract.contract_id}`, { force: true })
 
       const record = {
         contract_id: contract.contract_id,
@@ -269,7 +269,7 @@ export async function orchestrate({
         })
         await emit("GATE_DESIGNED", { contract_id: contract.contract_id, result: design.result })
         if (design.result === "GATE_READY") {
-          await commitPaths(worktree, [".codegen-contract"], `codegen: gate ${contract.contract_id}`)
+          await commitPaths(worktree, [".codegen-contract"], `codegen: gate ${contract.contract_id}`, { force: true })
           readiness = design.readiness_after
         }
       }
