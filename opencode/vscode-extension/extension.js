@@ -98,9 +98,6 @@ function releaseAbandoned(spool, output) {
   }
 }
 
-function quote(value) {
-  return `'${String(value).replace(/'/g, `'\\''`)}'`
-}
 
 function openTerminal(jobFile, output) {
   let job
@@ -126,6 +123,43 @@ function openTerminal(jobFile, output) {
   return true
 }
 
+function writeOwner(taken) {
+  fs.writeFileSync(ownerFile(taken), JSON.stringify({ pid: process.pid, at: new Date().toISOString() }))
+}
+
+// Claims every pending job of this workspace and opens its terminal.
+function poll(spool, output) {
+  let entries
+  try {
+    entries = fs.readdirSync(spool)
+  } catch {
+    return
+  }
+  for (const entry of entries) {
+    if (!entry.endsWith(".job.json") || entry.endsWith(".taken.job.json")) continue
+    const jobFile = path.join(spool, entry)
+    const pending = readJob(jobFile)
+    if (!pending || !ownsJob(pending)) continue
+    const taken = jobFile.replace(/\.job\.json$/, ".taken.job.json")
+    // Claim the job before the terminal starts so a second poll never opens it twice.
+    try {
+      fs.renameSync(jobFile, taken)
+      writeOwner(taken)
+    } catch {
+      continue
+    }
+    try {
+      if (!openTerminal(taken, output)) {
+        fs.rmSync(ownerFile(taken), { force: true })
+        fs.renameSync(taken, jobFile)
+      }
+    } catch (error) {
+      output.appendLine(`cannot open terminal for ${entry}: ${error.stack ?? error.message}`)
+      vscode.window.showErrorMessage(`Codegen agent terminal failed: ${error.message}`)
+    }
+  }
+}
+
 function activate(context) {
   const output = vscode.window.createOutputChannel("Codegen Agent Terminals")
   const spool = spoolDirectory()
@@ -146,4 +180,4 @@ function activate(context) {
 
 function deactivate() {}
 
-module.exports = { activate, deactivate }
+module.exports = { activate, deactivate, poll, releaseAbandoned, ownsJob }
