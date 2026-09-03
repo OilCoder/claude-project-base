@@ -72,7 +72,7 @@ test("tmux display runs the agent in its own window, shows the header, and retur
       assert.ok(text.includes("Builder"))
       assert.ok(text.includes("204.800 tokens"))
       assert.ok(text.includes("▸ read   a.txt"))
-      assert.ok(text.includes("1.200 / 204.800"))
+      assert.ok(text.includes("1.2k / 204.8k"))
       assert.ok(text.includes("■ terminado"))
       // Default hold: the window waits for Enter, then closes.
       delete process.env.CODEGEN_VIEW_HOLD
