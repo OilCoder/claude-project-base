@@ -8,7 +8,30 @@ import { createWriteStream } from "node:fs"
 import { readFile, writeFile } from "node:fs/promises"
 import readline from "node:readline"
 
+import { summarizeWrittenFiles } from "../lib/artifact-summary.mjs"
 import { createRenderer, dim, green, red, renderHeader } from "../lib/display.mjs"
+import path from "node:path"
+
+// What the agent produced, read back from disk: the outcome section of the
+// digest never depends on the model's own words.
+async function outcomeOf(renderer, directory, agent) {
+  const files = []
+  for (const relative of renderer.state.written) {
+    try {
+      files.push({ path: relative, content: await readFile(path.resolve(directory || ".", relative), "utf8") })
+    } catch {
+      // deleted or outside the project: nothing to summarize
+    }
+  }
+  const gateRuns = renderer.state.actions.filter((action) => action.verb === "Ejecutó" && /gate\.sh/.test(action.object))
+  const lastGate = gateRuns.at(-1)
+  const gate = lastGate ? { passed: !lastGate.failed, detail: lastGate.result } : null
+  try {
+    return summarizeWrittenFiles(files, { agent, gate })
+  } catch {
+    return []
+  }
+}
 
 const out = (line) => process.stdout.write(`${line}\n`)
 const width = process.stdout.columns || 100
@@ -43,7 +66,7 @@ if (args[0] === "--replay") {
       process.stdout.write("\r" + " ".repeat(20) + "\r")
     }
   }
-  for (const line of renderer.finish()) out(line)
+  for (const line of renderer.finish({ outcome: await outcomeOf(renderer, directory, header.agent) })) out(line)
   process.exit(0)
 }
 
@@ -94,7 +117,7 @@ child.on("close", async (code, signal) => {
   stderr.end()
   const exitCode = timedOut ? 124 : (code ?? 1)
   const seconds = Math.round((Date.now() - started) / 1000)
-  for (const line of renderer.finish()) out(line)
+  for (const line of renderer.finish({ outcome: await outcomeOf(renderer, job.directory, job.header.agent) })) out(line)
   out("")
   out(
     exitCode === 0

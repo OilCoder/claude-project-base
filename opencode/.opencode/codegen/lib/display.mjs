@@ -7,6 +7,8 @@
 // and at the end a numbered digest of the actions, the final report, and one
 // status line. Telemetry per step only in detail mode.
 
+import { AGENT_PURPOSE, describeStep } from "./artifact-summary.mjs"
+
 const ESC = "\u001b"
 const useColor = () => !process.env.NO_COLOR && process.env.CODEGEN_COLOR !== "0"
 const paint = (code, text) => (useColor() ? `${ESC}[${code}m${text}${ESC}[0m` : text)
@@ -86,10 +88,12 @@ function plainMarkdown(text) {
 //           context_tokens, lines: [] }
 export function renderHeader(header, { width = 100 } = {}) {
   const inner = Math.max(40, width - 4)
+  const purpose = AGENT_PURPOSE[header.agent] ?? null
   const rows = [
     `${bold(header.title ?? header.agent ?? "agent")}${header.run_id ? dim(`   run ${header.run_id}`) : ""}${
       header.attempt ? dim(` · intento ${header.attempt}${header.max_attempts ? `/${header.max_attempts}` : ""}`) : ""
     }`,
+    ...(purpose ? [`${dim("hace     ")}${purpose}`] : []),
     `${dim("modelo   ")}${cyan(header.model ?? "?")}`,
     `${dim("roles    ")}${(header.roles ?? []).join(" · ") || "—"}`,
     `${dim("ventana  ")}${header.context_tokens ? `${formatNumber(header.context_tokens)} tokens` : "desconocida"}`,
@@ -212,7 +216,12 @@ export function createRenderer({
   previewLines = Number(process.env.CODEGEN_VIEW_PREVIEW ?? 8),
   now = () => Date.now(),
 } = {}) {
-  const state = { steps: 0, cost: 0, total_tokens: 0, errors: 0, tools: 0, actions: [], narrations: 0, final_text: "" }
+  const state = { steps: 0, cost: 0, total_tokens: 0, errors: 0, tools: 0, actions: [], steps_actions: [], written: [], narrations: 0, final_text: "" }
+  const record = (action) => {
+    state.actions.push(action)
+    if (state.steps_actions.length === 0) state.steps_actions.push([])
+    state.steps_actions[state.steps_actions.length - 1].push(action)
+  }
   const textWidth = Math.max(40, width - 2)
   const startedAt = now()
   let pendingReads = []
@@ -239,7 +248,7 @@ export function createRenderer({
     if (pendingReads.length === 0) return []
     const files = pendingReads
     pendingReads = []
-    state.actions.push({ verb: "Leyó", object: files.length === 1 ? files[0] : `${files.length} archivos`, result: "", failed: false })
+    record({ verb: "Leyó", object: files.length === 1 ? files[0] : `${files.length} archivos`, files, result: "", failed: false })
     const line = files.length === 1
       ? `${mark(false)} ${bold("Leyó")} ${files[0]}`
       : `${mark(false)} ${bold("Leyó")} ${files.length} archivos ${dim(truncate(files.join(", "), textWidth - 24))}`
@@ -254,8 +263,11 @@ export function createRenderer({
       return []
     }
     const out = flushReads()
-    if (action.writes && !action.failed) lastWritten = { tool: action.tool, object: action.object, input: part.state?.input ?? {} }
-    state.actions.push({ verb: action.verb, object: action.object, result: action.result, failed: action.failed })
+    if (action.writes && !action.failed) {
+      lastWritten = { tool: action.tool, object: action.object, input: part.state?.input ?? {} }
+      for (const file of action.object.split(", ")) if (file && !state.written.includes(file)) state.written.push(file)
+    }
+    record({ verb: action.verb, object: action.object, result: action.result, failed: action.failed })
     const color = action.failed ? red : action.writes ? yellow : (text) => text
     const resultText = action.result ? `  ${action.failed ? red(action.result) : dim(action.result)}` : ""
     out.push(stamp(`${mark(action.failed)} ${bold(action.verb)} ${color(truncate(action.object, textWidth - 30))}${resultText}`))
@@ -293,6 +305,7 @@ export function createRenderer({
     switch (event.type) {
       case "step_start":
         state.steps += 1
+        state.steps_actions.push([])
         return []
       case "tool_use":
         return actionLines(part)
@@ -307,10 +320,13 @@ export function createRenderer({
       case "step_finish": {
         state.cost += part.cost ?? 0
         state.total_tokens = part.tokens?.total ?? state.total_tokens
-        if (!detail) return []
+        // Reads still pending belong to this step, not the next one.
+        const flushed = flushReads()
+        if (!detail) return flushed
         const t = part.tokens ?? {}
         const pct = contextTokens ? ` (${Math.round((state.total_tokens / contextTokens) * 100)}%)` : ""
         return [
+          ...flushed,
           dim(`· paso ${state.steps} · contexto ${compact(state.total_tokens)}${contextTokens ? ` / ${compact(contextTokens)}` : ""}${pct} · ${state.cost.toFixed(4)} USD`),
           dim(`  entrada ${formatNumber(t.input)} · caché ${formatNumber(t.cache?.read)} · salida ${formatNumber(t.output)} · razonamiento ${formatNumber(t.reasoning)}`),
         ]
@@ -331,14 +347,22 @@ export function createRenderer({
 
   // Closing digest: every action numbered on one line, then the final report
   // in full, so a reader who fell behind catches up here.
-  function finish() {
+  // `outcome` is what the caller learned from the files written (see
+  // artifact-summary.mjs); it leads the digest because it is what the user
+  // needs to decide.
+  function finish({ outcome = [] } = {}) {
     const out = flushReads()
+    if (outcome.length > 0) {
+      out.push("", bold("Resultado"))
+      for (const line of outcome) for (const row of wrap(line, textWidth - 2)) out.push(`  ${row}`)
+    }
     if (state.actions.length > 0) {
-      out.push("", bold("Resumen"))
-      state.actions.forEach((action, index) => {
-        const number = String(index + 1).padStart(2)
-        const result = action.result ? `  ${action.failed ? red(action.result) : dim(action.result)}` : ""
-        out.push(`${dim(number)} ${action.failed ? red("✘") : green("✔")} ${action.verb} ${truncate(action.object, textWidth - 30)}${result}`)
+      out.push("", bold("Qué hizo en cada paso"))
+      state.steps_actions.forEach((actions, index) => {
+        const failed = actions.some((action) => action.failed)
+        for (const row of wrap(describeStep(actions), textWidth - 12)) {
+          out.push(`${dim(String(index + 1).padStart(2))} ${failed ? red("✘") : green("✔")} ${row}`)
+        }
       })
     }
     if (lastText) {
