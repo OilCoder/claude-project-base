@@ -15,6 +15,6 @@
     "builder": "node .opencode/codegen/scripts/run-builder.mjs",
     "certify": "node .opencode/codegen/scripts/certify.mjs",
     "release:check": "node .opencode/codegen/scripts/certify.mjs check",
-    "test": "node --test"
+    "test": "CODEGEN_DISPLAY=inline node --test"
   }
 }

@@ -1,4 +1,5 @@
-import { access, mkdir, readFile, writeFile } from "node:fs/promises"
+import { access, copyFile, mkdir, readFile, writeFile } from "node:fs/promises"
+import os from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -8,7 +9,14 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const viewScript = path.resolve(here, "../scripts/agent-view.mjs")
 const rolesFile = path.resolve(here, "../config/agent-roles.json")
 
-export const DISPLAYS = ["inline", "tmux", "wt"]
+export const DISPLAYS = ["inline", "tmux", "wt", "vscode"]
+
+// The VS Code display hands each job to the "Codegen Agent Terminals"
+// extension through a spool directory; the extension opens one integrated
+// terminal per job and runs agent-view.mjs there.
+export function vscodeSpoolDirectory() {
+  return process.env.CODEGEN_VSCODE_SPOOL ?? path.join(os.homedir(), ".local/state/codegen/vscode-jobs")
+}
 
 export function resolveDisplay(args = {}) {
   const display = args.display ?? process.env.CODEGEN_DISPLAY ?? "tmux"
@@ -77,6 +85,7 @@ export async function runAgentProcess({
     stderr_file: path.join(artifacts, `${slug}.stderr.txt`),
     done_file: path.join(artifacts, `${slug}.done.json`),
     hold: hold && process.env.CODEGEN_VIEW_HOLD !== "0",
+    view_script: viewScript,
   }
   await writeFile(jobFile, `${JSON.stringify(job, null, 2)}\n`)
   const command = `${shellQuote(process.execPath)} ${shellQuote(viewScript)} ${shellQuote(jobFile)}`
@@ -84,6 +93,7 @@ export async function runAgentProcess({
 
   if (display === "tmux") await openTmuxWindow({ command, title, hold: job.hold })
   else if (display === "wt") await openWindowsTerminalTab({ command, title })
+  else if (display === "vscode") await spoolForVsCode(jobFile, slug)
 
   const deadline = Date.now() + (timeoutSeconds + 60) * 1000
   while (!(await exists(job.done_file))) {
@@ -132,6 +142,15 @@ async function openTmuxWindow({ command, title, hold }) {
   // it, keep the dead window so the output can still be read.
   if (!hold) await tmux(["set-option", "-p", "-t", pane, "remain-on-exit", "on"], { allowFailure: true })
   return pane
+}
+
+// VS Code: the extension polls the spool directory and opens a terminal tab
+// per job. Without the extension the runner waits until its timeout and
+// reports that no view finished, so the spool entry carries the hint.
+async function spoolForVsCode(jobFile, slug) {
+  const spool = vscodeSpoolDirectory()
+  await mkdir(spool, { recursive: true })
+  await copyFile(jobFile, path.join(spool, `${slug}.job.json`))
 }
 
 // Windows Terminal from WSL: one new tab per agent. Not exercised by tests.

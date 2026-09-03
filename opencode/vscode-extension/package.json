@@ -1,0 +1,32 @@
+{
+  "name": "codegen-agent-terminals",
+  "displayName": "Codegen Agent Terminals",
+  "description": "Opens one VS Code terminal per OpenCode codegen agent (CODEGEN_DISPLAY=vscode).",
+  "version": "0.1.0",
+  "publisher": "oilcoder",
+  "license": "MIT",
+  "engines": { "vscode": "^1.90.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "codegenAgentTerminals.showSpool", "title": "Codegen: Show agent job spool" }
+    ],
+    "configuration": {
+      "title": "Codegen Agent Terminals",
+      "properties": {
+        "codegenAgentTerminals.spoolDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Directory watched for agent jobs. Empty means ~/.local/state/codegen/vscode-jobs (CODEGEN_VSCODE_SPOOL in the runners)."
+        },
+        "codegenAgentTerminals.node": {
+          "type": "string",
+          "default": "node",
+          "description": "Node binary used to run agent-view.mjs inside the terminal."
+        }
+      }
+    }
+  }
+}

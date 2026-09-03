@@ -216,6 +216,19 @@ tmux attach -t codegen        # from another terminal, or from the phone over SS
 - `inline`: the agent's JSON events are captured silently without opening a
   window.
 - `wt`: one Windows Terminal tab per agent from WSL. Written, not yet exercised.
+- `vscode`: one VS Code integrated terminal per agent. The runner spools the
+  job to `~/.local/state/codegen/vscode-jobs` (`CODEGEN_VSCODE_SPOOL`) and the
+  "Codegen Agent Terminals" extension (`vscode-extension/`, install with
+  `node opencode/vscode-extension/install.mjs` and reload the window) opens a
+  terminal named after the agent that runs `agent-view.mjs` there. Without the
+  extension the runner waits for its timeout and reports that no view finished.
+
+From the supervisor, set the variable before starting OpenCode so the tool and
+the orchestrator pass it to every agent, for example
+`CODEGEN_DISPLAY=vscode opencode` from the VS Code terminal, or
+`CODEGEN_DISPLAY=tmux opencode` inside tmux (then `Ctrl-b n` cycles the agent
+windows). Do not resume with `opencode -c` after a run: the most recent session
+may be a runner's headless agent session, not the supervisor's.
 
 The window header shows the agent, its roles (`config/agent-roles.json`), run id
 and attempt, the selected Go model, the context window from
