@@ -86,3 +86,10 @@ test("installer refuses to overwrite a modified managed file", async () => {
     await rm(target, { recursive: true, force: true })
   }
 })
+
+test("the workflow tool starts runners through node, never through the OpenCode runtime", async () => {
+  const source = await readFile(path.resolve(".opencode/tools/codegen_workflow.js"), "utf8")
+  assert.ok(!source.includes("process.execPath"), "process.execPath is the OpenCode binary inside a tool")
+  assert.match(source, /executeFile\(nodeBinary/)
+  assert.match(source, /"--display", display/)
+})

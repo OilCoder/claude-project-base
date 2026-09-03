@@ -7,6 +7,13 @@ import { tool } from "@opencode-ai/plugin"
 const executeFile = promisify(execFile)
 const operations = new Set(["draft", "approve", "orchestrate"])
 
+// This tool runs inside the OpenCode runtime, whose own executable path is the
+// OpenCode binary itself, so the runners are started through `node` from PATH.
+const nodeBinary = process.env.CODEGEN_NODE ?? "node"
+// Runners open tmux windows by default; from the supervisor's tool the events
+// are captured silently unless the user asked for a display.
+const display = process.env.CODEGEN_DISPLAY ?? "inline"
+
 export default tool({
   description:
     "Run the controlled code-generation workflow. Draft a Goal from user intent, approve the existing Goal after explicit user confirmation, or orchestrate an approved Goal.",
@@ -25,17 +32,17 @@ export default tool({
     let scriptArgs
     if (args.operation === "draft") {
       script = "run-goal.mjs"
-      scriptArgs = ["--intent", args.intent, "--output", goal]
+      scriptArgs = ["--intent", args.intent, "--output", goal, "--display", display]
     } else if (args.operation === "approve") {
       script = "run-goal.mjs"
       scriptArgs = ["--approve", goal]
     } else {
       script = "orchestrate.mjs"
-      scriptArgs = ["--goal", goal]
+      scriptArgs = ["--goal", goal, "--display", display]
     }
 
     try {
-      const result = await executeFile(process.execPath, [path.join(codegen, script), ...scriptArgs], {
+      const result = await executeFile(nodeBinary, [path.join(codegen, script), ...scriptArgs], {
         cwd: context.directory,
         env: process.env,
         maxBuffer: 10 * 1024 * 1024,
