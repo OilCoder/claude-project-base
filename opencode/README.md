@@ -231,13 +231,23 @@ windows). Do not resume with `opencode -c` after a run: the most recent session
 may be a runner's headless agent session, not the supervisor's.
 
 The window header shows the agent, its roles (`config/agent-roles.json`), run id
-and attempt, the selected Go model, the context window from
-`model-pools.json`, and per-agent lines (contract and allowed paths, objective,
-research question and budget, options under deliberation). The body renders
-each tool call, the agent's text, and after every step the context in use
-against the window, cached/input/output tokens, and cumulative cost. Raw events
-still go to the run artifacts, so classification and metrics are identical in
-every display. Verified live on 2026-09-03 with `opencode-go/minimax-m2.7` on the
+and attempt, the selected model, the context window from `model-pools.json`,
+and per-agent lines (contract and allowed paths, objective, research question
+and budget, options under deliberation). The body is a guided transcript: one
+line per action in plain language with its result and elapsed time ("Escribió
+scripts/count-las.sh  +4", "Ejecutó gate.sh  salida 1" plus the failure cause),
+consecutive reads grouped, what was written previewed (`CODEGEN_VIEW_PREVIEW`
+lines, 40 by default), and the model's narration folded to two quoted lines.
+At the end, a numbered digest of every action, the agent's final report in
+full, and one status line with steps, actions, cost, and context used.
+`CODEGEN_VIEW_DETAIL=1` unfolds the narration and adds the tool names and the
+per-step token breakdown. Raw events still go to the run artifacts, so
+classification and metrics are identical in every display, and a finished run
+can be read again at reading speed:
+
+```bash
+node .opencode/codegen/scripts/agent-view.mjs --replay <run>/<agent>.events.jsonl --pace
+``` Verified live on 2026-09-03 with `opencode-go/minimax-m2.7` on the
 builder fixture.
 
 Operational note: `opencode run` waits for EOF on stdin when stdin is not a

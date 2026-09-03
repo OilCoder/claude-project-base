@@ -10,10 +10,45 @@ import readline from "node:readline"
 
 import { createRenderer, dim, green, red, renderHeader } from "../lib/display.mjs"
 
-const job = JSON.parse(await readFile(process.argv[2], "utf8"))
 const out = (line) => process.stdout.write(`${line}\n`)
-
 const width = process.stdout.columns || 100
+const args = process.argv.slice(2)
+
+// --replay <events.jsonl> [--pace]: render a finished run again, at reading
+// speed with --pace (Enter advances one step). The header comes from the
+// sibling job file when it exists.
+if (args[0] === "--replay") {
+  const eventsFile = args[1]
+  if (!eventsFile) throw new Error("usage: agent-view.mjs --replay <events.jsonl> [--pace]")
+  const pace = args.includes("--pace")
+  const jobFile = eventsFile.replace(/\.events\.jsonl$/, ".job.json")
+  let header = { title: eventsFile.split("/").at(-1) }
+  let directory = ""
+  try {
+    const replayJob = JSON.parse(await readFile(jobFile, "utf8"))
+    header = replayJob.header
+    directory = replayJob.directory
+  } catch {
+    // no job file next to the events: minimal header
+  }
+  for (const line of renderHeader(header, { width })) out(line)
+  out("")
+  const renderer = createRenderer({ directory, contextTokens: header.context_tokens, width })
+  const waitForEnter = () => new Promise((resolve) => { process.stdin.resume(); process.stdin.once("data", resolve) })
+  for (const line of (await readFile(eventsFile, "utf8")).split("\n")) {
+    for (const rendered of renderer.feed(line)) out(rendered)
+    if (pace && process.stdin.isTTY && line.includes('"step_finish"')) {
+      process.stdout.write(dim("  ⏎ siguiente paso"))
+      await waitForEnter()
+      process.stdout.write("\r" + " ".repeat(20) + "\r")
+    }
+  }
+  for (const line of renderer.finish()) out(line)
+  process.exit(0)
+}
+
+const job = JSON.parse(await readFile(args[0], "utf8"))
+
 for (const line of renderHeader(job.header, { width })) out(line)
 out("")
 
@@ -48,6 +83,7 @@ child.on("close", async (code, signal) => {
   stderr.end()
   const exitCode = timedOut ? 124 : (code ?? 1)
   const seconds = Math.round((Date.now() - started) / 1000)
+  for (const line of renderer.finish()) out(line)
   out("")
   out(
     exitCode === 0

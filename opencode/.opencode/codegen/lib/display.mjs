@@ -1,9 +1,11 @@
 // Human-readable rendering of `opencode run --format json` events, used by the
 // per-agent terminal view. Pure functions: feed lines, get printable lines.
 //
-// The view reads like a transcript: what the agent says as paragraphs, each
-// tool call as one short line, and one dim status line per step with context
-// use and cost. CODEGEN_VIEW_DETAIL=1 adds the token breakdown per step.
+// The view is a guided transcript: every action as one line in plain
+// language with its result and elapsed time, the model's narration folded to
+// a short quote (full with CODEGEN_VIEW_DETAIL=1), what it wrote previewed,
+// and at the end a numbered digest of the actions, the final report, and one
+// status line. Telemetry per step only in detail mode.
 
 const ESC = "\u001b"
 const useColor = () => !process.env.NO_COLOR && process.env.CODEGEN_COLOR !== "0"
@@ -75,6 +77,11 @@ function relative(filePath, directory) {
   return directory && filePath.startsWith(`${directory}/`) ? filePath.slice(directory.length + 1) : filePath
 }
 
+// Light markdown cleanup for terminal quotes: bold markers and heading hashes.
+function plainMarkdown(text) {
+  return String(text).replaceAll("**", "").replace(/^#{1,6}\s+/gm, "")
+}
+
 // header: { title, agent, roles, run_id, attempt, max_attempts, model,
 //           context_tokens, lines: [] }
 export function renderHeader(header, { width = 100 } = {}) {
@@ -101,6 +108,18 @@ export function patchFiles(patchText) {
   return [...String(patchText ?? "").matchAll(/^\*\*\* (?:Add|Update|Delete) File: (.+)$/gm)].map((match) => match[1].trim())
 }
 
+// +added −removed from a unified diff or an apply_patch body.
+export function diffStats(text) {
+  let added = 0
+  let removed = 0
+  for (const row of String(text ?? "").split("\n")) {
+    if (/^\+\+\+ |^--- |^\*\*\* /.test(row)) continue
+    if (row.startsWith("+")) added += 1
+    else if (row.startsWith("-")) removed += 1
+  }
+  return { added, removed }
+}
+
 // The content an agent wrote, so the view shows what was produced and not
 // only that something was produced. Capped at `limit` lines.
 export function writtenPreview(tool, input, limit) {
@@ -119,29 +138,140 @@ export function writtenPreview(tool, input, limit) {
   return rest > 0 ? [...shown, `… ${rest} líneas más`] : shown
 }
 
+// Plain-language verb for each tool. Unknown tools keep their name.
+export const VERBS = {
+  read: "Leyó",
+  glob: "Buscó archivos",
+  list: "Listó",
+  grep: "Buscó texto",
+  bash: "Ejecutó",
+  write: "Escribió",
+  edit: "Editó",
+  apply_patch: "Escribió",
+  webfetch: "Consultó",
+  websearch: "Buscó en la web",
+  todowrite: "Anotó tareas",
+  todoread: "Revisó tareas",
+  task: "Delegó",
+}
+
+// Describes one tool_use part: verb, object, result, failure cause, preview.
+export function describeAction(part, { directory = "", previewLines = 40 } = {}) {
+  const tool = part.tool ?? "tool"
+  const input = part.state?.input ?? {}
+  const metadata = part.state?.metadata ?? {}
+  const status = part.state?.status
+  const exit = metadata.exit
+  const failed = status === "error" || (exit !== undefined && exit !== 0)
+  const writes = tool === "write" || tool === "edit" || tool === "apply_patch"
+  let verb = VERBS[tool] ?? tool
+  let object = part.title ?? ""
+  let result = ""
+
+  if (tool === "bash") {
+    object = input.command ?? object
+    if (exit !== undefined) result = exit === 0 ? "salida 0" : `salida ${exit}`
+  } else if (tool === "apply_patch") {
+    const files = patchFiles(input.patchText).map((file) => relative(file, directory))
+    object = files.join(", ") || "parche"
+    const stats = diffStats(metadata.diff ?? input.patchText)
+    result = `+${stats.added}${stats.removed ? ` −${stats.removed}` : ""}`
+  } else if (tool === "write") {
+    object = relative(input.filePath ?? input.path ?? part.title, directory)
+    result = `${String(input.content ?? "").split("\n").length} líneas`
+  } else if (tool === "edit") {
+    object = relative(input.filePath ?? input.path ?? part.title, directory)
+    if (!String(input.oldString ?? input.old_string ?? "").length) verb = "Escribió"
+    const stats = diffStats(metadata.diff)
+    result = metadata.diff ? `+${stats.added} −${stats.removed}` : ""
+  } else if (["read", "glob", "list"].includes(tool)) {
+    object = relative(input.filePath ?? input.path ?? part.title, directory) || input.pattern || ""
+    if (tool === "glob" && input.pattern) object = `${input.pattern}${object && object !== input.pattern ? ` en ${object}` : ""}`
+    if (metadata.count !== undefined) result = `${metadata.count} resultados`
+  } else if (tool === "grep") {
+    object = `"${input.pattern ?? ""}"${input.path ? ` en ${relative(input.path, directory)}` : ""}`
+  } else if (tool === "webfetch") object = input.url ?? object
+  else if (tool === "websearch") object = `"${input.query ?? ""}"`
+
+  const cause = []
+  if (failed) {
+    const output = String(part.state?.output ?? metadata.output ?? part.state?.error ?? "").trim()
+    for (const row of output.split("\n").filter((r) => r.trim()).slice(-3)) cause.push(row)
+  }
+  const preview = writes && !failed && previewLines > 0
+    ? writtenPreview(tool, input, previewLines).map((row) => (directory ? row.replaceAll(`${directory}/`, "") : row))
+    : []
+  return { tool, verb, object, result, failed, cause, preview, writes }
+}
+
 export function createRenderer({
   directory = "",
   contextTokens = 0,
   width = 100,
   detail = process.env.CODEGEN_VIEW_DETAIL === "1",
   previewLines = Number(process.env.CODEGEN_VIEW_PREVIEW ?? 40),
+  now = () => Date.now(),
 } = {}) {
-  const state = { steps: 0, cost: 0, total_tokens: 0, errors: 0, tools: 0 }
+  const state = { steps: 0, cost: 0, total_tokens: 0, errors: 0, tools: 0, actions: [], narrations: 0, final_text: "" }
   const textWidth = Math.max(40, width - 2)
-  let lastWasText = false
+  const startedAt = now()
+  let pendingReads = []
+  let lastText = ""
+  // Elapsed time follows the events' own timestamps when they carry one, so a
+  // replay shows the real timing; otherwise the wall clock.
+  let firstEventAt = null
+  let currentEventAt = null
 
-  function statusLine(tokens) {
-    const total = tokens?.total ?? 0
-    state.total_tokens = total
-    const pct = contextTokens ? ` (${Math.round((total / contextTokens) * 100)}%)` : ""
-    const context = `${compact(total)}${contextTokens ? ` / ${compact(contextTokens)}` : ""}${pct}`
-    return dim(`· paso ${state.steps} · contexto ${context} · ${state.cost.toFixed(4)} USD`)
+  const elapsed = () => {
+    const ms = firstEventAt !== null ? currentEventAt - firstEventAt : now() - startedAt
+    return `+${Math.round(ms / 1000)} s`
+  }
+  const stamp = (line) => {
+    const plain = stripAnsi(line)
+    const tag = dim(elapsed())
+    const pad = Math.max(2, textWidth - plain.length - stripAnsi(tag).length)
+    return `${line}${" ".repeat(pad)}${tag}`
+  }
+  const mark = (failed) => (failed ? red("✘") : green("✔"))
+
+  function flushReads() {
+    if (pendingReads.length === 0) return []
+    const files = pendingReads
+    pendingReads = []
+    state.actions.push({ verb: "Leyó", object: files.length === 1 ? files[0] : `${files.length} archivos`, result: "", failed: false })
+    const line = files.length === 1
+      ? `${mark(false)} ${bold("Leyó")} ${files[0]}`
+      : `${mark(false)} ${bold("Leyó")} ${files.length} archivos ${dim(truncate(files.join(", "), textWidth - 24))}`
+    return [stamp(line)]
   }
 
-  function detailLine(tokens) {
-    return dim(
-      `  entrada ${formatNumber(tokens?.input)} · caché ${formatNumber(tokens?.cache?.read)} · salida ${formatNumber(tokens?.output)} · razonamiento ${formatNumber(tokens?.reasoning)}`,
-    )
+  function actionLines(part) {
+    const action = describeAction(part, { directory, previewLines })
+    state.tools += 1
+    if (action.tool === "read" && !action.failed) {
+      pendingReads.push(action.object)
+      return []
+    }
+    const out = flushReads()
+    state.actions.push({ verb: action.verb, object: action.object, result: action.result, failed: action.failed })
+    const color = action.failed ? red : action.writes ? yellow : (text) => text
+    const resultText = action.result ? `  ${action.failed ? red(action.result) : dim(action.result)}` : ""
+    out.push(stamp(`${mark(action.failed)} ${bold(action.verb)} ${color(truncate(action.object, textWidth - 30))}${resultText}`))
+    for (const row of action.cause) out.push(red(`    ${truncate(row, textWidth - 4)}`))
+    for (const row of action.preview) out.push(dim(`    ${clip(row, textWidth - 4)}`))
+    if (detail) out.push(dim(`    herramienta ${action.tool}`))
+    return out
+  }
+
+  // Narration is folded to two lines unless detail is on; the final report is
+  // printed in full by finish().
+  function narrationLines(text) {
+    state.narrations += 1
+    const rows = wrap(plainMarkdown(text), textWidth - 2)
+    const shown = detail ? rows : rows.slice(0, 2)
+    const out = shown.map((row) => `${green("┃")} ${detail ? row : dim(row)}`)
+    if (!detail && rows.length > 2) out[out.length - 1] = `${out[out.length - 1]}${dim(" …")}`
+    return out
   }
 
   function feed(line) {
@@ -154,69 +284,41 @@ export function createRenderer({
       return [dim(trimmed)]
     }
     const part = event.part ?? {}
+    if (typeof event.timestamp === "number") {
+      if (firstEventAt === null) firstEventAt = event.timestamp
+      currentEventAt = event.timestamp
+    }
     switch (event.type) {
       case "step_start":
         state.steps += 1
         return []
-      case "tool_use": {
-        state.tools += 1
-        const input = part.state?.input ?? {}
-        const status = part.state?.status
-        const ms = part.state?.time ? part.state.time.end - part.state.time.start : null
-        const tool = part.tool ?? "tool"
-        let detailText = part.title ?? ""
-        if (tool === "bash") detailText = input.command ?? detailText
-        else if (tool === "apply_patch") {
-          const files = patchFiles(input.patchText).map((file) => relative(file, directory))
-          detailText = files.join(", ") || "patch"
-        } else if (["read", "write", "edit", "glob", "list"].includes(tool)) {
-          detailText = relative(input.filePath ?? input.path ?? part.title, directory) || input.pattern || ""
-        } else if (tool === "grep") detailText = `${input.pattern ?? ""}  ${relative(input.path ?? "", directory)}`.trim()
-        else if (tool === "webfetch") detailText = input.url ?? detailText
-        else if (tool === "websearch") detailText = input.query ?? detailText
-        const exit = part.state?.metadata?.exit
-        const failed = status === "error" || (exit !== undefined && exit !== 0)
-        const tail = [
-          exit !== undefined && exit !== 0 ? red(`exit ${exit}`) : "",
-          status === "error" ? red("error") : "",
-          ms !== null && ms >= 2000 ? dim(`${(ms / 1000).toFixed(1)} s`) : "",
-        ]
-          .filter(Boolean)
-          .join(" ")
-        const writes = tool === "write" || tool === "edit" || tool === "apply_patch"
-        const color = failed ? red : writes ? yellow : cyan
-        const rows = [`${color("▸")} ${color(tool.padEnd(6))} ${truncate(detailText, textWidth - 10)}${tail ? `  ${tail}` : ""}`]
-        if (writes && !failed && previewLines > 0) {
-          for (const row of writtenPreview(tool, input, previewLines)) {
-            rows.push(dim(`    ${clip(row.replaceAll(`${directory}/`, ""), textWidth - 4)}`))
-          }
-        }
-        // A failed command shows the tail of its output so the reason is visible.
-        if (failed) {
-          const output = String(part.state?.output ?? part.state?.error ?? "").trim()
-          for (const row of output.split("\n").slice(-4)) rows.push(dim(`         ${truncate(row, textWidth - 9)}`))
-        }
-        lastWasText = false
-        return rows
-      }
+      case "tool_use":
+        return actionLines(part)
       case "text": {
         const text = (part.text ?? "").trim()
         if (!text) return []
-        const rows = wrap(text.replaceAll("**", ""), textWidth).map((row) => (row ? `${green("▎")} ${row}` : green("▎")))
-        const out = lastWasText ? rows : ["", ...rows]
-        lastWasText = true
-        return out
+        const out = flushReads()
+        lastText = text
+        state.final_text = text
+        return [...out, ...narrationLines(text)]
       }
       case "step_finish": {
         state.cost += part.cost ?? 0
-        lastWasText = false
-        return [statusLine(part.tokens), ...(detail ? [detailLine(part.tokens)] : [])]
+        state.total_tokens = part.tokens?.total ?? state.total_tokens
+        if (!detail) return []
+        const t = part.tokens ?? {}
+        const pct = contextTokens ? ` (${Math.round((state.total_tokens / contextTokens) * 100)}%)` : ""
+        return [
+          dim(`· paso ${state.steps} · contexto ${compact(state.total_tokens)}${contextTokens ? ` / ${compact(contextTokens)}` : ""}${pct} · ${state.cost.toFixed(4)} USD`),
+          dim(`  entrada ${formatNumber(t.input)} · caché ${formatNumber(t.cache?.read)} · salida ${formatNumber(t.output)} · razonamiento ${formatNumber(t.reasoning)}`),
+        ]
       }
       case "error":
       case "session.error": {
         state.errors += 1
         const error = event.error ?? event.properties?.error ?? {}
         return [
+          ...flushReads(),
           red(`ERROR ${error.name ?? ""} ${error.data?.statusCode ?? ""} ${error.data?.message ?? error.message ?? ""}`.trim()),
         ]
       }
@@ -225,5 +327,26 @@ export function createRenderer({
     }
   }
 
-  return { feed, state }
+  // Closing digest: every action numbered on one line, then the final report
+  // in full, so a reader who fell behind catches up here.
+  function finish() {
+    const out = flushReads()
+    if (state.actions.length > 0) {
+      out.push("", bold("Resumen"))
+      state.actions.forEach((action, index) => {
+        const number = String(index + 1).padStart(2)
+        const result = action.result ? `  ${action.failed ? red(action.result) : dim(action.result)}` : ""
+        out.push(`${dim(number)} ${action.failed ? red("✘") : green("✔")} ${action.verb} ${truncate(action.object, textWidth - 30)}${result}`)
+      })
+    }
+    if (lastText) {
+      out.push("", bold("Informe del agente"))
+      for (const row of wrap(plainMarkdown(lastText), textWidth - 2)) out.push(row ? `${green("┃")} ${row}` : green("┃"))
+    }
+    const pct = contextTokens ? ` · ventana ${Math.round((state.total_tokens / contextTokens) * 100)} %` : ""
+    out.push("", dim(`${state.steps} pasos · ${state.tools} acciones · ${state.narrations} intervenciones · ${state.cost.toFixed(4)} USD${pct}`))
+    return out
+  }
+
+  return { feed, finish, state }
 }
