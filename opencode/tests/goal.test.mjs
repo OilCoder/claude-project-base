@@ -145,3 +145,11 @@ test("renderer refuses an invalid goal", async () => {
   const goal = await fixtureGoal()
   assert.throws(() => renderGoalMarkdown({ ...goal, title: "" }), /Cannot render invalid goal/)
 })
+
+test("a Goal with no planner budget is invalid because nothing could ever build it", async () => {
+  const goal = JSON.parse(await readFile(path.join(here, "fixtures/goal-research/goal.json"), "utf8"))
+  goal.budgets.max_planner_calls = 0
+  const result = validateGoal(goal)
+  assert.equal(result.valid, false)
+  assert.ok(result.errors.some((error) => error.includes("max_planner_calls must be at least 1")))
+})

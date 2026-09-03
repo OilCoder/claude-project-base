@@ -115,13 +115,13 @@ test("sealed goal with recorded deliberation never routes direct or deliberative
   assert.ok(result.reasons.includes("deliberation-recorded"))
 })
 
-test("planned route without planner budget is BUDGET_BLOCKED", async () => {
+test("a Goal without planner budget never reaches routing: the validator rejects it", async () => {
   const goal = await fixtureGoal()
   const result = routeGoal({
     ...sealedDirect(goal),
     routing: { ...sealedDirect(goal).routing, change_shape: "system", risk: "high" },
     budgets: { ...goal.budgets, max_planner_calls: 0 },
   })
-  assert.equal(result.status, "BUDGET_BLOCKED")
-  assert.deepEqual(result.reasons, ["no-planner-budget"])
+  assert.equal(result.status, "INVALID_GOAL")
+  assert.ok(result.reasons.some((reason) => reason.includes("max_planner_calls must be at least 1")))
 })

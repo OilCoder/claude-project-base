@@ -400,7 +400,8 @@
         },
         "max_planner_calls": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 1,
+          "description": "At least 1: the Planner writes every contract, including the single contract of the direct route."
         },
         "max_derived_tasks": {
           "type": "integer",

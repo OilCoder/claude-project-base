@@ -149,6 +149,11 @@ export function validateGoal(goal) {
   if (research.length > (budgets?.max_research_questions ?? -1)) {
     errors.push("research question count exceeds its budget")
   }
+  // Every route that builds needs the Planner at least once (the direct route
+  // is the Planner capped at one contract), so a zero budget can never be built.
+  if (Number.isInteger(budgets?.max_planner_calls) && budgets.max_planner_calls < 1) {
+    errors.push("budgets.max_planner_calls must be at least 1: the Planner writes every contract, including the single contract of the direct route")
+  }
 
   if (goal?.status === "SEALED") {
     if (questions.some((question) => question.blocking)) {
