@@ -48,6 +48,56 @@ function readJob(file) {
   }
 }
 
+// A claim records which extension host took the job. A claim whose host is
+// gone (window reloaded or closed before the terminal started) is released so
+// the next poll can open the job again.
+function ownerFile(taken) {
+  return `${taken}.owner`
+}
+
+function claimAlive(taken) {
+  try {
+    const owner = JSON.parse(fs.readFileSync(ownerFile(taken), "utf8"))
+    if (owner.pid === process.pid) return true
+    process.kill(owner.pid, 0)
+    return true
+  } catch (error) {
+    return error?.code === "EPERM" // alive but not ours to signal
+  }
+}
+
+function releaseAbandoned(spool, output) {
+  let entries
+  try {
+    entries = fs.readdirSync(spool)
+  } catch {
+    return
+  }
+  for (const entry of entries) {
+    if (!entry.endsWith(".taken.job.json")) continue
+    const taken = path.join(spool, entry)
+    const job = readJob(taken)
+    if (!job || !ownsJob(job)) continue
+    if (job.done_file && fs.existsSync(job.done_file)) {
+      try {
+        fs.unlinkSync(taken)
+        fs.rmSync(ownerFile(taken), { force: true })
+      } catch {
+        // already gone
+      }
+      continue
+    }
+    if (claimAlive(taken)) continue
+    try {
+      fs.rmSync(ownerFile(taken), { force: true })
+      fs.renameSync(taken, taken.replace(/\.taken\.job\.json$/, ".job.json"))
+      output.appendLine(`released abandoned job ${entry}`)
+    } catch (error) {
+      output.appendLine(`cannot release ${entry}: ${error.message}`)
+    }
+  }
+}
+
 function quote(value) {
   return `'${String(value).replace(/'/g, `'\\''`)}'`
 }
@@ -76,68 +126,15 @@ function openTerminal(jobFile, output) {
   return true
 }
 
-// Jobs claimed by a previous window (for example before a reload) are reopened
-// if their runner is still waiting, or dropped if the view already finished.
-function recover(spool, output) {
-  let entries
-  try {
-    entries = fs.readdirSync(spool)
-  } catch {
-    return
-  }
-  for (const entry of entries) {
-    if (!entry.endsWith(".taken.job.json")) continue
-    const taken = path.join(spool, entry)
-    try {
-      const job = JSON.parse(fs.readFileSync(taken, "utf8"))
-      if (!ownsJob(job)) continue
-      if (job.done_file && fs.existsSync(job.done_file)) {
-        fs.unlinkSync(taken)
-        continue
-      }
-      fs.renameSync(taken, taken.replace(/\.taken\.job\.json$/, ".job.json"))
-      output.appendLine(`recovered pending job ${entry}`)
-    } catch (error) {
-      output.appendLine(`cannot recover ${entry}: ${error.message}`)
-    }
-  }
-}
-
-function poll(spool, output) {
-  let entries
-  try {
-    entries = fs.readdirSync(spool)
-  } catch {
-    return
-  }
-  for (const entry of entries) {
-    if (!entry.endsWith(".job.json") || entry.endsWith(".taken.job.json")) continue
-    const jobFile = path.join(spool, entry)
-    const pending = readJob(jobFile)
-    if (!pending || !ownsJob(pending)) continue
-    const taken = jobFile.replace(/\.job\.json$/, ".taken.job.json")
-    // Claim the job before the terminal starts so a second poll never opens it twice.
-    try {
-      fs.renameSync(jobFile, taken)
-    } catch {
-      continue
-    }
-    try {
-      if (!openTerminal(taken, output)) fs.renameSync(taken, jobFile)
-    } catch (error) {
-      output.appendLine(`cannot open terminal for ${entry}: ${error.stack ?? error.message}`)
-      vscode.window.showErrorMessage(`Codegen agent terminal failed: ${error.message}`)
-    }
-  }
-}
-
 function activate(context) {
   const output = vscode.window.createOutputChannel("Codegen Agent Terminals")
   const spool = spoolDirectory()
   fs.mkdirSync(spool, { recursive: true })
   output.appendLine(`watching ${spool} for ${(vscode.workspace.workspaceFolders ?? []).map((folder) => folder.uri.fsPath).join(", ") || "(no workspace)"}`)
-  recover(spool, output)
-  const timer = setInterval(() => poll(spool, output), POLL_MS)
+  const timer = setInterval(() => {
+    releaseAbandoned(spool, output)
+    poll(spool, output)
+  }, POLL_MS)
   context.subscriptions.push({ dispose: () => clearInterval(timer) })
   context.subscriptions.push(
     vscode.commands.registerCommand("codegenAgentTerminals.showSpool", () => {
