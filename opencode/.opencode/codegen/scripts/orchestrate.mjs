@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+
+import { loadRegistry, newRunId, parseArguments } from "../lib/cli.mjs"
+import { orchestrate } from "../lib/orchestrator.mjs"
+import { runProcess } from "../lib/process.mjs"
+
+const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
+const systemRoot = path.resolve(scriptDirectory, "../../..")
+
+// Every model-backed step runs as a separate runner process: run ids use the
+// pid, and each `opencode run` owns its own local server.
+async function spawnRunner(script, flags, directory) {
+  const args = [path.join(scriptDirectory, script), "--directory", directory]
+  for (const [key, value] of Object.entries(flags)) {
+    if (value !== null && value !== undefined) args.push(`--${key}`, String(value))
+  }
+  const result = await runProcess(process.execPath, args, { cwd: directory, timeoutSeconds: 3600 })
+  try {
+    return JSON.parse(result.stdout)
+  } catch {
+    throw new Error(`${script} produced no JSON summary (exit ${result.exitCode}): ${result.stderr.trim()}`)
+  }
+}
+
+async function main() {
+  const args = parseArguments(process.argv.slice(2))
+  const directory = path.resolve(args.directory ?? process.cwd())
+  const minimumStatus = args["minimum-status"] ?? "qualified"
+  const registry = await loadRegistry(systemRoot)
+  const runId = args["run-id"] ?? newRunId()
+  const timeout = args.timeout ?? null
+  const display = args.display ?? process.env.CODEGEN_DISPLAY ?? null
+  // Keep the Gate independent from the implementation: exclude the family of
+  // the Builder policy's first primary configuration.
+  const builderPrimaryId = registry.runner_policies.builder.configuration_ids[0]
+  const builderFamily =
+    registry.configurations.find((configuration) => configuration.configuration_id === builderPrimaryId)?.family ?? null
+
+  const state = await orchestrate({
+    directory,
+    goalPath: args.goal ?? ".codegen-goal/goal.json",
+    planPath: args.plan ?? null,
+    registry,
+    runId,
+    concurrency: Number(args.concurrency ?? 2),
+    keepWorktrees: args["keep-worktrees"] === "true",
+    minimumStatus,
+    gateTimeoutSeconds: Number(args["gate-timeout"] ?? 300),
+    log: (record) => process.stderr.write(
+      `[${record.at}] ${record.event}${record.contract_id ? ` ${record.contract_id}` : ""}${record.event === "RUN_STOPPED" && record.reason ? `: ${record.reason}` : ""}\n`,
+    ),
+    runners: {
+      planner: ({ directory: cwd, objective, goal, output, maxContracts }) =>
+        spawnRunner(
+          "run-planner.mjs",
+          { objective, goal, output, "minimum-status": minimumStatus, "max-contracts": maxContracts, timeout, display },
+          cwd,
+        ),
+      gateDesigner: ({ directory: cwd, contract, workClass, risk }) =>
+        spawnRunner(
+          "run-gate-designer.mjs",
+          { contract, "work-class": workClass, risk, "minimum-status": minimumStatus, "exclude-family": builderFamily, timeout, display },
+          cwd,
+        ),
+      builder: ({ directory: cwd, contract, workClass, risk, evidence }) =>
+        spawnRunner(
+          "run-builder.mjs",
+          { contract, "work-class": workClass, risk, "minimum-status": minimumStatus, evidence, timeout, display },
+          cwd,
+        ),
+    },
+  })
+  process.stdout.write(`${JSON.stringify(state, null, 2)}\n`)
+  process.exitCode = state.status === "COMPLETED" ? 0 : 1
+}
+
+main().catch((error) => {
+  process.stderr.write(`${error.message}\n`)
+  process.exitCode = 2
+})

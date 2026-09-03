@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "goal_id": "email-uniqueness",
+  "title": "Reject duplicate user emails",
+  "status": "DRAFT",
+  "summary": "Registration must reject an email that already exists.",
+  "objective": "Prevent registering users with an existing email address.",
+  "in_scope": ["Registration service validation"],
+  "out_of_scope": ["Email change flow"],
+  "requirements": [
+    { "id": "REQ-1", "statement": "Return EmailAlreadyExists for duplicates", "priority": "must" }
+  ],
+  "constraints": [{ "id": "CON-1", "statement": "Keep public API signatures" }],
+  "success_metrics": [
+    { "id": "MET-1", "metric": "Duplicate registrations", "target": "0 per week", "measurement": "Database audit" }
+  ],
+  "acceptance_criteria": [
+    { "id": "ACC-1", "criterion": "Registration test suite passes", "verification_type": "automated" }
+  ],
+  "decisions": [],
+  "research_questions": [
+    {
+      "id": "RQ-1",
+      "question": "Does the ORM support a unique constraint with a custom error?",
+      "why_needed": "Decide between application check and database constraint",
+      "required": true,
+      "status": "pending",
+      "allowed_source_types": ["official", "independent"],
+      "budget": { "max_sources": 3, "max_minutes": 10 }
+    }
+  ],
+  "open_questions": [],
+  "routing": {
+    "change_shape": "localized",
+    "risk": "low",
+    "existing_gate": true,
+    "architecture_uncertainty": false,
+    "external_research_required": true
+  },
+  "budgets": {
+    "max_research_questions": 2,
+    "max_research_calls": 2,
+    "max_planner_calls": 1,
+    "max_derived_tasks": 1
+  }
+}

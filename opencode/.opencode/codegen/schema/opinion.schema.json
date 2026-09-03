@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opencode.local/codegen/opinion.schema.json",
+  "title": "OpenCode Advisor Opinion",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "opinion_id",
+    "question_id",
+    "question",
+    "options",
+    "position",
+    "rationale",
+    "evidence",
+    "risks",
+    "confidence"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "opinion_id": { "type": "string", "minLength": 1 },
+    "question_id": { "type": "string", "minLength": 1 },
+    "question": { "type": "string", "minLength": 1 },
+    "options": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 } },
+    "position": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One of the listed options, or OTHER when none is acceptable."
+    },
+    "alternative": {
+      "type": "string",
+      "description": "Required when position is OTHER: the alternative the advisor proposes."
+    },
+    "rationale": { "type": "string", "minLength": 1 },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Repository paths or facts the advisor actually inspected."
+    },
+    "risks": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "confidence": { "enum": ["low", "medium", "high"] }
+  },
+  "additionalProperties": false
+}

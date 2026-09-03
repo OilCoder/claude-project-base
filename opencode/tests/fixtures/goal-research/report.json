@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "report_id": "RR-1",
+  "question_id": "RQ-1",
+  "question": "Does the ORM support a unique constraint with a custom error?",
+  "status": "COMPLETE",
+  "summary": "The ORM raises IntegrityError on unique violations; a custom domain error must be mapped in the service.",
+  "findings": [
+    { "id": "F-1", "claim": "Unique constraints raise IntegrityError", "source_ids": ["S-1"], "confidence": "high" }
+  ],
+  "alternatives": ["Application-level existence check before insert"],
+  "recommendation": "Use the database constraint and map IntegrityError to EmailAlreadyExists.",
+  "risks": ["Race condition if only the application check is used"],
+  "sources": [
+    {
+      "id": "S-1",
+      "title": "ORM constraints reference",
+      "url": "https://example.org/docs/constraints",
+      "publisher": "Example ORM",
+      "retrieved_at": "2026-09-01T10:00:00Z",
+      "source_type": "official"
+    }
+  ],
+  "limitations": ["Only the current major version was checked"],
+  "unanswered_questions": [],
+  "budget": { "max_sources": 3, "max_minutes": 10, "sources_used": 1 }
+}

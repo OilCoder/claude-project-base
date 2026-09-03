@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "plan_id": "alpha-only",
+  "objective": "Implement alpha so that its unit test passes.",
+  "base_revision": "REPLACED",
+  "phases": [
+    {
+      "phase_id": "core",
+      "objective": "Independent leaf functions",
+      "depends_on": [],
+      "contracts": [
+        {
+          "contract_id": "alpha",
+          "objective": "Implement alpha",
+          "work_class": "localized-low-risk-code-change",
+          "risk": "low",
+          "read": [
+            "lib/alpha.py",
+            "tests/test_alpha.py"
+          ],
+          "allowed_to_modify": [
+            "lib/alpha.py"
+          ],
+          "forbidden": [
+            "tests/**",
+            "lib/beta.py",
+            "lib/gamma.py"
+          ],
+          "requirements": [
+            "alpha doubles its input"
+          ],
+          "verification": {
+            "commands": [
+              "python3 -m unittest tests/test_alpha.py"
+            ],
+            "invariants": [
+              "Only lib/alpha.py changes"
+            ]
+          },
+          "budgets": {
+            "max_builder_attempts": 2,
+            "max_contract_revisions": 0,
+            "max_unplanned_scope_expansion": 0
+          },
+          "response": [
+            "status",
+            "changed files"
+          ]
+        }
+      ]
+    }
+  ]
+}

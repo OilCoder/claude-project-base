@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opencode.local/codegen/research-report.schema.json",
+  "title": "OpenCode Research Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "question_id",
+    "question",
+    "status",
+    "summary",
+    "findings",
+    "alternatives",
+    "recommendation",
+    "risks",
+    "sources",
+    "limitations",
+    "unanswered_questions",
+    "budget"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "report_id": { "type": "string", "minLength": 1 },
+    "question_id": { "type": "string", "minLength": 1 },
+    "question": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["COMPLETE", "BLOCKED"] },
+    "summary": { "type": "string", "minLength": 1 },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "claim", "source_ids", "confidence"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "claim": { "type": "string", "minLength": 1 },
+          "source_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "confidence": { "enum": ["low", "medium", "high"] }
+        }
+      }
+    },
+    "alternatives": { "$ref": "#/$defs/strings" },
+    "recommendation": { "type": "string" },
+    "risks": { "$ref": "#/$defs/strings" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "url", "publisher", "retrieved_at", "source_type"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "url": { "type": "string", "pattern": "^https://" },
+          "publisher": { "type": "string", "minLength": 1 },
+          "retrieved_at": { "type": "string", "format": "date-time" },
+          "source_type": { "enum": ["official", "independent", "vendor", "community"] }
+        }
+      }
+    },
+    "limitations": { "$ref": "#/$defs/strings" },
+    "unanswered_questions": { "$ref": "#/$defs/strings" },
+    "budget": {
+      "type": "object",
+      "required": ["max_sources", "max_minutes", "sources_used"],
+      "properties": {
+        "max_sources": { "type": "integer", "minimum": 1 },
+        "max_minutes": { "type": "integer", "minimum": 1 },
+        "sources_used": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "strings": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  },
+  "additionalProperties": false
+}

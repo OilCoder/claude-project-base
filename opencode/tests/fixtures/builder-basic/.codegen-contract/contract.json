@@ -1,0 +1,42 @@
+{
+  "contract_id": "builder-basic-safe-divide",
+  "objective": "Implement safe_divide in calculator.py.",
+  "read": [
+    "calculator.py",
+    "tests/test_calculator.py"
+  ],
+  "allowed_to_modify": [
+    "calculator.py"
+  ],
+  "forbidden": [
+    ".codegen-contract/**",
+    ".opencode/**",
+    "opencode.json",
+    "tests/**"
+  ],
+  "requirements": [
+    "Return normal Python division as a float.",
+    "Raise ValueError with the exact message 'divisor must not be zero' when the divisor is zero.",
+    "Preserve the public function signature."
+  ],
+  "verification": {
+    "commands": [
+      "bash .codegen-contract/gate.sh"
+    ],
+    "invariants": [
+      "Only calculator.py changes.",
+      "The contract, gate, tests, and OpenCode configuration remain unchanged."
+    ]
+  },
+  "budgets": {
+    "max_builder_attempts": 1,
+    "max_contract_revisions": 0,
+    "max_unplanned_scope_expansion": 0
+  },
+  "response": [
+    "status",
+    "changed files",
+    "self-check result",
+    "blockers"
+  ]
+}

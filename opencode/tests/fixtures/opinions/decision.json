@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "decision_id": "DEC-OQ-1",
+  "question_id": "OQ-1",
+  "question": "Application check or database constraint?",
+  "status": "PROPOSED",
+  "method": "reconciled",
+  "chosen": "database-constraint",
+  "rationale": "Race-free and simplest",
+  "opinion_ids": ["OQ-1-claude", "OQ-1-kimi"],
+  "rejected": [
+    { "position": "application-check", "opinion_ids": ["OQ-1-kimi"], "why_rejected": "race condition" }
+  ],
+  "residual_risks": ["Error mapping must be tested"]
+}

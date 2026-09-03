@@ -1,0 +1,413 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opencode.local/codegen/goal.schema.json",
+  "title": "OpenCode Code Generation Goal",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "goal_id",
+    "title",
+    "status",
+    "summary",
+    "objective",
+    "in_scope",
+    "out_of_scope",
+    "requirements",
+    "constraints",
+    "success_metrics",
+    "acceptance_criteria",
+    "decisions",
+    "research_questions",
+    "open_questions",
+    "routing",
+    "budgets"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "goal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "DRAFT",
+        "RESEARCHING",
+        "DECIDED",
+        "SEALED"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "in_scope": {
+      "$ref": "#/$defs/nonEmptyStrings"
+    },
+    "out_of_scope": {
+      "$ref": "#/$defs/strings"
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/statement"
+      }
+    },
+    "success_metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/metric"
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/acceptance"
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decision"
+      }
+    },
+    "research_questions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/researchQuestion"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/openQuestion"
+      }
+    },
+    "routing": {
+      "$ref": "#/$defs/routing"
+    },
+    "budgets": {
+      "$ref": "#/$defs/budgets"
+    }
+  },
+  "$defs": {
+    "strings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "statement": {
+      "type": "object",
+      "required": [
+        "id",
+        "statement"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "requirement": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/statement"
+        },
+        {
+          "type": "object",
+          "required": [
+            "priority"
+          ],
+          "properties": {
+            "priority": {
+              "enum": [
+                "must",
+                "should",
+                "could"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "metric": {
+      "type": "object",
+      "required": [
+        "id",
+        "metric",
+        "target",
+        "measurement"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measurement": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "required": [
+        "id",
+        "criterion",
+        "verification_type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "criterion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verification_type": {
+          "enum": [
+            "automated",
+            "manual",
+            "operational"
+          ]
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "required": [
+        "id",
+        "question",
+        "decision",
+        "rationale",
+        "research_report_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "research_report_ids": {
+          "$ref": "#/$defs/strings"
+        },
+        "opinion_ids": {
+          "$ref": "#/$defs/strings"
+        }
+      }
+    },
+    "researchQuestion": {
+      "type": "object",
+      "required": [
+        "id",
+        "question",
+        "why_needed",
+        "required",
+        "status",
+        "allowed_source_types",
+        "budget"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "why_needed": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "completed",
+            "waived"
+          ]
+        },
+        "allowed_source_types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "official",
+              "independent",
+              "vendor",
+              "community"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "budget": {
+          "type": "object",
+          "required": [
+            "max_sources",
+            "max_minutes"
+          ],
+          "properties": {
+            "max_sources": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_minutes": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "openQuestion": {
+      "type": "object",
+      "required": [
+        "id",
+        "question",
+        "blocking"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocking": {
+          "type": "boolean"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Closed option set that Advisors must choose from when the question goes to deliberation."
+        }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "required": [
+        "change_shape",
+        "risk",
+        "existing_gate",
+        "architecture_uncertainty",
+        "external_research_required"
+      ],
+      "properties": {
+        "change_shape": {
+          "enum": [
+            "localized",
+            "multi-component",
+            "system"
+          ]
+        },
+        "risk": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "existing_gate": {
+          "type": "boolean"
+        },
+        "architecture_uncertainty": {
+          "type": "boolean"
+        },
+        "external_research_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "required": [
+        "max_research_questions",
+        "max_research_calls",
+        "max_planner_calls",
+        "max_derived_tasks"
+      ],
+      "properties": {
+        "max_research_questions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_research_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_planner_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_derived_tasks": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

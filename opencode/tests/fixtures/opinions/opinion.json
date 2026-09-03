@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "opinion_id": "OQ-1-claude",
+  "question_id": "OQ-1",
+  "question": "Application check or database constraint?",
+  "options": ["application-check", "database-constraint"],
+  "position": "database-constraint",
+  "rationale": "Race-free under concurrent registrations",
+  "evidence": ["src/users/service.ts"],
+  "risks": ["IntegrityError mapping must be explicit"],
+  "confidence": "high"
+}

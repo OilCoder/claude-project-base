@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opencode.local/codegen/decision.schema.json",
+  "title": "OpenCode Reconciled Decision",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "decision_id",
+    "question_id",
+    "question",
+    "status",
+    "method",
+    "chosen",
+    "rationale",
+    "opinion_ids",
+    "rejected"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "decision_id": { "type": "string", "minLength": 1 },
+    "question_id": { "type": "string", "minLength": 1 },
+    "question": { "type": "string", "minLength": 1 },
+    "status": {
+      "enum": ["PROPOSED"],
+      "description": "A decision is only a proposal until the Goal Manager records it and the user seals the Goal."
+    },
+    "method": { "enum": ["unanimous", "reconciled"] },
+    "chosen": { "type": "string", "minLength": 1 },
+    "rationale": { "type": "string", "minLength": 1 },
+    "opinion_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "rejected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["position", "opinion_ids", "why_rejected"],
+        "properties": {
+          "position": { "type": "string", "minLength": 1 },
+          "opinion_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "why_rejected": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "residual_risks": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  },
+  "additionalProperties": false
+}

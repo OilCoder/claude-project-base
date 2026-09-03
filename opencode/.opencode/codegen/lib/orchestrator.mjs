@@ -1,0 +1,363 @@
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises"
+import path from "node:path"
+
+import { runFinalGate } from "./final-gate.mjs"
+import { GATE_WRAPPER, checkGateReadiness, gateScript } from "./gate.mjs"
+import { routeGoal } from "./goal-routing.mjs"
+import { validateGoal } from "./goal.mjs"
+import { validatePlan } from "./plan-validation.mjs"
+import {
+  cherryPick,
+  commitPaths,
+  createWorktree,
+  ensureExcluded,
+  linkOpenCodeLayer,
+  removeWorktree,
+  restorePaths,
+  revision,
+} from "./worktrees.mjs"
+
+export const RUN_ROOT = ".codegen-run"
+
+// Terminal dispositions after a Builder attempt, from CODE_GENERATION_FLOW §4.
+const PROVIDER_STOPS = new Set(["PROVIDER_RATE_LIMIT", "PROVIDER_UNAVAILABLE"])
+const USER_ACTION_STOPS = new Set(["ZEN_BALANCE_EXHAUSTED", "GO_USAGE_LIMIT"])
+const BLOCKING_STOPS = new Set([
+  "AUTH_ERROR",
+  "MODEL_CONFIG_ERROR",
+  "LOCAL_RUNNER_ERROR",
+  "UNCLASSIFIED_ERROR",
+  "PARTIAL_EXECUTION",
+])
+
+export function classifyBuilderOutcome(result, { attempt, maxAttempts }) {
+  if (result === "PASS") return { disposition: "ACCEPT" }
+  const retriable = result === "GATE_FAIL" || result === "SCOPE_FAIL" || result === "NO_CHANGES"
+  if (retriable) {
+    if (attempt < maxAttempts) return { disposition: "RETRY", reason: result }
+    return { disposition: "STOP", status: "BUILD_FAILED", reason: `${result} after ${attempt} attempts` }
+  }
+  if (result === "CONTRACT_BLOCKED") return { disposition: "STOP", status: "REPLAN_REQUIRED", reason: result }
+  if (USER_ACTION_STOPS.has(result)) return { disposition: "STOP", status: "USER_ACTION_REQUIRED", reason: result }
+  if (PROVIDER_STOPS.has(result)) return { disposition: "STOP", status: "ESCALATE", reason: result }
+  if (BLOCKING_STOPS.has(result)) return { disposition: "STOP", status: "BLOCKED", reason: result }
+  return { disposition: "STOP", status: "BLOCKED", reason: `unknown builder result ${result}` }
+}
+
+function pathspec(pattern) {
+  return pattern.endsWith("/**") ? pattern.slice(0, -3) : pattern
+}
+
+async function pool(items, concurrency, worker) {
+  const results = new Array(items.length)
+  let next = 0
+  async function lane() {
+    while (next < items.length) {
+      const index = next
+      next += 1
+      results[index] = await worker(items[index], index)
+    }
+  }
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(concurrency, items.length)) }, lane))
+  return results
+}
+
+export async function orchestrate({
+  directory,
+  goalPath,
+  planPath = null,
+  registry,
+  runners,
+  runId,
+  concurrency = 2,
+  keepWorktrees = false,
+  minimumStatus = "qualified",
+  gateTimeoutSeconds = 300,
+  log = () => {},
+}) {
+  const runDirectory = path.join(directory, RUN_ROOT, runId)
+  await mkdir(runDirectory, { recursive: true })
+  await ensureExcluded(directory, `${RUN_ROOT}/`)
+  const eventsFile = path.join(runDirectory, "events.jsonl")
+  const stateFile = path.join(runDirectory, "state.json")
+  const state = {
+    run_id: runId,
+    status: "STARTED",
+    stop_reason: null,
+    goal_id: null,
+    route: null,
+    plan_id: null,
+    plan_path: null,
+    base_revision: null,
+    integration_branch: `codegen/${runId}`,
+    integration_worktree: path.join(runDirectory, "integration"),
+    integration_head: null,
+    waves: [],
+    final_gate: null,
+    derived_work: [],
+    planner_calls: 0,
+    gate_designer_calls: 0,
+    user_action: null,
+  }
+  async function emit(event, data = {}) {
+    const record = { at: new Date().toISOString(), event, ...data }
+    await appendFile(eventsFile, `${JSON.stringify(record)}\n`)
+    log(record)
+  }
+  async function persist() {
+    await writeFile(stateFile, `${JSON.stringify(state, null, 2)}\n`)
+  }
+  async function stop(status, reason, extra = {}) {
+    state.status = status
+    state.stop_reason = reason
+    if (extra.user_action) state.user_action = extra.user_action
+    await emit("RUN_STOPPED", { status, reason, ...extra })
+    await persist()
+    return state
+  }
+
+  // 1. Goal and Router.
+  const goal = JSON.parse(await readFile(path.resolve(directory, goalPath), "utf8"))
+  const goalValidation = validateGoal(goal)
+  if (!goalValidation.valid) return stop("INVALID_GOAL", goalValidation.errors.join("; "))
+  state.goal_id = goal.goal_id
+  await emit("GOAL_LOADED", { goal_id: goal.goal_id, status: goal.status })
+  const routing = routeGoal(goal)
+  await emit("ROUTED", routing)
+  if (routing.status !== "ROUTED") return stop("ROUTE_BLOCKED", routing.status, { routing })
+  if (routing.route === "deliberative") {
+    return stop("DELIBERATION_REQUIRED", "goal needs research, opinions, or decisions before planning", { routing })
+  }
+  state.route = routing.route
+  const baseRevision = await revision(directory)
+  state.base_revision = baseRevision
+
+  // 2. Plan: reuse a validated plan or ask the Planner. The direct route is
+  //    the Planner constrained to exactly one contract.
+  const workClasses = new Set(Object.keys(registry.routes))
+  const maxContracts = routing.route === "direct" ? 1 : null
+  let plan
+  if (planPath) {
+    plan = JSON.parse(await readFile(path.resolve(directory, planPath), "utf8"))
+    state.plan_path = planPath
+  } else {
+    if ((routing.budgets?.planner_calls ?? goal.budgets.max_planner_calls) < 1 && routing.route !== "direct") {
+      return stop("BUDGET_BLOCKED", "no planner budget")
+    }
+    const output = `.codegen-plan/${runId}.json`
+    await emit("PLAN_REQUESTED", { output, max_contracts: maxContracts })
+    state.planner_calls += 1
+    const summary = await runners.planner({
+      directory,
+      objective: goal.objective,
+      goal: goalPath,
+      output,
+      minimumStatus,
+      maxContracts,
+    })
+    await emit("PLAN_GENERATED", { result: summary.result, output })
+    if (summary.result !== "PASS") {
+      return stop("PLAN_FAILED", summary.result, { validation: summary.validation ?? null })
+    }
+    plan = JSON.parse(await readFile(path.resolve(directory, output), "utf8"))
+    state.plan_path = output
+  }
+  const planValidation = validatePlan(plan, { workClasses, maxContracts })
+  await emit("PLAN_VALIDATED", planValidation)
+  if (!planValidation.valid) return stop("PLAN_INVALID", planValidation.errors.join("; "))
+  if (plan.base_revision !== baseRevision) {
+    return stop("PLAN_STALE", `plan base_revision ${plan.base_revision} is not HEAD ${baseRevision}`)
+  }
+  state.plan_id = plan.plan_id
+  const phasesById = new Map(plan.phases.map((phase) => [phase.phase_id, phase]))
+  await emit("DAG_READY", { waves: planValidation.execution_waves })
+
+  // 3. Integration branch, isolated from the user's checkout.
+  await createWorktree({
+    repository: directory,
+    directory: state.integration_worktree,
+    revision: baseRevision,
+    branch: state.integration_branch,
+  })
+  state.integration_head = baseRevision
+  await persist()
+
+  const gateSources = []
+  const worktreesToRemove = []
+
+  // 4. Waves: one worktree per contract, builders in parallel, gates per contract.
+  for (const [waveIndex, phaseIds] of planValidation.execution_waves.entries()) {
+    const contracts = phaseIds.flatMap((phaseId) =>
+      phasesById.get(phaseId).contracts.map((contract) => ({ phaseId, contract })),
+    )
+    const wave = { index: waveIndex + 1, phases: phaseIds, status: "STARTED", contracts: [] }
+    state.waves.push(wave)
+    await emit("WAVE_READY", { wave: wave.index, phases: phaseIds, contracts: contracts.map((c) => c.contract.contract_id) })
+
+    // 4a. Prepare worktrees serially: seal contract + gate, check readiness.
+    const prepared = []
+    for (const { phaseId, contract } of contracts) {
+      const worktree = path.join(runDirectory, "worktrees", contract.contract_id)
+      await createWorktree({ repository: directory, directory: worktree, revision: state.integration_head })
+      worktreesToRemove.push(worktree)
+      await linkOpenCodeLayer(directory, worktree)
+      await emit("WORKTREE_CREATED", { contract_id: contract.contract_id, worktree, base: state.integration_head })
+
+      const contractDirectory = path.join(worktree, ".codegen-contract")
+      await mkdir(contractDirectory, { recursive: true })
+      const sealed = {
+        ...contract,
+        verification: {
+          ...contract.verification,
+          source_commands: contract.verification.commands,
+          commands: [`bash ${GATE_WRAPPER}`],
+        },
+      }
+      const usesProjectGate =
+        contract.verification.commands.length === 1 &&
+        contract.verification.commands[0] === `bash ${GATE_WRAPPER}`
+      if (!usesProjectGate) {
+        await writeFile(path.join(worktree, GATE_WRAPPER), gateScript(contract.verification.commands))
+      }
+      await writeFile(path.join(contractDirectory, "contract.json"), `${JSON.stringify(sealed, null, 2)}\n`)
+      await commitPaths(worktree, [".codegen-contract"], `codegen: seal ${contract.contract_id}`)
+
+      const record = {
+        contract_id: contract.contract_id,
+        phase_id: phaseId,
+        worktree,
+        status: "PREPARED",
+        gate_readiness: null,
+        attempts: [],
+        result_commit: null,
+        stop: null,
+      }
+      wave.contracts.push(record)
+
+      let readiness = await checkGateReadiness({ directory: worktree, contract: sealed, timeoutSeconds: gateTimeoutSeconds })
+      if (!readiness.ready && readiness.fixable) {
+        await emit("GATE_DESIGN_REQUESTED", { contract_id: contract.contract_id, reasons: readiness.reasons })
+        state.gate_designer_calls += 1
+        const design = await runners.gateDesigner({
+          directory: worktree,
+          contract: ".codegen-contract/contract.json",
+          workClass: contract.work_class,
+          risk: contract.risk,
+          minimumStatus,
+        })
+        await emit("GATE_DESIGNED", { contract_id: contract.contract_id, result: design.result })
+        if (design.result === "GATE_READY") {
+          await commitPaths(worktree, [".codegen-contract"], `codegen: gate ${contract.contract_id}`)
+          readiness = design.readiness_after
+        }
+      }
+      record.gate_readiness = readiness
+      if (!readiness.ready) {
+        record.status = "GATE_NOT_READY"
+        wave.status = "BLOCKED"
+        await emit("WAVE_BLOCKED", { wave: wave.index, contract_id: contract.contract_id, reasons: readiness.reasons })
+        await persist()
+        return stop("GATE_NOT_READY", `${contract.contract_id}: ${readiness.reasons.join(", ")}`)
+      }
+      await emit("GATE_READY", { contract_id: contract.contract_id, baseline: readiness.baseline })
+      prepared.push({ contract, record, sealed })
+    }
+    await persist()
+
+    // 4b. Build contracts of the wave concurrently.
+    await pool(prepared, concurrency, async ({ contract, record }) => {
+      const maxAttempts = contract.budgets.max_builder_attempts
+      let evidence = null
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        await emit("BUILDER_DISPATCHED", { contract_id: contract.contract_id, attempt, evidence })
+        const summary = await runners.builder({
+          directory: record.worktree,
+          contract: ".codegen-contract/contract.json",
+          workClass: contract.work_class,
+          risk: contract.risk,
+          minimumStatus,
+          evidence,
+        })
+        record.attempts.push({ attempt, result: summary.result, evidence, summary })
+        const outcome = classifyBuilderOutcome(summary.result, { attempt, maxAttempts })
+        if (outcome.disposition === "ACCEPT") {
+          record.result_commit = await commitPaths(
+            record.worktree,
+            contract.allowed_to_modify.map(pathspec),
+            `codegen(${contract.contract_id}): ${contract.objective}`,
+          )
+          record.status = record.result_commit ? "PASSED" : "NO_RESULT_COMMIT"
+          await emit("CONTRACT_PASSED", { contract_id: contract.contract_id, attempt, commit: record.result_commit })
+          return
+        }
+        if (outcome.disposition === "RETRY") {
+          if (summary.result === "SCOPE_FAIL") await restorePaths(record.worktree, summary.outside_scope ?? [])
+          evidence = `.codegen-contract/evidence-${attempt}.json`
+          await writeFile(
+            path.join(record.worktree, evidence),
+            `${JSON.stringify({ attempt, result: summary.result, outside_scope: summary.outside_scope, verification: summary.verification, attempts: summary.attempts }, null, 2)}\n`,
+          )
+          await emit("RETRY", { contract_id: contract.contract_id, attempt, reason: outcome.reason, evidence })
+          continue
+        }
+        record.status = outcome.status
+        record.stop = summary.user_action ?? outcome.reason
+        await emit("CONTRACT_FAILED", { contract_id: contract.contract_id, attempt, status: outcome.status, reason: outcome.reason })
+        return
+      }
+      record.status = "BUILD_FAILED"
+      record.stop = `budget exhausted after ${maxAttempts} attempts`
+      await emit("CONTRACT_FAILED", { contract_id: contract.contract_id, status: "BUILD_FAILED", reason: record.stop })
+    })
+    await persist()
+
+    const failed = wave.contracts.filter((record) => record.status !== "PASSED")
+    if (failed.length > 0) {
+      wave.status = "BLOCKED"
+      await emit("WAVE_BLOCKED", { wave: wave.index, failed: failed.map((record) => [record.contract_id, record.status]) })
+      const statuses = new Set(failed.map((record) => record.status))
+      const status = ["USER_ACTION_REQUIRED", "REPLAN_REQUIRED", "ESCALATE", "BLOCKED", "BUILD_FAILED"].find((candidate) => statuses.has(candidate)) ?? "BUILD_FAILED"
+      const userAction = failed.find((record) => record.status === "USER_ACTION_REQUIRED")?.stop ?? null
+      return stop(
+        status,
+        failed.map((record) => `${record.contract_id}: ${record.stop ?? record.status}`).join("; "),
+        { user_action: userAction },
+      )
+    }
+
+    // 4c. Integrate the wave onto the integration branch, in contract order.
+    for (const record of [...wave.contracts].sort((a, b) => a.contract_id.localeCompare(b.contract_id))) {
+      const picked = await cherryPick(state.integration_worktree, record.result_commit)
+      if (!picked.ok) {
+        wave.status = "INTEGRATION_CONFLICT"
+        await emit("INTEGRATION_CONFLICT", { contract_id: record.contract_id, detail: picked.conflict })
+        return stop("INTEGRATION_CONFLICT", `${record.contract_id}: ${picked.conflict}`)
+      }
+      state.integration_head = picked.head
+      await emit("INTEGRATED", { contract_id: record.contract_id, head: picked.head })
+      gateSources.push({ contract_id: record.contract_id, source: path.join(record.worktree, ".codegen-contract") })
+    }
+    wave.status = "COMPLETED"
+    await emit("WAVE_COMPLETED", { wave: wave.index, head: state.integration_head })
+    await persist()
+  }
+
+  // 5. Final Gate on the integrated result.
+  await emit("FINAL_GATE_STARTED", { head: state.integration_head })
+  state.final_gate = await runFinalGate({
+    directory: state.integration_worktree,
+    baseRevision,
+    plan,
+    contractGates: gateSources,
+    timeoutSeconds: gateTimeoutSeconds,
+  })
+  await emit(state.final_gate.result === "PASS" ? "FINAL_GATE_PASS" : "FINAL_GATE_FAIL", state.final_gate)
+
+  if (!keepWorktrees && state.final_gate.result === "PASS") {
+    for (const worktree of worktreesToRemove) await removeWorktree({ repository: directory, directory: worktree })
+  }
+  state.status = state.final_gate.result === "PASS" ? "COMPLETED" : "FINAL_GATE_FAILED"
+  await emit("RUN_COMPLETED", { status: state.status, branch: state.integration_branch, head: state.integration_head })
+  await persist()
+  return state
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "snapshot": true,
+  "subagent_depth": 1,
+  "instructions": [
+    ".opencode/instructions/codegen.md"
+  ],
+  "enabled_providers": [
+    "ollama",
+    "openai",
+    "opencode",
+    "opencode-go",
+    "openrouter"
+  ],
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama local",
+      "options": {
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "gpt-oss-64k:latest": {
+          "name": "GPT OSS 64K local"
+        }
+      }
+    },
+    "opencode": {
+      "whitelist": [
+        "minimax-m2.7",
+        "qwen3.6-plus",
+        "kimi-k2.7-code",
+        "minimax-m3",
+        "mimo-v2.5-pro",
+        "gpt-5.6-luna",
+        "deepseek-v4-pro",
+        "deepseek-v4-flash",
+        "qwen3.8-flash",
+        "glm-5.3-flash",
+        "qwen3.8-max",
+        "kimi-k3",
+        "claude-opus-5",
+        "claude-sonnet-5",
+        "claude-haiku-4-5",
+        "gemini-3.1-pro",
+        "gemini-3.8-flash",
+        "gemini-3.5-flash-lite"
+      ]
+    },
+    "opencode-go": {
+      "whitelist": [
+        "minimax-m2.7",
+        "qwen3.6-plus",
+        "kimi-k2.7-code",
+        "glm-5.3",
+        "glm-5.3-flash",
+        "minimax-m3",
+        "mimo-v2.5-pro",
+        "gpt-5.6-luna",
+        "deepseek-v4-pro",
+        "deepseek-v4-flash",
+        "qwen3.8-flash",
+        "qwen3.8-max",
+        "kimi-k3"
+      ]
+    },
+    "openrouter": {
+      "whitelist": [
+        "anthropic/claude-opus-4.6",
+        "anthropic/claude-opus-5",
+        "anthropic/claude-fable-5.1",
+        "minimax/minimax-m2.5",
+        "moonshotai/kimi-k2.5",
+        "moonshotai/kimi-k3",
+        "z-ai/glm-5.3",
+        "z-ai/glm-5.3-flash",
+        "openai/gpt-5.6-sol"
+      ]
+    }
+  },
+  "permission": {
+    "model_select": "allow"
+  }
+}

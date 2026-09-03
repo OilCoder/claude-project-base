@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "install:target": "node install.mjs",
+    "orchestrate": "node .opencode/codegen/scripts/orchestrate.mjs",
+    "goal:run": "node .opencode/codegen/scripts/run-goal.mjs",
+    "goal": "node .opencode/codegen/scripts/goal.mjs",
+    "researcher": "node .opencode/codegen/scripts/run-researcher.mjs",
+    "research": "node .opencode/codegen/scripts/research.mjs",
+    "opinions": "node .opencode/codegen/scripts/run-opinions.mjs",
+    "planner": "node .opencode/codegen/scripts/run-planner.mjs",
+    "plan:validate": "node .opencode/codegen/scripts/validate-plan.mjs",
+    "gate:design": "node .opencode/codegen/scripts/run-gate-designer.mjs",
+    "builder": "node .opencode/codegen/scripts/run-builder.mjs",
+    "test": "node --test"
+  }
+}
