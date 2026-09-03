@@ -135,7 +135,7 @@ export function writtenPreview(tool, input, limit) {
   const rows = body.split("\n")
   const shown = rows.slice(0, limit)
   const rest = rows.length - shown.length
-  return rest > 0 ? [...shown, `… ${rest} líneas más`] : shown
+  return rest > 0 ? [...shown, `… ${rest} líneas más · v muestra todo · Ctrl+clic en la ruta abre el archivo`] : shown
 }
 
 // Plain-language verb for each tool. Unknown tools keep their name.
@@ -209,7 +209,7 @@ export function createRenderer({
   contextTokens = 0,
   width = 100,
   detail = process.env.CODEGEN_VIEW_DETAIL === "1",
-  previewLines = Number(process.env.CODEGEN_VIEW_PREVIEW ?? 40),
+  previewLines = Number(process.env.CODEGEN_VIEW_PREVIEW ?? 8),
   now = () => Date.now(),
 } = {}) {
   const state = { steps: 0, cost: 0, total_tokens: 0, errors: 0, tools: 0, actions: [], narrations: 0, final_text: "" }
@@ -217,6 +217,7 @@ export function createRenderer({
   const startedAt = now()
   let pendingReads = []
   let lastText = ""
+  let lastWritten = null
   // Elapsed time follows the events' own timestamps when they carry one, so a
   // replay shows the real timing; otherwise the wall clock.
   let firstEventAt = null
@@ -253,6 +254,7 @@ export function createRenderer({
       return []
     }
     const out = flushReads()
+    if (action.writes && !action.failed) lastWritten = { tool: action.tool, object: action.object, input: part.state?.input ?? {} }
     state.actions.push({ verb: action.verb, object: action.object, result: action.result, failed: action.failed })
     const color = action.failed ? red : action.writes ? yellow : (text) => text
     const resultText = action.result ? `  ${action.failed ? red(action.result) : dim(action.result)}` : ""
@@ -348,5 +350,13 @@ export function createRenderer({
     return out
   }
 
-  return { feed, finish, state }
+  // Full content of the last write, for the "v" key in the terminal view.
+  function expandLast() {
+    if (!lastWritten) return [dim("  (nada escrito todavía)")]
+    const rows = writtenPreview(lastWritten.tool, lastWritten.input, Number.POSITIVE_INFINITY)
+      .map((row) => (directory ? row.replaceAll(`${directory}/`, "") : row))
+    return ["", bold(`Contenido completo · ${lastWritten.object}`), ...rows.map((row) => dim(`    ${clip(row, textWidth - 4)}`)), ""]
+  }
+
+  return { feed, finish, expandLast, state }
 }

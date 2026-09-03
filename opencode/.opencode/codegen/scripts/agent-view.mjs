@@ -58,6 +58,17 @@ const renderer = createRenderer({ directory: job.directory, contextTokens: job.h
 const started = Date.now()
 let timedOut = false
 
+// Keys while the agent runs: v prints the full content of the last write.
+if (process.stdin.isTTY) {
+  process.stdin.setRawMode(true)
+  process.stdin.resume()
+  process.stdin.setEncoding("utf8")
+  process.stdin.on("data", (key) => {
+    if (key === "v" || key === "V") for (const line of renderer.expandLast()) out(line)
+    else if (key === "\u0003") process.exit(130)
+  })
+}
+
 const child = spawn(job.command, job.args, {
   cwd: job.directory,
   env: { ...process.env, ...job.env, PWD: job.directory },
@@ -95,9 +106,10 @@ child.on("close", async (code, signal) => {
     `${JSON.stringify({ exit_code: exitCode, signal: signal ?? null, timed_out: timedOut, seconds }, null, 2)}\n`,
   )
   if (job.hold && process.stdin.isTTY) {
-    out(dim("Enter para cerrar esta ventana"))
-    process.stdin.resume()
-    process.stdin.once("data", () => process.exit(exitCode === 0 ? 0 : 1))
+    out(dim("Enter para cerrar esta ventana · v muestra el último archivo escrito"))
+    process.stdin.on("data", (key) => {
+      if (key === "\r" || key === "\n") process.exit(exitCode === 0 ? 0 : 1)
+    })
   } else {
     process.exit(exitCode === 0 ? 0 : 1)
   }
