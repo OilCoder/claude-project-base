@@ -50,7 +50,7 @@ test("Planner plan selects the certified Go primary (Luna) without a transport f
 
   assert.equal(plan.status, "READY")
   assert.equal(plan.primary.configuration_id, "builder-go-gpt-5.6-luna")
-  assert.equal(plan.primary.admission_status, "candidate", "candidate level still follows policy order")
+  assert.equal(plan.primary.admission_status, "qualified")
   assert.equal("fallback" in plan, false)
 })
 
