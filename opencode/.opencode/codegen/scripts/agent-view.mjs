@@ -13,12 +13,13 @@ import { createRenderer, dim, green, red, renderHeader } from "../lib/display.mj
 const job = JSON.parse(await readFile(process.argv[2], "utf8"))
 const out = (line) => process.stdout.write(`${line}\n`)
 
-for (const line of renderHeader(job.header)) out(line)
+const width = process.stdout.columns || 100
+for (const line of renderHeader(job.header, { width })) out(line)
 out("")
 
 const events = createWriteStream(job.events_file, { flags: "w" })
 const stderr = createWriteStream(job.stderr_file, { flags: "w" })
-const renderer = createRenderer({ directory: job.directory, contextTokens: job.header.context_tokens })
+const renderer = createRenderer({ directory: job.directory, contextTokens: job.header.context_tokens, width })
 const started = Date.now()
 let timedOut = false
 
