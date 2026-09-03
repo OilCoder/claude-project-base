@@ -5,9 +5,18 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { runExecutionPlan, selectExecutionPlan } from "../lib/builder-runner.mjs"
-import { exists, loadRegistry, newRunId, parseArguments, resolveInsideProject } from "../lib/cli.mjs"
+import {
+  exists,
+  loadRegistry,
+  newRunId,
+  parseArguments,
+  requireGitHead,
+  resolveInsideProject,
+  resolveMinimumStatus,
+  resolvePinnedConfiguration,
+} from "../lib/cli.mjs"
 import { routeGoal } from "../lib/goal-routing.mjs"
-import { renderGoalMarkdown, validateGoal } from "../lib/goal.mjs"
+import { renderGoalMarkdown, sealApprovedGoal, validateGoal } from "../lib/goal.mjs"
 import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 import { validateResearchReport } from "../lib/research-report.mjs"
@@ -15,15 +24,43 @@ import { validateResearchReport } from "../lib/research-report.mjs"
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const systemRoot = path.resolve(scriptDirectory, "../../..")
 
-// The Goal Manager structures intent and shares the Planner's Go-preferred policy.
+// The Goal Manager structures intent with a configuration admitted for its own role.
+// Approval is deterministic: the user approved this exact Goal, so it is sealed
+// in place without another model call. Nothing else changes.
+async function approve(directory, goalArgument) {
+  const goalFile = resolveInsideProject(directory, goalArgument, "Goal")
+  if (!(await exists(goalFile.absolute))) throw new Error(`Goal does not exist: ${goalFile.relative}`)
+  const goal = JSON.parse(await readFile(goalFile.absolute, "utf8"))
+  const sealed = sealApprovedGoal(goal)
+  await writeFile(goalFile.absolute, `${JSON.stringify(sealed, null, 2)}\n`)
+  const markdown = path.join(path.dirname(goalFile.absolute), "GOAL.md")
+  await writeFile(markdown, renderGoalMarkdown(sealed))
+  const routing = routeGoal(sealed)
+  const summary = {
+    result: "SEALED",
+    operation: "approve",
+    output: goalFile.relative,
+    markdown: path.relative(directory, markdown),
+    goal_id: sealed.goal_id,
+    previous_status: goal.status,
+    routing,
+  }
+  process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
+  process.exitCode = routing.status === "ROUTED" ? 0 : 1
+}
+
 async function main() {
   const args = parseArguments(process.argv.slice(2))
+  const directory = path.resolve(args.directory ?? process.cwd())
+  await requireGitHead(directory)
+  if (args.approve) return approve(directory, args.approve)
   if (!args.intent) {
     throw new Error(
-      "usage: run-goal.mjs --intent <text> [--reports a.json,b.json] [--output .codegen-goal/goal.json] [--minimum-status <status>] [--allow-sealed true]",
+      "usage: run-goal.mjs --intent <text> [--reports a.json,b.json] [--output .codegen-goal/goal.json] [--allow-sealed true] | --approve <goal.json>",
     )
   }
-  const directory = path.resolve(args.directory ?? process.cwd())
+  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
+  const configurationId = await resolvePinnedConfiguration(args, systemRoot)
   const output = resolveInsideProject(
     directory,
     args.output ?? ".codegen-goal/goal.json",
@@ -43,10 +80,11 @@ async function main() {
   }
 
   const registry = await loadRegistry(systemRoot)
-  const plan = selectExecutionPlan(registry, "planner", {
+  const plan = selectExecutionPlan(registry, "goal-manager", {
     workClass: "complex-engineering-plan",
     risk: args.risk ?? "medium",
-    minimumStatus: args["minimum-status"] ?? "qualified",
+    minimumStatus,
+    configurationId,
     requiredContext: Number(args["required-context"] ?? 0),
     requiresTools: true,
     requiresCodeEditing: false,

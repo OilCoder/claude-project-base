@@ -10,11 +10,15 @@
     "The console's Use balance option continues the same Go request against Zen credits after Go usage limits are reached; this is not a model-selection fallback.",
     "The runtime never switches models because of quota or provider failure. An exhausted Zen balance stops the run with ZEN_BALANCE_EXHAUSTED.",
     "2026-09-03: GPT 5.6 Sol was removed from Zen routing because the authenticated OpenAI provider already supplies it; the historical smoke remains documented outside this active registry.",
-    "2026-09-03: DeepSeek V4 Flash on Go plus Claude Sonnet 5, Claude Haiku 4.5, Gemini 3.8 Flash, and Gemini 3.5 Flash Lite on Zen passed the sealed Builder smoke. Evidence tiers stay C or D; nothing is qualified."
+    "2026-09-03: DeepSeek V4 Flash on Go plus Claude Sonnet 5, Claude Haiku 4.5, Gemini 3.8 Flash, and Gemini 3.5 Flash Lite on Zen passed the sealed Builder smoke. Evidence tiers stay C or D; nothing is qualified.",
+    "2026-09-03: admission is recorded per role under admission.roles; the catalog status can never be qualified. Only the certification process of the harness repository (certify.mjs) writes a qualified role entry, and the release check requires a complete qualified route before install or commit."
   ],
   "runner_policies": {
-    "planner": {
-      "providers": ["opencode-go", "opencode"],
+    "goal-manager": {
+      "providers": [
+        "opencode-go",
+        "opencode"
+      ],
       "configuration_ids": [
         "planner-go-glm-5.3",
         "builder-go-gpt-5.6-luna",
@@ -26,8 +30,27 @@
         "analyst-zen-gemini-3.1-pro"
       ]
     },
-    "builder": {
-      "providers": ["opencode-go", "opencode"],
+    "planner": {
+      "providers": [
+        "opencode-go",
+        "opencode"
+      ],
+      "configuration_ids": [
+        "planner-go-glm-5.3",
+        "builder-go-gpt-5.6-luna",
+        "builder-go-deepseek-v4-pro",
+        "builder-go-minimax-m3",
+        "builder-zen-claude-opus-5",
+        "builder-zen-claude-sonnet-5",
+        "builder-zen-gemini-3.8-flash",
+        "analyst-zen-gemini-3.1-pro"
+      ]
+    },
+    "gate-designer": {
+      "providers": [
+        "opencode-go",
+        "opencode"
+      ],
       "configuration_ids": [
         "builder-go-minimax-m3",
         "builder-go-mimo-v2.5-pro",
@@ -44,6 +67,83 @@
         "builder-zen-claude-haiku-4-5",
         "builder-zen-gemini-3.8-flash",
         "builder-zen-gemini-3.5-flash-lite"
+      ]
+    },
+    "builder": {
+      "providers": [
+        "opencode-go",
+        "opencode"
+      ],
+      "configuration_ids": [
+        "builder-go-minimax-m3",
+        "builder-go-mimo-v2.5-pro",
+        "builder-go-gpt-5.6-luna",
+        "builder-go-deepseek-v4-pro",
+        "builder-go-deepseek-v4-flash",
+        "builder-go-qwen3.8-flash",
+        "builder-go-glm-5.3-flash",
+        "builder-go-minimax-m2.7",
+        "builder-go-qwen3.6-plus",
+        "builder-go-kimi-k2.7-code",
+        "builder-zen-claude-opus-5",
+        "builder-zen-claude-sonnet-5",
+        "builder-zen-claude-haiku-4-5",
+        "builder-zen-gemini-3.8-flash",
+        "builder-zen-gemini-3.5-flash-lite"
+      ]
+    },
+    "researcher": {
+      "providers": [
+        "opencode-go",
+        "opencode"
+      ],
+      "configuration_ids": [
+        "builder-go-gpt-5.6-luna",
+        "builder-go-deepseek-v4-pro",
+        "builder-go-minimax-m3",
+        "builder-go-mimo-v2.5-pro",
+        "builder-zen-claude-opus-5",
+        "builder-zen-claude-sonnet-5",
+        "builder-zen-claude-haiku-4-5",
+        "builder-zen-gemini-3.8-flash",
+        "builder-zen-gemini-3.5-flash-lite",
+        "analyst-zen-gemini-3.1-pro"
+      ]
+    },
+    "advisor": {
+      "providers": [
+        "opencode-go",
+        "opencode"
+      ],
+      "configuration_ids": [
+        "builder-go-gpt-5.6-luna",
+        "builder-go-deepseek-v4-pro",
+        "builder-go-minimax-m3",
+        "builder-go-mimo-v2.5-pro",
+        "builder-zen-claude-opus-5",
+        "builder-zen-claude-sonnet-5",
+        "builder-zen-claude-haiku-4-5",
+        "builder-zen-gemini-3.8-flash",
+        "builder-zen-gemini-3.5-flash-lite",
+        "analyst-zen-gemini-3.1-pro"
+      ]
+    },
+    "reconciler": {
+      "providers": [
+        "opencode-go",
+        "opencode"
+      ],
+      "configuration_ids": [
+        "builder-go-gpt-5.6-luna",
+        "builder-go-deepseek-v4-pro",
+        "builder-go-minimax-m3",
+        "builder-go-mimo-v2.5-pro",
+        "builder-zen-claude-opus-5",
+        "builder-zen-claude-sonnet-5",
+        "builder-zen-claude-haiku-4-5",
+        "builder-zen-gemini-3.8-flash",
+        "builder-zen-gemini-3.5-flash-lite",
+        "analyst-zen-gemini-3.1-pro"
       ]
     }
   },
@@ -201,6 +301,44 @@
           "output_tokens": 1920,
           "cache_read_tokens": 76554,
           "reported_quota_value": 0.06713704
+        },
+        "roles": {
+          "planner": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T18:32:22.985Z",
+            "evidence": {
+              "run_id": "20260903T182525Z-737642",
+              "fixture": "planner",
+              "result": "PASS",
+              "detail": "plan valid with 2 waves",
+              "duration_s": 417,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 38608,
+                "output_tokens": 3990,
+                "reported_cost": 0.2214463,
+                "steps": 14
+              }
+            }
+          },
+          "goal-manager": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T18:34:36.328Z",
+            "evidence": {
+              "run_id": "20260903T183223Z-747658",
+              "fixture": "goal-manager",
+              "result": "PASS",
+              "detail": "draft DECIDED, approved to route direct",
+              "duration_s": 133,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 16602,
+                "output_tokens": 9848,
+                "reported_cost": 0.10595226,
+                "steps": 12
+              }
+            }
+          }
         }
       }
     },
@@ -833,7 +971,7 @@
         "note": "Direct OpenCode Go basic smoke passed on 2026-09-03. Vendor-reported SWE-bench Verified 80.5 (Claude Code scaffold, 4 runs) and Terminal-Bench 2.1 66.0 (Terminus 2); broader admission pending.",
         "public_evidence": {
           "swe_bench_verified": 80.5,
-          "terminal_bench_2_1": 66.0,
+          "terminal_bench_2_1": 66,
           "source": "https://www.minimax.io/blog/minimax-m3"
         },
         "last_smoke": {
@@ -844,6 +982,44 @@
           "cache_read_tokens": 26629,
           "cache_write_tokens": 0,
           "reported_quota_value": 0.004279440000000001
+        },
+        "roles": {
+          "builder": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T18:25:14.486Z",
+            "evidence": {
+              "run_id": "20260903T182457Z-736938",
+              "fixture": "builder",
+              "result": "PASS",
+              "detail": "gate passed after changing calculator.py",
+              "duration_s": 17,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 5637,
+                "output_tokens": 488,
+                "reported_cost": 0.0048573,
+                "steps": 8
+              }
+            }
+          },
+          "reconciler": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T18:38:08.746Z",
+            "evidence": {
+              "run_id": "20260903T183753Z-755267",
+              "fixture": "reconciler",
+              "result": "PASS",
+              "detail": "decision proposed: database-constraint",
+              "duration_s": 15,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 7051,
+                "output_tokens": 1323,
+                "reported_cost": 0.00627948,
+                "steps": 7
+              }
+            }
+          }
         }
       }
     },
@@ -896,6 +1072,26 @@
           "cache_read_tokens": 20224,
           "cache_write_tokens": 0,
           "reported_quota_value": 0.0030578470000000003
+        },
+        "roles": {
+          "gate-designer": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T18:35:59.910Z",
+            "evidence": {
+              "run_id": "20260903T183436Z-750527",
+              "fixture": "gate-designer",
+              "result": "PASS",
+              "detail": "gate fails on baseline: .codegen-contract/checks/check_alpha.py, .codegen-contract/gate.sh",
+              "duration_s": 83,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 10874,
+                "output_tokens": 2972,
+                "reported_cost": 0.007610238,
+                "steps": 13
+              }
+            }
+          }
         }
       }
     },
@@ -948,6 +1144,44 @@
           "cache_read_tokens": 15541,
           "cache_write_tokens": 4482,
           "reported_quota_value": 0.0018807200000000002
+        },
+        "roles": {
+          "researcher": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T18:38:51.122Z",
+            "evidence": {
+              "run_id": "20260903T183822Z-756006",
+              "fixture": "researcher",
+              "result": "PASS",
+              "detail": "report COMPLETE with validated citations",
+              "duration_s": 28,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reported_cost": 0,
+                "steps": 0
+              }
+            }
+          },
+          "advisor": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T18:37:53.251Z",
+            "evidence": {
+              "run_id": "20260903T183616Z-752971",
+              "fixture": "advisor",
+              "result": "PASS",
+              "detail": "DECISION_PROPOSED (UNANIMOUS); validated advisor:builder-go-gpt-5.6-luna, advisor:builder-go-deepseek-v4-pro",
+              "duration_s": 96,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reported_cost": 0,
+                "steps": 0
+              }
+            }
+          }
         }
       }
     },
@@ -1001,6 +1235,26 @@
           "cache_read_tokens": 27520,
           "cache_write_tokens": 0,
           "reported_quota_value": 0.0059679400000000014
+        },
+        "roles": {
+          "advisor": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T18:37:53.251Z",
+            "evidence": {
+              "run_id": "20260903T183616Z-752971",
+              "fixture": "advisor",
+              "result": "PASS",
+              "detail": "DECISION_PROPOSED (UNANIMOUS); validated advisor:builder-go-gpt-5.6-luna, advisor:builder-go-deepseek-v4-pro",
+              "duration_s": 96,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "reported_cost": 0,
+                "steps": 0
+              }
+            }
+          }
         }
       }
     },
@@ -1253,8 +1507,8 @@
       },
       "economics": {
         "currency": "USD",
-        "input_per_million_quota_value": 3.0,
-        "output_per_million_quota_value": 15.0,
+        "input_per_million_quota_value": 3,
+        "output_per_million_quota_value": 15,
         "cached_input_per_million_quota_value": 0.3,
         "price_type": "opencode-go-subscription-quota"
       },
@@ -1294,8 +1548,8 @@
       },
       "economics": {
         "currency": "USD",
-        "input_per_million_quota_value": 2.0,
-        "output_per_million_quota_value": 6.0,
+        "input_per_million_quota_value": 2,
+        "output_per_million_quota_value": 6,
         "cached_input_per_million_quota_value": 0.25,
         "price_type": "opencode-go-subscription-quota"
       },

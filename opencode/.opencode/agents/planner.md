@@ -1,6 +1,6 @@
 ---
 description: Inspects a repository and converts one objective into a validated phased plan of sealed Builder contracts.
-mode: all
+mode: primary
 steps: 30
 permission:
   read: allow

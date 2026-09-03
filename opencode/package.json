@@ -13,6 +13,8 @@
     "plan:validate": "node .opencode/codegen/scripts/validate-plan.mjs",
     "gate:design": "node .opencode/codegen/scripts/run-gate-designer.mjs",
     "builder": "node .opencode/codegen/scripts/run-builder.mjs",
+    "certify": "node .opencode/codegen/scripts/certify.mjs",
+    "release:check": "node .opencode/codegen/scripts/certify.mjs check",
     "test": "node --test"
   }
 }

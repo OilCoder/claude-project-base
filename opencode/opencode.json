@@ -3,6 +3,7 @@
   "share": "disabled",
   "snapshot": true,
   "subagent_depth": 1,
+  "default_agent": "supervisor",
   "instructions": [
     ".opencode/instructions/codegen.md"
   ],

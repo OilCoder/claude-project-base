@@ -9,7 +9,14 @@ import {
   runBuilderExecution,
   selectBuilderExecutionPlan,
 } from "../lib/builder-runner.mjs"
-import { loadRegistry, newRunId, parseArguments } from "../lib/cli.mjs"
+import {
+  loadRegistry,
+  newRunId,
+  parseArguments,
+  requireGitHead,
+  resolveMinimumStatus,
+  resolvePinnedConfiguration,
+} from "../lib/cli.mjs"
 import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 
@@ -60,16 +67,20 @@ async function main() {
   const contractPath = path.resolve(directory, args.contract ?? "")
   if (!args.contract || !args["work-class"]) {
     throw new Error(
-      "usage: run-builder.mjs --contract <path> --work-class <class> [--risk <risk>] [--minimum-status <status>] [--evidence <path>] [--exclude-family <family>]",
+      "usage: run-builder.mjs --contract <path> --work-class <class> [--risk <risk>] [--evidence <path>] [--exclude-family <family>]",
     )
   }
 
+  await requireGitHead(directory)
+  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
+  const configurationId = await resolvePinnedConfiguration(args, systemRoot)
   const registry = await loadRegistry(systemRoot)
   const contract = JSON.parse(await readFile(contractPath, "utf8"))
   const plan = selectBuilderExecutionPlan(registry, {
     workClass: args["work-class"],
     risk: args.risk ?? "low",
-    minimumStatus: args["minimum-status"] ?? "qualified",
+    minimumStatus,
+    configurationId,
     requiredContext: Number(args["required-context"] ?? 0),
     excludeFamily: args["exclude-family"] ?? null,
   })

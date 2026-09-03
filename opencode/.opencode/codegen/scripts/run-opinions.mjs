@@ -5,9 +5,19 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { classifyExecution } from "../lib/builder-runner.mjs"
-import { exists, loadRegistry, newRunId, parseArguments, resolveInsideProject } from "../lib/cli.mjs"
+import { admittedForRole, independentFamilies } from "../lib/certification.mjs"
+import {
+  exists,
+  loadRegistry,
+  newRunId,
+  parseArguments,
+  requireGitHead,
+  resolveInsideProject,
+  resolveMinimumStatus,
+  resolvePinnedConfiguration,
+} from "../lib/cli.mjs"
 import { validateGoal } from "../lib/goal.mjs"
-import { eligibleConfigurations } from "../lib/model-selection.mjs"
+import { roleStatus } from "../lib/model-selection.mjs"
 import {
   reconcileOpinions,
   renderDecisionMarkdown,
@@ -21,13 +31,13 @@ import { runProcess } from "../lib/process.mjs"
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const systemRoot = path.resolve(scriptDirectory, "../../..")
 
-function view(configuration) {
+function view(configuration, role) {
   return {
     configuration_id: configuration.configuration_id,
     model: configuration.opencode_model,
     provider: configuration.provider,
     family: configuration.family,
-    admission_status: configuration.status,
+    admission_status: roleStatus(configuration, role),
   }
 }
 
@@ -55,16 +65,22 @@ async function runAgent({ directory, agent, model, prompt, timeoutSeconds, outpu
   }
 }
 
-// Advisors run once each on distinct OpenCode Go model families. Unanimity is
-// decided deterministically; divergence goes to a third Go family.
+// Advisors run once each on distinct model families admitted as advisor.
+// Unanimity is decided deterministically; divergence goes to a reconciler
+// from a third family admitted as reconciler.
 async function main() {
   const args = parseArguments(process.argv.slice(2))
   if (!args.question) {
     throw new Error(
-      "usage: run-opinions.mjs --question <open_question_id> [--goal .codegen-goal/goal.json] [--advisors 2] [--minimum-status <status>]",
+      "usage: run-opinions.mjs --question <open_question_id> [--goal .codegen-goal/goal.json] [--advisors 2]",
     )
   }
   const directory = path.resolve(args.directory ?? process.cwd())
+  await requireGitHead(directory)
+  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
+  // Certification pins advisors and reconciler in order: a,b[,c].
+  const pinned = (await resolvePinnedConfiguration({ configuration: args.configurations ?? null }, systemRoot))
+    ?.split(",").map((value) => value.trim()).filter(Boolean) ?? []
   const goalFile = resolveInsideProject(directory, args.goal ?? ".codegen-goal/goal.json", "Goal")
   const goal = JSON.parse(await readFile(goalFile.absolute, "utf8"))
   const goalValidation = validateGoal(goal)
@@ -84,31 +100,42 @@ async function main() {
   const request = {
     workClass: "independent-analysis",
     risk: goal.routing.risk,
-    minimumStatus: args["minimum-status"] ?? "qualified",
+    minimumStatus,
     requiredContext: Number(args["required-context"] ?? 0),
     requiresTools: true,
     requiresCodeEditing: false,
   }
-  const { eligible, rejected } = eligibleConfigurations(registry, request)
-  const byFamily = new Map()
-  for (const configuration of eligible) {
-    if (!byFamily.has(configuration.family)) byFamily.set(configuration.family, configuration)
-  }
-  const independent = [...byFamily.values()]
-  if (independent.length < advisorCount + 1) {
+  // Advisors come from configurations admitted as advisor, one per family; the
+  // reconciler from a configuration admitted as reconciler in a family that
+  // gave no opinion.
+  const pinnedAdvisors = pinned.slice(0, advisorCount)
+  const pinnedReconciler = pinned[advisorCount] ?? null
+  const admittedAdvisors = admittedForRole(registry, "advisor", request)
+  const advisorPool = independentFamilies(
+    pinnedAdvisors.length > 0
+      ? pinnedAdvisors.map((id) => admittedAdvisors.eligible.find((c) => c.configuration_id === id)).filter(Boolean)
+      : admittedAdvisors.eligible,
+  )
+  const advisors = advisorPool.slice(0, advisorCount)
+  const advisorFamilies = new Set(advisors.map((configuration) => configuration.family))
+  const admittedReconcilers = admittedForRole(registry, "reconciler", request)
+  const reconciler = independentFamilies(admittedReconcilers.eligible).find(
+    (configuration) =>
+      !advisorFamilies.has(configuration.family) &&
+      (!pinnedReconciler || configuration.configuration_id === pinnedReconciler),
+  ) ?? null
+  if (advisors.length < advisorCount || !reconciler) {
     const summary = {
       result: "INSUFFICIENT_INDEPENDENCE",
       question_id: question.id,
-      reason: `${independent.length} eligible model families; need ${advisorCount} advisors plus a reconciler family`,
-      families: independent.map((configuration) => configuration.family),
-      rejected,
+      reason: `${advisors.length} admitted advisor families of ${advisorCount} required; reconciler family ${reconciler ? "available" : "missing"}`,
+      families: advisors.map((configuration) => configuration.family),
+      rejected: { advisor: admittedAdvisors.rejected, reconciler: admittedReconcilers.rejected },
     }
     process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
     process.exitCode = 2
     return
   }
-  const advisors = independent.slice(0, advisorCount)
-  const reconciler = independent[advisorCount]
 
   await mkdir(outputDirectory.absolute, { recursive: true })
   const runId = newRunId()
@@ -144,7 +171,7 @@ async function main() {
         lines: [`pregunta  ${question.question}`, `opciones  ${question.options.join(" | ")}`],
       },
     })
-    const attempt = { role: "advisor", configuration: view(configuration), output, ...run, validation: null }
+    const attempt = { role: "advisor", configuration: view(configuration, "advisor"), output, ...run, validation: null }
     attempts.push(attempt)
     if (run.user_action) {
       userAction = run.user_action
@@ -195,7 +222,7 @@ async function main() {
         lines: [`pregunta  ${question.question}`, `posiciones ${reconciliation.tally.map((t) => `${t.position} (${t.opinion_ids.join(",")})`).join(" | ")}`],
       },
     })
-    attempts.push({ role: "reconciler", configuration: view(reconciler), output: decisionOutput, ...run })
+    attempts.push({ role: "reconciler", configuration: view(reconciler, "reconciler"), output: decisionOutput, ...run })
     if (run.user_action) {
       userAction = run.user_action
       result = "USER_ACTION_REQUIRED"

@@ -39,6 +39,12 @@ async function worktree() {
   await writeFile(path.join(bin, "opencode"), fakeOpenCode, { mode: 0o755 })
   await mkdir(path.join(directory, ".codegen-goal"), { recursive: true })
   await cp(path.join(fixtures, "goal.json"), path.join(directory, ".codegen-goal/goal.json"))
+  // Runners refuse to start without a Git HEAD; the Goal itself stays untracked.
+  await writeFile(path.join(directory, ".gitignore"), "bin/\nfake.log\n.codegen-goal/\n.codegen-research/\n")
+  const git = (...args) => execFile("git", ["-c", "user.name=t", "-c", "user.email=t@localhost", ...args], { cwd: directory })
+  await git("init", "-q", "-b", "main")
+  await git("add", ".")
+  await git("commit", "-q", "-m", "baseline")
   return { directory, bin }
 }
 
@@ -205,6 +211,53 @@ test("run-goal refuses to overwrite an existing Goal and rejects invalid researc
     )
     assert.equal(invalid.code, 2)
     assert.match(invalid.stderr, /Research report bad.json is invalid/)
+    await assert.rejects(readFile(path.join(tree.directory, "fake.log")))
+  } finally {
+    await rm(tree.directory, { recursive: true, force: true })
+  }
+})
+
+test("run-goal --approve seals the drafted Goal deterministically without a model call", async () => {
+  const tree = await worktree()
+  try {
+    const goalPath = path.join(tree.directory, ".codegen-goal/goal.json")
+    const goal = JSON.parse(await readFile(goalPath, "utf8"))
+    goal.status = "DECIDED"
+    goal.research_questions = goal.research_questions.map((item) => ({ ...item, status: "completed" }))
+    goal.decisions = [{ id: "DEC-1", question: "q", decision: "d", rationale: "r", research_report_ids: ["RR-1"] }]
+    await writeFile(goalPath, JSON.stringify(goal))
+
+    const result = await run("run-goal.mjs", ["--approve", ".codegen-goal/goal.json"], tree)
+    assert.equal(result.code, 0, result.stderr)
+    const summary = JSON.parse(result.stdout)
+    assert.equal(summary.result, "SEALED")
+    assert.equal(summary.previous_status, "DECIDED")
+    assert.equal(summary.routing.status, "ROUTED")
+    assert.equal(JSON.parse(await readFile(goalPath, "utf8")).status, "SEALED")
+    assert.ok((await readFile(path.join(tree.directory, ".codegen-goal/GOAL.md"), "utf8")).startsWith("# "))
+    await assert.rejects(readFile(path.join(tree.directory, "fake.log")))
+
+    // A Goal that still needs research cannot be approved into a sealed state.
+    goal.status = "DRAFT"
+    goal.research_questions = goal.research_questions.map((item) => ({ ...item, status: "pending" }))
+    await writeFile(goalPath, JSON.stringify(goal))
+    const refused = await run("run-goal.mjs", ["--approve", ".codegen-goal/goal.json"], tree)
+    assert.equal(refused.code, 2)
+    assert.match(refused.stderr, /required pending research/)
+  } finally {
+    await rm(tree.directory, { recursive: true, force: true })
+  }
+})
+
+test("runners refuse to start without a Git HEAD", async () => {
+  const tree = await worktree()
+  try {
+    await rm(path.join(tree.directory, ".git"), { recursive: true, force: true })
+    const result = await run("run-researcher.mjs", ["--question", "RQ-1", "--minimum-status", "candidate"], tree, {
+      FAKE_OUTPUT_FIXTURE: path.join(fixtures, "report.json"),
+    })
+    assert.equal(result.code, 2)
+    assert.match(result.stderr, /GIT_HEAD_REQUIRED/)
     await assert.rejects(readFile(path.join(tree.directory, "fake.log")))
   } finally {
     await rm(tree.directory, { recursive: true, force: true })

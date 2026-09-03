@@ -1,6 +1,6 @@
 ---
 description: Converts user intent and bounded research reports into a structured Goal without making product decisions for the user.
-mode: all
+mode: primary
 steps: 24
 permission:
   read: allow

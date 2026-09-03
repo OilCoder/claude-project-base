@@ -1,6 +1,6 @@
 ---
 description: Gives one independent, evidence-based opinion on a closed decision question from the Goal; reads the repository, never edits product code.
-mode: all
+mode: primary
 steps: 20
 permission:
   read: allow

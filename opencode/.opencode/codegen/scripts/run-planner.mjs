@@ -9,7 +9,15 @@ import {
   selectExecutionPlan,
 } from "../lib/builder-runner.mjs"
 import { validatePlan } from "../lib/plan-validation.mjs"
-import { exists, loadRegistry, newRunId, parseArguments } from "../lib/cli.mjs"
+import {
+  exists,
+  loadRegistry,
+  newRunId,
+  parseArguments,
+  requireGitHead,
+  resolveMinimumStatus,
+  resolvePinnedConfiguration,
+} from "../lib/cli.mjs"
 import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 
@@ -20,10 +28,13 @@ async function main() {
   const args = parseArguments(process.argv.slice(2))
   if (!args.objective) {
     throw new Error(
-      "usage: run-planner.mjs --objective <text> [--goal <path>] [--output .codegen-plan/plan.json] [--minimum-status <status>] [--max-contracts <n>]",
+      "usage: run-planner.mjs --objective <text> [--goal <path>] [--output .codegen-plan/plan.json] [--max-contracts <n>]",
     )
   }
   const directory = path.resolve(args.directory ?? process.cwd())
+  await requireGitHead(directory)
+  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
+  const configurationId = await resolvePinnedConfiguration(args, systemRoot)
   const outputPath = path.resolve(directory, args.output ?? ".codegen-plan/plan.json")
   const relativeOutput = path.relative(directory, outputPath)
   if (relativeOutput.startsWith("..") || path.isAbsolute(relativeOutput)) {
@@ -36,7 +47,8 @@ async function main() {
   const plan = selectExecutionPlan(registry, "planner", {
     workClass: "complex-engineering-plan",
     risk: args.risk ?? "medium",
-    minimumStatus: args["minimum-status"] ?? "qualified",
+    minimumStatus,
+    configurationId,
     requiredContext: Number(args["required-context"] ?? 0),
     requiresTools: true,
     requiresCodeEditing: false,

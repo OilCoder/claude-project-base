@@ -1,6 +1,6 @@
 ---
 description: Compares divergent advisor opinions on one decision question and writes a single proposed decision that explains every rejected position.
-mode: all
+mode: primary
 steps: 16
 permission:
   read: allow

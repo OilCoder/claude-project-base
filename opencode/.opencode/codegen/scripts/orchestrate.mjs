@@ -3,7 +3,8 @@
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { loadRegistry, newRunId, parseArguments } from "../lib/cli.mjs"
+import { builderFamily } from "../lib/certification.mjs"
+import { loadRegistry, newRunId, parseArguments, requireGitHead, resolveMinimumStatus } from "../lib/cli.mjs"
 import { orchestrate } from "../lib/orchestrator.mjs"
 import { runProcess } from "../lib/process.mjs"
 
@@ -28,16 +29,15 @@ async function spawnRunner(script, flags, directory) {
 async function main() {
   const args = parseArguments(process.argv.slice(2))
   const directory = path.resolve(args.directory ?? process.cwd())
-  const minimumStatus = args["minimum-status"] ?? "qualified"
+  await requireGitHead(directory)
+  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
   const registry = await loadRegistry(systemRoot)
   const runId = args["run-id"] ?? newRunId()
   const timeout = args.timeout ?? null
   const display = args.display ?? process.env.CODEGEN_DISPLAY ?? null
   // Keep the Gate independent from the implementation: exclude the family of
-  // the Builder policy's first primary configuration.
-  const builderPrimaryId = registry.runner_policies.builder.configuration_ids[0]
-  const builderFamily =
-    registry.configurations.find((configuration) => configuration.configuration_id === builderPrimaryId)?.family ?? null
+  // the Builder configuration admitted for this admission level.
+  const excludedFamily = builderFamily(registry, minimumStatus)
 
   const state = await orchestrate({
     directory,
@@ -62,7 +62,7 @@ async function main() {
       gateDesigner: ({ directory: cwd, contract, workClass, risk }) =>
         spawnRunner(
           "run-gate-designer.mjs",
-          { contract, "work-class": workClass, risk, "minimum-status": minimumStatus, "exclude-family": builderFamily, timeout, display },
+          { contract, "work-class": workClass, risk, "minimum-status": minimumStatus, "exclude-family": excludedFamily, timeout, display },
           cwd,
         ),
       builder: ({ directory: cwd, contract, workClass, risk, evidence }) =>

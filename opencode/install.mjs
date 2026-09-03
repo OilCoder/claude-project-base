@@ -6,6 +6,8 @@ import { access, chmod, copyFile, mkdir, readFile, readdir, stat, writeFile } fr
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { checkRelease } from "./.opencode/codegen/lib/certification.mjs"
+
 const sourceRoot = path.dirname(fileURLToPath(import.meta.url))
 const sourceOpenCode = path.join(sourceRoot, ".opencode")
 const manifestRelative = ".opencode/.codegen-install.json"
@@ -137,7 +139,7 @@ async function prepareRootFiles(targetRoot) {
   const scriptConflicts = []
   targetPackage.scripts ??= {}
   for (const [name, command] of Object.entries(sourcePackage.scripts ?? {})) {
-    if (name === "test") continue
+    if (["test", "install:target", "certify", "release:check"].includes(name)) continue
     if (targetPackage.scripts[name] && targetPackage.scripts[name] !== command) scriptConflicts.push(`package.json scripts.${name}`)
     else targetPackage.scripts[name] = command
   }
@@ -170,12 +172,22 @@ async function main() {
   if (!(await exists(targetRoot)) || !(await stat(targetRoot)).isDirectory()) throw new Error(`Target is not a directory: ${targetRoot}`)
   if (targetRoot === sourceRoot) throw new Error("Source and target directories must be different")
 
+  // A target project receives only a certified system: every role must have
+  // a qualified configuration for the requests production issues.
+  const registry = await readJson(path.join(sourceRoot, ".opencode/codegen/config/model-pools.json"), null)
+  if (!registry) throw new Error("Source registry .opencode/codegen/config/model-pools.json is missing")
+  const release = checkRelease(registry)
+  if (!release.ok) {
+    throw new Error(`Release check failed; certify the missing roles with certify.mjs before installing:\n- ${release.missing.join("\n- ")}`)
+  }
+
   const managed = await prepareManagedFiles(targetRoot)
   const root = await prepareRootFiles(targetRoot)
   const conflicts = [...managed.conflicts, ...root.conflicts]
   if (conflicts.length) throw new Error(`Installation conflicts:\n- ${conflicts.join("\n- ")}`)
 
   console.log(`${dryRun ? "Would install" : "Installing"} OpenCode code-generation system into ${targetRoot}`)
+  console.log(`Release check: qualified route complete (builder family ${release.builder_family})`)
   console.log(`Managed files to copy: ${managed.copies.length}`)
   if (root.preserved.length) console.log(`Project settings preserved: ${root.preserved.join(", ")}`)
   if (dryRun) return

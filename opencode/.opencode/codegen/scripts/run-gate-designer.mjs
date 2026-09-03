@@ -5,7 +5,15 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { runExecutionPlan, selectExecutionPlan } from "../lib/builder-runner.mjs"
-import { exists, loadRegistry, newRunId, parseArguments } from "../lib/cli.mjs"
+import {
+  exists,
+  loadRegistry,
+  newRunId,
+  parseArguments,
+  requireGitHead,
+  resolveMinimumStatus,
+  resolvePinnedConfiguration,
+} from "../lib/cli.mjs"
 import { checkGateReadiness } from "../lib/gate.mjs"
 import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
@@ -14,16 +22,19 @@ import { changedFilesSince, revision } from "../lib/worktrees.mjs"
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const systemRoot = path.resolve(scriptDirectory, "../../..")
 
-// The Gate Designer writes tests, so it uses the Builder's Go-preferred policy
-// and may exclude the model family that will implement the contract.
+// The Gate Designer writes tests with a configuration admitted for its own
+// role and excludes the model family that will implement the contract.
 async function main() {
   const args = parseArguments(process.argv.slice(2))
   if (!args.contract || !args["work-class"]) {
     throw new Error(
-      "usage: run-gate-designer.mjs --contract <path> --work-class <class> [--risk <risk>] [--minimum-status <status>] [--exclude-family <family>]",
+      "usage: run-gate-designer.mjs --contract <path> --work-class <class> [--risk <risk>] [--exclude-family <family>]",
     )
   }
   const directory = path.resolve(args.directory ?? process.cwd())
+  await requireGitHead(directory)
+  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
+  const configurationId = await resolvePinnedConfiguration(args, systemRoot)
   const contractPath = path.resolve(directory, args.contract)
   const contract = JSON.parse(await readFile(contractPath, "utf8"))
   const before = await checkGateReadiness({ directory, contract })
@@ -40,10 +51,11 @@ async function main() {
   }
 
   const registry = await loadRegistry(systemRoot)
-  const plan = selectExecutionPlan(registry, "builder", {
+  const plan = selectExecutionPlan(registry, "gate-designer", {
     workClass: args["work-class"],
     risk: args.risk ?? "low",
-    minimumStatus: args["minimum-status"] ?? "qualified",
+    minimumStatus,
+    configurationId,
     requiredContext: Number(args["required-context"] ?? 0),
     requiresTools: true,
     requiresCodeEditing: true,

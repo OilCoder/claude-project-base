@@ -1,36 +1,38 @@
-import { eligibleConfigurations, validateRegistry } from "./model-selection.mjs"
+import { eligibleConfigurations, roleStatus, validateRegistry } from "./model-selection.mjs"
 import { summarizeEvents } from "./run-metrics.mjs"
 
 const ZEN_RECHARGE_ACTION = "OpenCode Zen balance is exhausted. Recharge the Zen balance, then resume the run."
 const GO_BALANCE_ACTION = "OpenCode Go reached a usage limit. Verify that Use balance is enabled in the OpenCode console."
 
-function configurationView(configuration) {
+function configurationView(configuration, role) {
   return {
     configuration_id: configuration.configuration_id,
     model: configuration.opencode_model,
     provider: configuration.provider,
     family: configuration.family,
-    admission_status: configuration.status,
+    admission_status: roleStatus(configuration, role),
     context_tokens: configuration.capabilities?.context_tokens ?? null,
   }
 }
 
-export function selectExecutionPlan(registry, policyName, request) {
+// The policy name is the role: every runner asks for configurations admitted
+// for its own role, in the order the role policy declares.
+export function selectExecutionPlan(registry, role, request) {
   validateRegistry(registry)
-  const policy = registry.runner_policies?.[policyName]
-  if (!policy) throw new Error(`Registry does not define a ${policyName} runner policy`)
+  const policy = registry.runner_policies?.[role]
+  if (!policy) throw new Error(`Registry does not define a ${role} runner policy`)
 
-  const { eligible, rejected } = eligibleConfigurations(registry, request)
-  const primary = eligible.find(
-    (configuration) =>
-      policy.providers.includes(configuration.provider) &&
-      policy.configuration_ids.includes(configuration.configuration_id),
-  )
+  const { eligible, rejected } = eligibleConfigurations(registry, { ...request, role })
+  const primary = policy.configuration_ids
+    .map((id) => eligible.find((configuration) => configuration.configuration_id === id))
+    .find((configuration) => configuration && policy.providers.includes(configuration.provider))
 
   if (!primary) {
     return {
       status: "NO_MATCH",
       work_class: request.workClass,
+      role,
+      minimum_status: request.minimumStatus ?? "qualified",
       rejected,
     }
   }
@@ -38,7 +40,8 @@ export function selectExecutionPlan(registry, policyName, request) {
   return {
     status: "READY",
     work_class: request.workClass,
-    primary: configurationView(primary),
+    role,
+    primary: configurationView(primary, role),
     rejected,
   }
 }
@@ -50,7 +53,6 @@ export function selectBuilderExecutionPlan(registry, request) {
     requiresTools: true,
   })
 }
-
 export function classifyExecution({
   exitCode,
   signal = null,

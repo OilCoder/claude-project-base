@@ -1,6 +1,6 @@
 ---
 description: Answers one bounded research question from a Goal with cited, actually retrieved sources and writes a structured research report.
-mode: all
+mode: primary
 steps: 24
 permission:
   read: allow

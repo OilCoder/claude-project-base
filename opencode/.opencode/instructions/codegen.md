@@ -3,14 +3,26 @@
 This directory is a self-contained code-generation system built for OpenCode.
 Treat roles, agents, models, and model calls as separate concepts.
 
+## Supervisor
+
+- The interactive session runs the `supervisor` agent on the user's model. It
+  never edits product files and never runs shell commands. Requests that change
+  code go through the `codegen_workflow` tool: `draft` a Goal, `approve` it
+  only after the user explicitly approves that exact Goal, then `orchestrate`.
+- Without a Git HEAD, without a certified route, or after any controlled step
+  fails, the supervisor reports the blocker and stops with zero product edits.
+
 ## Model selection
 
-- Call `model_select` before dispatching model-backed work.
-- Select by work class, risk, context, capabilities, and admission status.
+- Call `model_select` with the requesting role before dispatching model-backed
+  work. Admission is certified per role: a configuration admitted as `builder`
+  is not admitted as `planner`.
+- Select by role, work class, risk, context, and capabilities.
 - Never invent a model ID or select a model merely because it appears in the
   provider catalog.
-- Use `minimumStatus: "qualified"` for production work.
-- Use `minimumStatus: "candidate"` only for an explicit compatibility test.
+- Production work uses `minimumStatus: "qualified"`, which is the default. This
+  project runs only certified configurations; there is no lower level to ask
+  for here.
 - Treat the returned alternate as another eligible configuration, not an automatic retry.
 - A configured model is not necessarily available now. The Runner must perform
   provider and endpoint preflight before execution.
@@ -43,17 +55,18 @@ the evidence and admission methodology.
   through `.opencode/codegen/scripts/run-researcher.mjs`, within the Goal's
   research budget. The Researcher cites only sources it actually retrieved and
   never edits the Goal; the Goal Manager records conclusions under `decisions`.
-- A Goal is `SEALED` only after explicit user approval.
+- A Goal is `SEALED` only after explicit user approval, through
+  `run-goal.mjs --approve`, which seals deterministically without a model call.
 
 ## Orchestration
 
-- The interactive parent agent may use the user's chosen provider (for example,
-  OpenAI) to supervise and handle high-level decisions. Child runners receive
-  the explicit Go-preferred or capacity-escalated Zen model from the registry.
+- The supervisor uses the user's chosen provider (for example, OpenAI) to
+  handle the conversation and high-level decisions. Child runners receive the
+  configuration certified for their role from the registry.
 - `.opencode/codegen/scripts/orchestrate.mjs` is the only component that
   chains Router, Planner, Gate readiness, Builders, integration, and the final
   Gate. It is deterministic and spawns the runners; it never calls a model
-  directly.
+  directly. It requires a Git HEAD and a `SEALED` Goal.
 - Every contract builds in its own Git worktree under `.codegen-run/<run>/`
   from the current integration head. Results are cherry-picked onto the branch
   `codegen/<run>`. The user's checkout is never modified.

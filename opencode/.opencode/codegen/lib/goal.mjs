@@ -169,6 +169,16 @@ export function validateGoal(goal) {
   return { valid: errors.length === 0, errors }
 }
 
+export function sealApprovedGoal(goal) {
+  const current = validateGoal(goal)
+  if (!current.valid) throw new Error(`Cannot approve invalid Goal: ${current.errors.join("; ")}`)
+  const sealed = structuredClone(goal)
+  sealed.status = "SEALED"
+  const validation = validateGoal(sealed)
+  if (!validation.valid) throw new Error(`Goal is not ready for approval: ${validation.errors.join("; ")}`)
+  return sealed
+}
+
 function bullets(items, format) {
   return items.length > 0 ? items.map((item) => `- ${format(item)}`).join("\n") : "- None"
 }

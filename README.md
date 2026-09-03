@@ -1,8 +1,7 @@
-# claude-project-base — dos métodos de generación de código
+# claude-project-base — métodos de generación de código
 
-Este repo contiene **dos métodos de generación de código con Claude Code**, cada uno
-autocontenido en su propia carpeta con su `.claude/` adentro — porque así funciona
-Claude: el método vive en la carpeta `.claude/` del proyecto donde trabaja.
+Este repositorio compara métodos autocontenidos de generación de código para
+Claude Code y OpenCode. Cada variante conserva su propia integración de harness.
 
 ```
 clasico/
@@ -21,6 +20,12 @@ noloop/
     ├── fixture-project/  (banco de pruebas con errores deliberados)
     ├── run-e2e.sh    (verificación end-to-end con claude -p real)
     └── adw-gates.conf.example
+
+opencode/
+├── .opencode/        ← agentes, Runner, gates y selección de modelos
+├── install.mjs       ← instalación segura en otro proyecto
+├── opencode.json     ← configuración de proveedores del método
+└── tests/            ← pruebas del sistema reutilizable
 ```
 
 ## Filosofías
@@ -45,6 +50,26 @@ cp noloop/.mcp.json    /ruta/al/proyecto/.mcp.json  # opcional, ver abajo
 (Para no-loop: renombrar `settings.template.json` a `settings.json` en el destino y,
 opcionalmente, definir los gates en `adw-gates.conf`; sin él se autodetectan —
 Python → ruff/pytest, JS → eslint/prettier. Para el clásico: correr `/setup`.)
+
+Para OpenCode, usa el instalador; no copies la carpeta `opencode/` dentro del
+proyecto destino:
+
+```bash
+node opencode/install.mjs /ruta/al/proyecto --dry-run
+node opencode/install.mjs /ruta/al/proyecto
+```
+
+El instalador solo entrega un sistema certificado: cada rol (Goal Manager,
+Planner, Gate Designer, Builder, Researcher, Advisors, Reconciler) debe tener
+una configuración `qualified` certificada aquí con `npm run certify` (ver
+`opencode/README.md`). Si la ruta no está completa, la instalación falla antes
+de copiar nada. El proyecto destino arranca en el agente `supervisor`, que no
+edita archivos: todo cambio de código pasa por Goal → aprobación → Planner →
+Gate → Builder.
+
+El repositorio conserva código, pruebas y documentación. Credenciales,
+dependencias instaladas y artefactos de ejecución permanecen solo en local y
+están ignorados por Git.
 
 ### Opcional: Codex vía MCP (no-loop)
 

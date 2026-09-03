@@ -1,6 +1,6 @@
 ---
 description: Prepares an executable, non-trivial Gate for one sealed contract before the Builder runs; writes only under .codegen-contract/.
-mode: all
+mode: primary
 steps: 20
 permission:
   read: allow

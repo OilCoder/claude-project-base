@@ -5,8 +5,9 @@ for OpenCode and the source copied into target projects.
 
 ## Layout
 
-- `.opencode/`: agents (goal-manager, researcher, advisor, reconciler, planner,
-  gate-designer, builder), tools, instructions, and namespaced runtime files.
+- `.opencode/`: agents (supervisor, goal-manager, researcher, advisor,
+  reconciler, planner, gate-designer, builder), tools, instructions, and
+  namespaced runtime files.
 - `opencode.json`: project-level OpenCode configuration.
 - `tests/`: tests for the reusable system.
 - `CODE_GENERATION_FLOW.md`: conceptual workflow.
@@ -32,10 +33,14 @@ From inside this directory, the equivalent command is:
 npm run install:target -- /path/to/project
 ```
 
-The installer copies only reusable `.opencode/` runtime files, merges missing
-OpenCode settings and provider whitelist entries, adds the code-generation npm
-scripts without replacing the target's `test` script, and appends local runtime
-paths to `.gitignore`. Existing project scalar settings win and are reported.
+The installer first runs the release check (`npm run release:check`): every
+role must have a `qualified` configuration for the requests production issues,
+otherwise nothing is copied. It then copies only reusable `.opencode/` runtime
+files, merges missing OpenCode settings (including `default_agent: supervisor`)
+and provider whitelist entries, adds the code-generation npm scripts without
+replacing the target's `test` script or shipping the maintenance scripts, and
+appends local runtime paths to `.gitignore`. Existing project scalar settings
+win and are reported.
 
 Install state is recorded in ignored `.opencode/.codegen-install.json`. On a
 later update, files that still match the previous installation can be replaced;
@@ -48,10 +53,15 @@ files, and the installation manifest are machine-local state and are never part
 of the payload or source commit. Tests and design documents stay in this source
 repository for maintenance but are not copied into target projects.
 
-The interactive parent session keeps the provider and model selected by the
-user, for example an OpenAI-authenticated GPT model. That parent can supervise
-the workflow, while each child receives the model chosen by the registry; the
-parent model is not spent on routine agent work.
+The interactive session opens on the `supervisor` agent with the provider and
+model selected by the user, for example an OpenAI-authenticated GPT model. The
+supervisor cannot edit files or run shell commands: a request that changes code
+goes through the `codegen_workflow` tool (`draft` a Goal, `approve` it after
+the user's explicit approval, `orchestrate`), and every model-backed step runs
+in a child process with the configuration certified for that role. If Git has
+no HEAD or any controlled step fails, the supervisor reports the blocker and
+stops with zero product edits. The role agents are addressable only through
+`opencode run --agent <role>`, which is what the runners do.
 
 Automatic model selection prefers an admitted OpenCode Go configuration that
 meets the task's capability, risk, and context requirements. A Zen-only model
@@ -72,13 +82,13 @@ Select a model interactively with `/models`, or per non-interactive execution:
 opencode run --model opencode-go/minimax-m3 --agent builder "..."
 ```
 
-Run a sealed Builder contract through the capability-first, Go-preferred policy:
+Run a sealed Builder contract through the capability-first, Go-preferred policy
+(production selection: only configurations certified as `builder`):
 
 ```bash
 npm run builder -- \
   --contract .codegen-contract/contract.json \
-  --work-class localized-low-risk-code-change \
-  --minimum-status candidate
+  --work-class localized-low-risk-code-change
 ```
 
 Generate and validate a phased plan from a project objective:
@@ -86,13 +96,12 @@ Generate and validate a phased plan from a project objective:
 ```bash
 npm run planner -- \
   --objective "Implement the requested project behavior" \
-  --output .codegen-plan/plan.json \
-  --minimum-status candidate
+  --output .codegen-plan/plan.json
 
 npm run plan:validate -- .codegen-plan/plan.json
 ```
 
-The Planner uses `opencode-go/glm-5.3`. The plan schema is
+The Planner uses the configuration certified as `planner` (`opencode-go/glm-5.3`). The plan schema is
 `.opencode/codegen/schema/plan.schema.json`. Independent phases form the
 same execution wave; the validator rejects cycles, unknown work classes,
 unsafe paths, and file overlap between contracts that could run concurrently.
@@ -102,18 +111,21 @@ Structure user intent into a Goal, then route it:
 ```bash
 npm run goal:run -- \
   --intent "Prevent registering users with an existing email" \
-  --reports .codegen-research/RQ-1.json \
-  --minimum-status candidate
+  --reports .codegen-research/RQ-1.json
 
+npm run goal:run -- --approve .codegen-goal/goal.json   # after the user approves
 npm run goal -- validate .codegen-goal/goal.json
 npm run goal -- render .codegen-goal/goal.json
 npm run goal -- route .codegen-goal/goal.json
 ```
 
-The Goal Manager shares the Planner transport policy and writes
-`.codegen-goal/goal.json`; `GOAL.md` is rendered deterministically after
+The Goal Manager runs with the configuration certified as `goal-manager` and
+writes `.codegen-goal/goal.json`; `GOAL.md` is rendered deterministically after
 validation. A Goal returned as `SEALED` is rejected unless the run passes
-`--allow-sealed true`, because only the user seals a Goal. The Router (`route`)
+`--allow-sealed true`, because only the user seals a Goal. `--approve` seals the
+existing Goal deterministically, without a model call, once the user has
+approved that exact Goal; it refuses a Goal that still has required pending
+research or blocking questions. The Router (`route`)
 is a deterministic function of the Goal: an
 open Goal with research, architecture uncertainty, or blocking questions routes
 `deliberative`; a `SEALED` Goal routes `direct` (localized, low risk, existing
@@ -123,13 +135,13 @@ its conclusions under `decisions`, so it never routes back to deliberation.
 Answer one bounded research question from the Goal:
 
 ```bash
-npm run researcher -- --question RQ-1 --minimum-status candidate
+npm run researcher -- --question RQ-1
 npm run research -- validate .codegen-research/RQ-1.json .codegen-goal/goal.json RQ-1
 npm run research -- render .codegen-research/RQ-1.json
 ```
 
-The Researcher runs one selected configuration from the Go-preferred
-`research-synthesis` route. The Runner also sets `OPENCODE_ENABLE_EXA=1` so
+The Researcher runs one configuration certified as `researcher` from the
+Go-preferred `research-synthesis` route. The Runner also sets `OPENCODE_ENABLE_EXA=1` so
 hosted search remains available when needed. The
 report must cite only sources actually retrieved; the validator binds it to the
 Goal question (id, text, budget, allowed source types) and rejects future
@@ -140,26 +152,27 @@ reports never edit the Goal: the Goal Manager records accepted conclusions under
 Deliberate a blocking open question that carries a closed option set:
 
 ```bash
-npm run opinions -- --question OQ-1 --advisors 2 --minimum-status candidate
+npm run opinions -- --question OQ-1 --advisors 2
 ```
 
-Advisors run once each on distinct model families from the
-`independent-analysis` route. Unanimity on a listed option becomes a proposed
-decision deterministically; divergence (or an `OTHER` position) goes to a
-Reconciler from a third family, whose decision must cite every opinion and
-explain every rejected position. The output under `.codegen-opinions/<id>/` is
+Advisors run once each on distinct model families certified as `advisor`.
+Unanimity on a listed option becomes a proposed decision deterministically;
+divergence (or an `OTHER` position) goes to a Reconciler certified as
+`reconciler` from a family that gave no opinion, whose decision must cite every
+opinion and explain every rejected position. The output under `.codegen-opinions/<id>/` is
 `PROPOSED`: the Goal Manager records it under `decisions` (with `opinion_ids`)
 and the user seals the Goal.
 
 Run a sealed Goal end to end:
 
 ```bash
-npm run orchestrate -- --concurrency 2 --minimum-status candidate
+npm run orchestrate -- --concurrency 2
 npm run orchestrate -- --plan .codegen-plan/plan.json --keep-worktrees true
 ```
 
-The orchestrator is deterministic glue over the runners above. It routes the
-Goal, asks the Planner (the direct route is the Planner capped at one
+The orchestrator is deterministic glue over the runners above. It requires a
+Git HEAD and a `SEALED` Goal (an unapproved Goal stops as `APPROVAL_REQUIRED`,
+an open one as `DELIBERATION_REQUIRED`), routes the Goal, asks the Planner (the direct route is the Planner capped at one
 contract), validates the plan DAG, and then for each execution wave:
 
 1. creates one detached Git worktree per contract under `.codegen-run/<run>/`
@@ -192,7 +205,7 @@ Every agent opens in a separate tmux window by default. Every runner and the
 orchestrator also accept `--display` (or `CODEGEN_DISPLAY`) to override it:
 
 ```bash
-npm run orchestrate -- --concurrency 2 --minimum-status candidate
+npm run orchestrate -- --concurrency 2
 tmux attach -t codegen        # from another terminal, or from the phone over SSH
 ```
 
@@ -222,9 +235,54 @@ evidence), derived-work contracts (`.opencode/codegen/lib/derived-work.mjs`
 classifies findings but nothing feeds it yet), and Goal acceptance criteria,
 which are prose and are not executed.
 
-`candidate` is for compatibility and development runs. Omit it in production;
-the Runner defaults to `qualified` and refuses to run when no configuration has
-completed broader admission.
+## Certification and admission
+
+Admission is a property of one combination: model, provider, role, and this
+harness. It is recorded per role under `admission.roles` in
+`.opencode/codegen/config/model-pools.json`; the catalog `status` of a
+configuration is capped at `candidate`, so a configuration certified as
+`builder` is not thereby admitted as `planner`. Every runner requests
+configurations `qualified` for its own role, and production never lowers that
+level: `--minimum-status candidate` and `--configuration <id>` (pinning) are
+maintenance options that the runners refuse in an installed project (detected
+through the install manifest). A target project's user never needs to know that
+`candidate` exists.
+
+Certification runs only in this repository, on the real runners and the real
+OpenCode binary, against the fixtures under `tests/fixtures/`:
+
+```bash
+npm run certify -- run --role builder --configuration builder-go-minimax-m3
+npm run certify -- run --role planner --configuration planner-go-glm-5.3
+npm run certify -- run --role goal-manager --configuration planner-go-glm-5.3
+npm run certify -- run --role gate-designer --configuration builder-go-mimo-v2.5-pro
+npm run certify -- run --role researcher --configuration builder-go-gpt-5.6-luna
+npm run certify -- run --role advisor --configuration builder-go-gpt-5.6-luna \
+  --with builder-go-deepseek-v4-pro,builder-go-minimax-m3
+npm run certify -- run --role reconciler --configuration builder-go-minimax-m3
+npm run certify -- status
+npm run release:check
+```
+
+Each run copies a fixture into a throwaway Git repository, executes the role's
+runner with the pinned configuration, validates the artifact deterministically
+(Gate pass and scope for the Builder, a valid plan on HEAD for the Planner, an
+approvable Goal for the Goal Manager, a gate that fails on the baseline for the
+Gate Designer, a complete cited report for the Researcher, a proposed decision
+for advisors and reconciler), and writes the verdict with its evidence (run id,
+duration, tokens, cost, OpenCode version) into the registry. A failure demotes
+the role entry to `candidate` and keeps the failure. Run artifacts stay under
+the ignored `.opencode/codegen/runs/certification/`.
+
+The release check (`.opencode/codegen/lib/certification.mjs`) resolves the
+requests production issues: Goal Manager and Planner on
+`complex-engineering-plan`, Builder and Gate Designer on
+`localized-low-risk-code-change` and `repository-code-change` (the Gate
+Designer excluding the certified Builder's family), Researcher on
+`research-synthesis`, two advisor families and a third reconciler family on
+`independent-analysis`. It runs as a test (`npm test` is red while the route is
+incomplete), inside the installer before any file is copied, and by hand before
+a commit. The whole certified route ships with the installer.
 
 Enable Go's console option `Use balance`: after a Go usage limit, the same Go
 request continues against Zen credits. Set a Zen monthly spending limit. If the
@@ -252,5 +310,5 @@ Basic-smoke pool (sealed Builder fixture, one attempt each):
 - `kimi-k3` and `qwen3.8-max` are registered as `watch` on Go without a smoke.
 
 `GO_CATALOG_ANALYSIS.md` records the full Go catalog with quota prices and the
-public evidence behind these choices. This is compatibility admission, not
-broad production qualification; every configuration stays `candidate`.
+public evidence behind these choices. Basic smokes are compatibility evidence
+for candidacy; only the certification above qualifies a role.

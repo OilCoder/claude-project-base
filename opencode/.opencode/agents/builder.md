@@ -1,6 +1,6 @@
 ---
 description: Implements one sealed code-generation contract using the model selected for this execution.
-mode: all
+mode: primary
 steps: 20
 permission:
   read: allow

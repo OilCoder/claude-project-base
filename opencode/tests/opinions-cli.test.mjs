@@ -54,6 +54,11 @@ async function worktree() {
   ]
   await mkdir(path.join(directory, ".codegen-goal"))
   await writeFile(path.join(directory, ".codegen-goal/goal.json"), JSON.stringify(goal))
+  await writeFile(path.join(directory, ".gitignore"), "bin/\nfake.log\n.codegen-goal/\n.codegen-opinions/\n")
+  const git = (...args) => execFile("git", ["-c", "user.name=t", "-c", "user.email=t@localhost", ...args], { cwd: directory })
+  await git("init", "-q", "-b", "main")
+  await git("add", ".")
+  await git("commit", "-q", "-m", "baseline")
   return { directory, bin }
 }
 

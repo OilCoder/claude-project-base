@@ -204,6 +204,23 @@ test("direct route rejects a plan with more than one contract", async () => {
   }
 })
 
+test("a deliberated goal the user has not approved stops for approval", async () => {
+  const tree = await project(path.join(fixture, "goal-direct.json"))
+  try {
+    const goalPath = path.join(tree.directory, ".codegen-goal/goal.json")
+    const goal = JSON.parse(await readFile(goalPath, "utf8"))
+    await writeFile(goalPath, JSON.stringify({ ...goal, status: "DECIDED" }))
+    const result = await orchestrate(tree, ["--run-id", "r6"])
+    assert.equal(result.code, 1)
+    const state = JSON.parse(result.stdout)
+    assert.equal(state.status, "APPROVAL_REQUIRED")
+    assert.equal(state.planner_calls, 0)
+    await assert.rejects(readFile(path.join(tree.directory, "fake.log")))
+  } finally {
+    await rm(tree.directory, { recursive: true, force: true })
+  }
+})
+
 test("a goal that still needs deliberation stops before planning", async () => {
   const tree = await project(path.join(here, "fixtures/goal-research/goal.json"))
   try {

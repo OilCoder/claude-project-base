@@ -5,6 +5,7 @@ import test from "node:test"
 import { fileURLToPath } from "node:url"
 
 import {
+  roleStatus,
   selectModel,
   validateRegistry,
 } from "../.opencode/codegen/lib/model-selection.mjs"
@@ -22,8 +23,15 @@ test("registry is internally consistent", () => {
   assert.doesNotThrow(() => validateRegistry(registry))
 })
 
-test("production selection rejects a pool with no qualified configurations", () => {
-  const result = selectModel(registry, {
+function uncertified() {
+  const copy = structuredClone(registry)
+  for (const configuration of copy.configurations) delete configuration.admission?.roles
+  return copy
+}
+
+test("production selection rejects a role with no qualified configurations", () => {
+  const result = selectModel(uncertified(), {
+    role: "builder",
     workClass: "localized-low-risk-code-change",
     risk: "low",
     requiresCodeEditing: true,
@@ -31,10 +39,51 @@ test("production selection rejects a pool with no qualified configurations", () 
 
   assert.equal(result.status, "NO_MATCH")
   assert.equal(result.minimum_status, "qualified")
+  assert.ok(result.rejected.every((item) => item.reasons.some((reason) => reason.startsWith("admission:builder:"))))
+})
+
+test("qualified is recorded per role and never at catalog level", () => {
+  const copy = uncertified()
+  const builder = copy.configurations.find((item) => item.configuration_id === "builder-go-minimax-m3")
+  builder.admission.roles = { builder: { status: "qualified", certified_at: "2026-09-03T00:00:00Z", evidence: { run_id: "r" } } }
+  assert.equal(roleStatus(builder, "builder"), "qualified")
+  assert.equal(roleStatus(builder, "planner"), "candidate")
+  assert.equal(selectModel(copy, { role: "builder", workClass: "localized-low-risk-code-change", requiresCodeEditing: true }).status, "SELECTED")
+  assert.equal(selectModel(copy, { role: "planner", workClass: "complex-engineering-plan" }).status, "NO_MATCH")
+
+  builder.status = "qualified"
+  assert.throws(() => validateRegistry(copy), /catalog status must be one of/)
+  builder.status = "candidate"
+  builder.admission.roles = { builder: { status: "qualified" } }
+  assert.throws(() => validateRegistry(copy), /without certification evidence/)
+  builder.admission.roles = { supervisor: { status: "candidate" } }
+  assert.throws(() => validateRegistry(copy), /unknown role/)
+})
+
+test("a pinned configuration must still pass every admission filter", () => {
+  const pinned = selectModel(registry, {
+    role: "builder",
+    workClass: "localized-low-risk-code-change",
+    minimumStatus: "candidate",
+    requiresCodeEditing: true,
+    configurationId: "builder-go-mimo-v2.5-pro",
+  })
+  assert.equal(pinned.selection.configuration_id, "builder-go-mimo-v2.5-pro")
+  const tooRisky = selectModel(registry, {
+    role: "builder",
+    workClass: "localized-low-risk-code-change",
+    risk: "medium",
+    minimumStatus: "candidate",
+    requiresCodeEditing: true,
+    configurationId: "builder-local-gpt-oss-64k",
+  })
+  assert.equal(tooRisky.status, "NO_MATCH")
+  assert.throws(() => selectModel(registry, { workClass: "localized-low-risk-code-change" }), /role must be one of/)
 })
 
 test("candidate admission follows the Go-first route", () => {
   const result = selectModel(registry, {
+    role: "builder",
     workClass: "localized-low-risk-code-change",
     risk: "low",
     minimumStatus: "candidate",
@@ -50,6 +99,7 @@ test("candidate admission follows the Go-first route", () => {
 
 test("risk and context filters remove an insufficient local configuration", () => {
   const result = selectModel(registry, {
+    role: "builder",
     workClass: "localized-low-risk-code-change",
     risk: "medium",
     minimumStatus: "candidate",
@@ -83,6 +133,7 @@ test("automatic routes contain Go and Zen but exclude OpenRouter", () => {
 
 test("high-risk work escalates to a Zen-only model when candidate Go models are insufficient", () => {
   const result = selectModel(registry, {
+    role: "builder",
     workClass: "repository-code-change",
     risk: "high",
     minimumStatus: "candidate",
@@ -101,6 +152,7 @@ test("Zen routing omits GPT Sol when authenticated OpenAI already supplies it", 
 
 test("family exclusion preserves independent analysis", () => {
   const result = selectModel(registry, {
+    role: "advisor",
     workClass: "independent-analysis",
     risk: "medium",
     minimumStatus: "candidate",
@@ -114,7 +166,7 @@ test("family exclusion preserves independent analysis", () => {
 
 test("unknown work classes fail explicitly", () => {
   assert.throws(
-    () => selectModel(registry, { workClass: "invented-work" }),
+    () => selectModel(registry, { role: "builder", workClass: "invented-work" }),
     /Unknown workClass/,
   )
 })

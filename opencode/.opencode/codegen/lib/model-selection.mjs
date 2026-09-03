@@ -5,16 +5,42 @@ const STATUS_RANK = {
   qualified: 3,
 }
 
+// Catalog status is capped at candidate. `qualified` exists only per role,
+// recorded by the certification process of the harness repository.
+const CATALOG_STATUSES = ["deprecated", "watch", "candidate"]
+
 const RISK_RANK = {
   low: 0,
   medium: 1,
   high: 2,
 }
 
+// Roles that request configurations from the registry. The supervisor is the
+// user's own interactive model and is never selected here.
+export const ROLES = [
+  "goal-manager",
+  "planner",
+  "gate-designer",
+  "builder",
+  "researcher",
+  "advisor",
+  "reconciler",
+]
+
+export const MINIMUM_STATUSES = ["watch", "candidate", "qualified"]
+
 function requireEnum(value, values, label) {
   if (!values.includes(value)) {
     throw new Error(`${label} must be one of: ${values.join(", ")}`)
   }
+}
+
+// Admission is decided per role: a configuration certified as Builder is not
+// thereby admitted as Planner. Without a role entry the catalog status applies,
+// which can never be qualified.
+export function roleStatus(configuration, role) {
+  const entry = configuration.admission?.roles?.[role]
+  return entry?.status ?? configuration.status
 }
 
 export function validateRegistry(registry) {
@@ -31,12 +57,27 @@ export function validateRegistry(registry) {
       throw new Error(`Missing or duplicate configuration_id: ${configuration.configuration_id}`)
     }
     ids.add(configuration.configuration_id)
-    requireEnum(configuration.status, Object.keys(STATUS_RANK), "configuration status")
+    if (!CATALOG_STATUSES.includes(configuration.status)) {
+      throw new Error(
+        `Configuration ${configuration.configuration_id}: catalog status must be one of ${CATALOG_STATUSES.join(", ")}; qualified is recorded per role under admission.roles`,
+      )
+    }
     requireEnum(configuration.constraints?.max_risk, Object.keys(RISK_RANK), "max_risk")
     if (!configuration.provider || !configuration.opencode_model?.startsWith(`${configuration.provider}/`)) {
       throw new Error(
         `Configuration ${configuration.configuration_id} must use its provider as model prefix`,
       )
+    }
+    for (const [role, entry] of Object.entries(configuration.admission?.roles ?? {})) {
+      if (!ROLES.includes(role)) {
+        throw new Error(`Configuration ${configuration.configuration_id} admits unknown role: ${role}`)
+      }
+      requireEnum(entry?.status, Object.keys(STATUS_RANK), `${configuration.configuration_id} ${role} status`)
+      if (entry.status === "qualified" && (!entry.certified_at || !entry.evidence?.run_id)) {
+        throw new Error(
+          `Configuration ${configuration.configuration_id} is qualified as ${role} without certification evidence`,
+        )
+      }
     }
   }
 
@@ -58,6 +99,9 @@ export function validateRegistry(registry) {
   }
 
   for (const [policyName, policy] of Object.entries(registry.runner_policies ?? {})) {
+    if (!ROLES.includes(policyName)) {
+      throw new Error(`Runner policy ${policyName} is not a registry role`)
+    }
     if (!Array.isArray(policy.providers) || policy.providers.length === 0 || !Array.isArray(policy.configuration_ids) || policy.configuration_ids.length === 0) {
       throw new Error(`${policyName} policy must define providers and configuration_ids`)
     }
@@ -79,15 +123,18 @@ export function eligibleConfigurations(registry, request) {
   validateRegistry(registry)
 
   const workClass = request.workClass
+  const role = request.role
   const risk = request.risk ?? "low"
   const minimumStatus = request.minimumStatus ?? "qualified"
   const requiredContext = request.requiredContext ?? 0
   const requiresTools = request.requiresTools ?? true
   const requiresCodeEditing = request.requiresCodeEditing ?? false
   const excludeFamily = request.excludeFamily ?? null
+  const configurationId = request.configurationId ?? null
 
+  requireEnum(role, ROLES, "role")
   requireEnum(risk, Object.keys(RISK_RANK), "risk")
-  requireEnum(minimumStatus, ["watch", "candidate", "qualified"], "minimumStatus")
+  requireEnum(minimumStatus, MINIMUM_STATUSES, "minimumStatus")
   if (!Number.isInteger(requiredContext) || requiredContext < 0) {
     throw new Error("requiredContext must be a non-negative integer")
   }
@@ -106,10 +153,11 @@ export function eligibleConfigurations(registry, request) {
   for (const id of route) {
     const configuration = byId.get(id)
     const reasons = []
+    const status = roleStatus(configuration, role)
 
     if (!configuration.enabled) reasons.push("disabled")
-    if (STATUS_RANK[configuration.status] < STATUS_RANK[minimumStatus]) {
-      reasons.push(`status:${configuration.status}`)
+    if (STATUS_RANK[status] < STATUS_RANK[minimumStatus]) {
+      reasons.push(`admission:${role}:${status}`)
     }
     if (RISK_RANK[configuration.constraints.max_risk] < RISK_RANK[risk]) {
       reasons.push(`risk-ceiling:${configuration.constraints.max_risk}`)
@@ -126,6 +174,9 @@ export function eligibleConfigurations(registry, request) {
     if (excludeFamily && configuration.family === excludeFamily) {
       reasons.push(`excluded-family:${excludeFamily}`)
     }
+    if (configurationId && configuration.configuration_id !== configurationId) {
+      reasons.push(`pinned:${configurationId}`)
+    }
 
     if (reasons.length > 0) {
       rejected.push({ configuration_id: id, reasons })
@@ -137,13 +188,13 @@ export function eligibleConfigurations(registry, request) {
   return { eligible, rejected }
 }
 
-function selectionView(configuration) {
+export function selectionView(configuration, role = null) {
   return {
     configuration_id: configuration.configuration_id,
     model: configuration.opencode_model,
     provider: configuration.provider,
     family: configuration.family,
-    admission_status: configuration.status,
+    admission_status: role ? roleStatus(configuration, role) : configuration.status,
     context_tokens: configuration.capabilities?.context_tokens ?? null,
     availability: "not-checked",
   }
@@ -151,6 +202,7 @@ function selectionView(configuration) {
 
 export function selectModel(registry, request) {
   const workClass = request.workClass
+  const role = request.role
   const minimumStatus = request.minimumStatus ?? "qualified"
   const { eligible, rejected } = eligibleConfigurations(registry, request)
 
@@ -158,6 +210,7 @@ export function selectModel(registry, request) {
     return {
       status: "NO_MATCH",
       work_class: workClass,
+      role,
       minimum_status: minimumStatus,
       rejected,
     }
@@ -168,14 +221,15 @@ export function selectModel(registry, request) {
   return {
     status: "SELECTED",
     work_class: workClass,
+    role,
     selection: {
-      ...selectionView(selected),
+      ...selectionView(selected, role),
     },
-    alternate: alternate ? selectionView(alternate) : null,
+    alternate: alternate ? selectionView(alternate, role) : null,
     warnings: [
       "The Runner must verify live provider and endpoint availability before execution.",
-      ...(selected.status !== "qualified"
-        ? ["Selected configuration is not qualified for production use."]
+      ...(roleStatus(selected, role) !== "qualified"
+        ? [`Selected configuration is not certified as ${role}; this selection is valid only for harness maintenance.`]
         : []),
     ],
     rejected,

@@ -1,6 +1,11 @@
 import { access, readFile } from "node:fs/promises"
 import path from "node:path"
 
+import { MINIMUM_STATUSES } from "./model-selection.mjs"
+import { runProcess } from "./process.mjs"
+
+export const INSTALL_MANIFEST = ".opencode/.codegen-install.json"
+
 export function parseArguments(argv) {
   const result = {}
   for (let index = 0; index < argv.length; index += 2) {
@@ -31,6 +36,55 @@ export async function loadRegistry(systemRoot) {
   return JSON.parse(
     await readFile(path.join(systemRoot, ".opencode/codegen/config/model-pools.json"), "utf8"),
   )
+}
+
+// An installed project carries the installer manifest; the harness repository
+// does not. Admission below `qualified` is a maintenance option of the harness
+// repository (smokes and certification) and is refused in installed projects.
+export async function isInstalledProject(systemRoot) {
+  return exists(path.join(systemRoot, INSTALL_MANIFEST))
+}
+
+export async function resolveMinimumStatus(args, systemRoot) {
+  const value = args["minimum-status"] ?? "qualified"
+  if (!MINIMUM_STATUSES.includes(value)) {
+    throw new Error(`minimum-status must be one of: ${MINIMUM_STATUSES.join(", ")}`)
+  }
+  if (value !== "qualified" && (await isInstalledProject(systemRoot))) {
+    const error = new Error(
+      `MAINTENANCE_ONLY: admission level ${value} is reserved for certification inside the harness repository; installed projects run only qualified configurations`,
+    )
+    error.code = "MAINTENANCE_ONLY"
+    throw error
+  }
+  return value
+}
+
+// Pinning a configuration bypasses the policy order (never the admission
+// filters) and exists for certification runs only.
+export async function resolvePinnedConfiguration(args, systemRoot) {
+  const value = args.configuration ?? null
+  if (value && (await isInstalledProject(systemRoot))) {
+    const error = new Error(
+      "MAINTENANCE_ONLY: pinning a configuration is reserved for certification inside the harness repository",
+    )
+    error.code = "MAINTENANCE_ONLY"
+    throw error
+  }
+  return value
+}
+
+export async function requireGitHead(directory) {
+  const result = await runProcess("git", ["rev-parse", "--verify", "HEAD^{commit}"], {
+    cwd: directory,
+    timeoutSeconds: 30,
+  })
+  if (result.exitCode !== 0 || !result.stdout.trim()) {
+    const error = new Error("GIT_HEAD_REQUIRED: initialize Git and create a baseline commit before running code generation")
+    error.code = "GIT_HEAD_REQUIRED"
+    throw error
+  }
+  return result.stdout.trim()
 }
 
 export function resolveInsideProject(directory, relativeOrAbsolute, label) {

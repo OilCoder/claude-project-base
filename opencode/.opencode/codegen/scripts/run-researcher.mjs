@@ -4,10 +4,18 @@ import { mkdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { classifyExecution } from "../lib/builder-runner.mjs"
-import { exists, loadRegistry, newRunId, parseArguments, resolveInsideProject } from "../lib/cli.mjs"
+import { classifyExecution, selectExecutionPlan } from "../lib/builder-runner.mjs"
+import {
+  exists,
+  loadRegistry,
+  newRunId,
+  parseArguments,
+  requireGitHead,
+  resolveInsideProject,
+  resolveMinimumStatus,
+  resolvePinnedConfiguration,
+} from "../lib/cli.mjs"
 import { validateGoal } from "../lib/goal.mjs"
-import { selectModel } from "../lib/model-selection.mjs"
 import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 import { renderResearchMarkdown, validateResearchReport } from "../lib/research-report.mjs"
@@ -15,16 +23,19 @@ import { renderResearchMarkdown, validateResearchReport } from "../lib/research-
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const systemRoot = path.resolve(scriptDirectory, "../../..")
 
-// The Researcher runs one admitted configuration once. Routes prefer Go and
-// admit Zen-only capacity when Go cannot meet the request.
+// The Researcher runs one configuration admitted for its role once. Routes
+// prefer Go and admit Zen-only capacity when Go cannot meet the request.
 async function main() {
   const args = parseArguments(process.argv.slice(2))
   if (!args.question) {
     throw new Error(
-      "usage: run-researcher.mjs --question <id> [--goal .codegen-goal/goal.json] [--output .codegen-research/<id>.json] [--minimum-status <status>]",
+      "usage: run-researcher.mjs --question <id> [--goal .codegen-goal/goal.json] [--output .codegen-research/<id>.json]",
     )
   }
   const directory = path.resolve(args.directory ?? process.cwd())
+  await requireGitHead(directory)
+  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
+  const configurationId = await resolvePinnedConfiguration(args, systemRoot)
   const goalFile = resolveInsideProject(directory, args.goal ?? ".codegen-goal/goal.json", "Goal")
   const output = resolveInsideProject(
     directory,
@@ -50,16 +61,17 @@ async function main() {
   }
 
   const registry = await loadRegistry(systemRoot)
-  const selection = selectModel(registry, {
+  const plan = selectExecutionPlan(registry, "researcher", {
     workClass: "research-synthesis",
     risk: goal.routing.risk,
-    minimumStatus: args["minimum-status"] ?? "qualified",
+    minimumStatus,
+    configurationId,
     requiredContext: Number(args["required-context"] ?? 0),
     requiresTools: true,
     requiresCodeEditing: false,
   })
-  if (selection.status !== "SELECTED") {
-    process.stdout.write(`${JSON.stringify(selection, null, 2)}\n`)
+  if (plan.status !== "READY") {
+    process.stdout.write(`${JSON.stringify(plan, null, 2)}\n`)
     process.exitCode = 2
     return
   }
@@ -79,7 +91,7 @@ async function main() {
     "Cite only sources you actually retrieved. If blocked, write a BLOCKED report instead of guessing.",
   ].join("\n")
 
-  const configuration = selection.selection
+  const configuration = plan.primary
   const run = await runAgentProcess({
     directory,
     args: ["run", "--format", "json", "--model", configuration.model, "--agent", "researcher", prompt],

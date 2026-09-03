@@ -1,4 +1,5 @@
 {
+  "supervisor": ["Supervisor", "Goal Owner", "Orchestrator Controller"],
   "goal-manager": ["Goal Manager", "State Recorder del Goal"],
   "researcher": ["Researcher"],
   "advisor": ["Advisor / Opinion Agent"],

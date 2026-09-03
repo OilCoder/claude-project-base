@@ -75,6 +75,7 @@ export async function orchestrate({
   gateTimeoutSeconds = 300,
   log = () => {},
 }) {
+  const baseRevision = await revision(directory)
   const runDirectory = path.join(directory, RUN_ROOT, runId)
   await mkdir(runDirectory, { recursive: true })
   await ensureExcluded(directory, `${RUN_ROOT}/`)
@@ -124,12 +125,18 @@ export async function orchestrate({
   await emit("GOAL_LOADED", { goal_id: goal.goal_id, status: goal.status })
   const routing = routeGoal(goal)
   await emit("ROUTED", routing)
+  // A Goal that still needs research or decisions stops for deliberation; a
+  // deliberated Goal the user has not approved stops for approval. Only the
+  // user seals a Goal, and only a SEALED Goal reaches the Planner.
+  if (routing.status === "GOAL_NOT_SEALED") {
+    return stop("APPROVAL_REQUIRED", `goal status is ${goal.status}, not SEALED`, { routing })
+  }
   if (routing.status !== "ROUTED") return stop("ROUTE_BLOCKED", routing.status, { routing })
   if (routing.route === "deliberative") {
     return stop("DELIBERATION_REQUIRED", "goal needs research, opinions, or decisions before planning", { routing })
   }
+  if (goal.status !== "SEALED") return stop("APPROVAL_REQUIRED", `goal status is ${goal.status}, not SEALED`, { routing })
   state.route = routing.route
-  const baseRevision = await revision(directory)
   state.base_revision = baseRevision
 
   // 2. Plan: reuse a validated plan or ask the Planner. The direct route is
