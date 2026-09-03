@@ -39,7 +39,7 @@ test("Builder plan selects its Go primary without a transport fallback", () => {
   assert.equal("fallback" in plan, false)
 })
 
-test("Planner plan selects Go GLM without a transport fallback", () => {
+test("Planner plan selects the certified Go primary (Luna) without a transport fallback", () => {
   const plan = selectExecutionPlan(registry, "planner", {
     workClass: "complex-engineering-plan",
     risk: "medium",
@@ -49,7 +49,8 @@ test("Planner plan selects Go GLM without a transport fallback", () => {
   })
 
   assert.equal(plan.status, "READY")
-  assert.equal(plan.primary.configuration_id, "planner-go-glm-5.3")
+  assert.equal(plan.primary.configuration_id, "builder-go-gpt-5.6-luna")
+  assert.equal(plan.primary.admission_status, "candidate", "candidate level still follows policy order")
   assert.equal("fallback" in plan, false)
 })
 
