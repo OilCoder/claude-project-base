@@ -11,7 +11,8 @@
     "The runtime never switches models because of quota or provider failure. An exhausted Zen balance stops the run with ZEN_BALANCE_EXHAUSTED.",
     "2026-09-03: GPT 5.6 Sol was removed from Zen routing because the authenticated OpenAI provider already supplies it; the historical smoke remains documented outside this active registry.",
     "2026-09-03: DeepSeek V4 Flash on Go plus Claude Sonnet 5, Claude Haiku 4.5, Gemini 3.8 Flash, and Gemini 3.5 Flash Lite on Zen passed the sealed Builder smoke. Evidence tiers stay C or D; nothing is qualified.",
-    "2026-09-03: admission is recorded per role under admission.roles; the catalog status can never be qualified. Only the certification process of the harness repository (certify.mjs) writes a qualified role entry, and the release check requires a complete qualified route before install or commit."
+    "2026-09-03: admission is recorded per role under admission.roles; the catalog status can never be qualified. Only the certification process of the harness repository (certify.mjs) writes a qualified role entry, and the release check requires a complete qualified route before install or commit.",
+    "2026-09-03: gpt-5.6-luna certified as goal-manager and planner and made primary for both; glm-5.3 stays qualified as the alternate but costs ~25x more per Goal (cache reads at 0.26/M and long explorations)."
   ],
   "runner_policies": {
     "goal-manager": {
@@ -20,8 +21,8 @@
         "opencode"
       ],
       "configuration_ids": [
-        "planner-go-glm-5.3",
         "builder-go-gpt-5.6-luna",
+        "planner-go-glm-5.3",
         "builder-go-deepseek-v4-pro",
         "builder-go-minimax-m3",
         "builder-zen-claude-opus-5",
@@ -36,8 +37,8 @@
         "opencode"
       ],
       "configuration_ids": [
-        "planner-go-glm-5.3",
         "builder-go-gpt-5.6-luna",
+        "planner-go-glm-5.3",
         "builder-go-deepseek-v4-pro",
         "builder-go-minimax-m3",
         "builder-zen-claude-opus-5",
@@ -1179,6 +1180,42 @@
                 "output_tokens": 0,
                 "reported_cost": 0,
                 "steps": 0
+              }
+            }
+          },
+          "goal-manager": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T20:02:23.896Z",
+            "evidence": {
+              "run_id": "20260903T200159Z-846868",
+              "fixture": "goal-manager",
+              "result": "PASS",
+              "detail": "draft DRAFT, approved to route direct",
+              "duration_s": 24,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 9,
+                "output_tokens": 947,
+                "reported_cost": 0.0044452499999999995,
+                "steps": 3
+              }
+            }
+          },
+          "planner": {
+            "status": "qualified",
+            "certified_at": "2026-09-03T20:02:56.575Z",
+            "evidence": {
+              "run_id": "20260903T200223Z-847470",
+              "fixture": "planner",
+              "result": "PASS",
+              "detail": "plan valid with 1 waves",
+              "duration_s": 32,
+              "opencode_version": "1.18.27",
+              "metrics": {
+                "input_tokens": 18,
+                "output_tokens": 1562,
+                "reported_cost": 0.00646269,
+                "steps": 6
               }
             }
           }
