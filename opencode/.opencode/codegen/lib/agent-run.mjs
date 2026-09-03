@@ -86,6 +86,8 @@ export async function runAgentProcess({
     done_file: path.join(artifacts, `${slug}.done.json`),
     hold: hold && process.env.CODEGEN_VIEW_HOLD !== "0",
     view_script: viewScript,
+    // Absolute node for terminals that start the view without a shell.
+    node: process.execPath,
   }
   await writeFile(jobFile, `${JSON.stringify(job, null, 2)}\n`)
   const command = `${shellQuote(process.execPath)} ${shellQuote(viewScript)} ${shellQuote(jobFile)}`

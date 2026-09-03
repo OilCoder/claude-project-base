@@ -21,7 +21,7 @@ function quote(value) {
   return `'${String(value).replace(/'/g, `'\\''`)}'`
 }
 
-function openTerminal(jobFile) {
+function openTerminal(jobFile, output) {
   let job
   try {
     job = JSON.parse(fs.readFileSync(jobFile, "utf8"))
@@ -29,11 +29,46 @@ function openTerminal(jobFile) {
     return false // still being written; retry on the next poll
   }
   const name = job.header?.title ?? job.header?.agent ?? "agent"
-  const node = vscode.workspace.getConfiguration("codegenAgentTerminals").get("node") || "node"
-  const terminal = vscode.window.createTerminal({ name, cwd: job.directory })
+  const configured = vscode.workspace.getConfiguration("codegenAgentTerminals").get("node")
+  const node = (configured && configured !== "node") ? configured : (job.node || "node")
+  // The terminal runs the view directly as its process: no shell startup, no
+  // PATH lookup, no text injection. With hold, the view waits for Enter.
+  const terminal = vscode.window.createTerminal({
+    name,
+    cwd: job.directory,
+    shellPath: node,
+    shellArgs: [job.view_script, jobFile],
+    env: { CODEGEN_VIEW_HOLD: job.hold ? "1" : "0" },
+  })
   terminal.show(true)
-  terminal.sendText(`${quote(node)} ${quote(job.view_script)} ${quote(jobFile.replace(/\.job\.json$/, ".taken.job.json"))}`)
+  output.appendLine(`terminal "${name}": ${node} ${job.view_script} ${jobFile}`)
   return true
+}
+
+// Jobs claimed by a previous window (for example before a reload) are reopened
+// if their runner is still waiting, or dropped if the view already finished.
+function recover(spool, output) {
+  let entries
+  try {
+    entries = fs.readdirSync(spool)
+  } catch {
+    return
+  }
+  for (const entry of entries) {
+    if (!entry.endsWith(".taken.job.json")) continue
+    const taken = path.join(spool, entry)
+    try {
+      const job = JSON.parse(fs.readFileSync(taken, "utf8"))
+      if (job.done_file && fs.existsSync(job.done_file)) {
+        fs.unlinkSync(taken)
+        continue
+      }
+      fs.renameSync(taken, taken.replace(/\.taken\.job\.json$/, ".job.json"))
+      output.appendLine(`recovered pending job ${entry}`)
+    } catch (error) {
+      output.appendLine(`cannot recover ${entry}: ${error.message}`)
+    }
+  }
 }
 
 function poll(spool, output) {
@@ -53,8 +88,12 @@ function poll(spool, output) {
     } catch {
       continue
     }
-    if (openTerminal(taken)) output.appendLine(`opened terminal for ${entry}`)
-    else fs.renameSync(taken, jobFile)
+    try {
+      if (!openTerminal(taken, output)) fs.renameSync(taken, jobFile)
+    } catch (error) {
+      output.appendLine(`cannot open terminal for ${entry}: ${error.stack ?? error.message}`)
+      vscode.window.showErrorMessage(`Codegen agent terminal failed: ${error.message}`)
+    }
   }
 }
 
@@ -63,6 +102,7 @@ function activate(context) {
   const spool = spoolDirectory()
   fs.mkdirSync(spool, { recursive: true })
   output.appendLine(`watching ${spool}`)
+  recover(spool, output)
   const timer = setInterval(() => poll(spool, output), POLL_MS)
   context.subscriptions.push({ dispose: () => clearInterval(timer) })
   context.subscriptions.push(
