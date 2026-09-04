@@ -95,3 +95,22 @@ test("cherry-pick conflict is reported and aborted, leaving the branch clean", a
     await rm(repo, { recursive: true, force: true })
   }
 })
+
+test("a tracked .opencode layer gets the project's node_modules linked into the worktree", async () => {
+  const repo = await mkdtemp(path.join(os.tmpdir(), "worktrees-tracked-"))
+  try {
+    await git(repo, ["init", "-q", "-b", "main"])
+    await mkdir(path.join(repo, ".opencode/node_modules/dep"), { recursive: true })
+    await writeFile(path.join(repo, ".opencode/package.json"), "{}\n")
+    await writeFile(path.join(repo, ".opencode/node_modules/dep/index.js"), "// installed\n")
+    await writeFile(path.join(repo, ".gitignore"), ".opencode/node_modules/\n")
+    await git(repo, ["add", "."])
+    await git(repo, ["-c", "user.name=t", "-c", "user.email=t@localhost", "commit", "-q", "-m", "base"])
+    const worktree = path.join(repo, "wt/c2")
+    await createWorktree({ repository: repo, directory: worktree, revision: await revision(repo) })
+    assert.deepEqual(await linkOpenCodeLayer(repo, worktree), [".opencode/node_modules"])
+    assert.equal(await readFile(path.join(worktree, ".opencode/node_modules/dep/index.js"), "utf8"), "// installed\n")
+  } finally {
+    await rm(repo, { recursive: true, force: true })
+  }
+})

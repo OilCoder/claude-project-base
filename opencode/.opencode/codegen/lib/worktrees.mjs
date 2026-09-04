@@ -65,12 +65,18 @@ export async function listWorktrees(repository) {
 // The OpenCode layer (.opencode/, opencode.json) is often untracked in the
 // target project, so a fresh worktree lacks it. Link what is missing so the
 // same agents, tools, and instructions apply inside the worktree.
+// A worktree needs the OpenCode layer to run agents. Untracked pieces are
+// symlinked from the project; when .opencode is tracked (checked out in the
+// worktree), its machine-local node_modules is linked too. Without it,
+// OpenCode installs the runtime dependencies while bootstrapping the
+// worktree instance, which took more than two minutes on 2026-09-04 and
+// starved the Builder past its first-output deadline.
 export async function linkOpenCodeLayer(project, worktree) {
   const linked = []
-  for (const entry of [".opencode", "opencode.json"]) {
+  for (const entry of [".opencode", "opencode.json", ".opencode/node_modules", ".opencode/package-lock.json"]) {
     const source = path.join(project, entry)
     const target = path.join(worktree, entry)
-    if ((await exists(source)) && !(await exists(target))) {
+    if ((await exists(source)) && !(await exists(target)) && (await exists(path.dirname(target)))) {
       await symlink(source, target)
       linked.push(entry)
     }
