@@ -17,6 +17,7 @@
     "certify": "node .opencode/codegen/scripts/certify.mjs",
     "release:check": "node .opencode/codegen/scripts/certify.mjs check",
     "test": "CODEGEN_DISPLAY=inline CODEGEN_RUNS_DIR=${TMPDIR:-/tmp}/codegen-test-runs node --test",
-    "clean": "node .opencode/codegen/scripts/clean.mjs"
+    "clean": "node .opencode/codegen/scripts/clean.mjs",
+    "merge": "node .opencode/codegen/scripts/merge-run.mjs"
   }
 }

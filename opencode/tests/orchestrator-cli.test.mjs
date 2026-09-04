@@ -103,7 +103,8 @@ async function events(tree, runId) {
 test("planned route: parallel wave, dependent wave, integration branch, final gate", async () => {
   const tree = await project()
   try {
-    const result = await orchestrate(tree, ["--run-id", "r1", "--concurrency", "2"])
+    // Builders sleep long enough for the overlap assertion to hold on a loaded machine.
+    const result = await orchestrate(tree, ["--run-id", "r1", "--concurrency", "2"], { FAKE_SLEEP_MS: "2000" })
     assert.equal(result.code, 0, result.stderr)
     const state = JSON.parse(result.stdout)
     assert.equal(state.status, "COMPLETED")

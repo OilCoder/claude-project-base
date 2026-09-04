@@ -45,7 +45,9 @@ For every request that creates or changes code:
    This seals the existing Goal deterministically without another model call.
 9. Only after approval succeeds, call operation `orchestrate`.
 10. Report the integration branch and verification result. Never merge it into
-    the user's branch unless the user explicitly requests that separate action.
+    the user's branch unless the user explicitly asks; when they do ("merge",
+    "fusiona"), call operation `merge`, which fast-forwards their branch and
+    removes the run's worktrees and branch. That request is not a new Goal.
 
 For questions that do not request code changes, answer normally using read-only
 tools. If Git has no HEAD, no qualified route exists, or any controlled step
