@@ -17,8 +17,9 @@ import {
   requireGitHead,
   resolveMinimumStatus,
   resolvePinnedConfiguration,
+  runsDirectory,
 } from "../lib/cli.mjs"
-import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
+import { resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
@@ -60,10 +61,9 @@ async function main() {
   }
 
   const runId = newRunId()
-  const artifacts = path.join(systemRoot, ".opencode/codegen/runs/planner", runId)
+  const artifacts = runsDirectory(systemRoot, "planner", runId)
   await mkdir(artifacts, { recursive: true })
   const display = resolveDisplay(args)
-  const roles = await agentRoles("planner")
   const maxContracts = args["max-contracts"] ? Number(args["max-contracts"]) : null
   const evidencePath = args.evidence ? path.resolve(directory, args.evidence) : null
   const evidence = evidencePath ? JSON.parse(await readFile(evidencePath, "utf8")) : null
@@ -92,17 +92,7 @@ async function main() {
         args: ["run", "--format", "json", "--model", configuration.model, "--agent", "planner", prompt],
         timeoutSeconds: Number(args.timeout ?? 900),
         display,
-        artifacts,
-        header: {
-          title: `planner · ${relativeOutput}`,
-          agent: "planner",
-          roles,
-          run_id: runId,
-          attempt: attemptNumber,
-          model: configuration.model,
-          context_tokens: configuration.context_tokens,
-          lines: [`objetivo  ${args.objective}`, ...(maxContracts === 1 ? ["ruta directa: un solo contrato"] : []), ...(evidence ? [`reintento: ${(evidence.errors ?? []).length} errores del plan anterior`] : [])],
-        },
+        title: `planner · ${relativeOutput}`,
       })
       return {
         exitCode: result.exitCode,

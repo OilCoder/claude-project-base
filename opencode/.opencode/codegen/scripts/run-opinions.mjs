@@ -15,6 +15,7 @@ import {
   resolveInsideProject,
   resolveMinimumStatus,
   resolvePinnedConfiguration,
+  runsDirectory,
 } from "../lib/cli.mjs"
 import { validateGoal } from "../lib/goal.mjs"
 import { roleStatus } from "../lib/model-selection.mjs"
@@ -25,7 +26,7 @@ import {
   validateDecision,
   validateOpinion,
 } from "../lib/opinions.mjs"
-import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
+import { resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
@@ -41,14 +42,13 @@ function view(configuration, role) {
   }
 }
 
-async function runAgent({ directory, agent, model, prompt, timeoutSeconds, output, display, artifacts, header }) {
+async function runAgent({ directory, agent, model, prompt, timeoutSeconds, output, display, title }) {
   const result = await runAgentProcess({
     directory,
     args: ["run", "--format", "json", "--model", model, "--agent", agent, prompt],
     timeoutSeconds,
     display,
-    artifacts,
-    header: { agent, roles: await agentRoles(agent), model, ...header },
+    title,
   })
   const written = await exists(output)
   return {
@@ -139,7 +139,7 @@ async function main() {
 
   await mkdir(outputDirectory.absolute, { recursive: true })
   const runId = newRunId()
-  const artifacts = path.join(systemRoot, ".opencode/codegen/runs/opinions", runId)
+  const artifacts = runsDirectory(systemRoot, "opinions", runId)
   await mkdir(artifacts, { recursive: true })
   const display = resolveDisplay(args)
   const timeoutSeconds = Number(args.timeout ?? 600)
@@ -163,13 +163,7 @@ async function main() {
       timeoutSeconds,
       output: path.join(directory, output),
       display,
-      artifacts,
-      header: {
-        title: `advisor · ${question.id} · ${configuration.family}`,
-        run_id: runId,
-        context_tokens: configuration.capabilities?.context_tokens ?? null,
-        lines: [`pregunta  ${question.question}`, `opciones  ${question.options.join(" | ")}`],
-      },
+      title: `advisor · ${question.id} · ${configuration.family}`,
     })
     const attempt = { role: "advisor", configuration: view(configuration, "advisor"), output, ...run, validation: null }
     attempts.push(attempt)
@@ -214,13 +208,7 @@ async function main() {
       timeoutSeconds,
       output: path.join(directory, decisionOutput),
       display,
-      artifacts,
-      header: {
-        title: `reconciler · ${question.id} · ${reconciler.family}`,
-        run_id: runId,
-        context_tokens: reconciler.capabilities?.context_tokens ?? null,
-        lines: [`pregunta  ${question.question}`, `posiciones ${reconciliation.tally.map((t) => `${t.position} (${t.opinion_ids.join(",")})`).join(" | ")}`],
-      },
+      title: `reconciler · ${question.id} · ${reconciler.family}`,
     })
     attempts.push({ role: "reconciler", configuration: view(reconciler, "reconciler"), output: decisionOutput, ...run })
     if (run.user_action) {

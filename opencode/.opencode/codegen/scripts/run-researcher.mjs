@@ -14,9 +14,10 @@ import {
   resolveInsideProject,
   resolveMinimumStatus,
   resolvePinnedConfiguration,
+  runsDirectory,
 } from "../lib/cli.mjs"
 import { validateGoal } from "../lib/goal.mjs"
-import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
+import { resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 import { renderResearchMarkdown, validateResearchReport } from "../lib/research-report.mjs"
 
@@ -78,10 +79,9 @@ async function main() {
 
   await mkdir(path.dirname(output.absolute), { recursive: true })
   const runId = newRunId()
-  const artifacts = path.join(systemRoot, ".opencode/codegen/runs/researcher", runId)
+  const artifacts = runsDirectory(systemRoot, "researcher", runId)
   await mkdir(artifacts, { recursive: true })
   const display = resolveDisplay(args)
-  const roles = await agentRoles("researcher")
   const prompt = [
     `Research question ${question.id} from ${goalFile.relative}: ${question.question}`,
     `Why it is needed: ${question.why_needed}`,
@@ -99,19 +99,7 @@ async function main() {
     // Keep hosted Exa available if the selected Go model needs it.
     env: { OPENCODE_ENABLE_EXA: process.env.OPENCODE_ENABLE_EXA ?? "1" },
     display,
-    artifacts,
-    header: {
-      title: `researcher · ${question.id}`,
-      agent: "researcher",
-      roles,
-      run_id: runId,
-      model: configuration.model,
-      context_tokens: configuration.context_tokens,
-      lines: [
-        `pregunta  ${question.question}`,
-        `fuentes   máx. ${question.budget.max_sources} · ${question.allowed_source_types.join(", ")} · ${question.budget.max_minutes} min`,
-      ],
-    },
+    title: `researcher · ${question.id}`,
   })
   const written = await exists(output.absolute)
   const classification = classifyExecution({

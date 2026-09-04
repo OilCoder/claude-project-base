@@ -87,9 +87,19 @@ test("installer refuses to overwrite a modified managed file", async () => {
   }
 })
 
-test("the workflow tool starts runners through node, never through the OpenCode runtime", async () => {
+test("the workflow tool starts runners through node and decides the display once per operation", async () => {
   const source = await readFile(path.resolve(".opencode/tools/codegen_workflow.js"), "utf8")
   assert.ok(!source.includes("process.execPath"), "process.execPath is the OpenCode binary inside a tool")
   assert.match(source, /executeFile\(nodeBinary/)
-  assert.match(source, /"--display", display/)
+  assert.match(source, /"--display", choice\.display/)
+  assert.match(source, /CODEGEN_ATTACH: choice\.url/)
+  const { chooseDisplay } = await import("../.opencode/tools/codegen_workflow.js")
+  const root = await mkdtemp(path.join(os.tmpdir(), "codegen-tool-"))
+  try {
+    assert.deepEqual((await chooseDisplay(root, undefined)).display, "inline")
+    assert.match((await chooseDisplay(root, "vscode")).reason, /no longer a display/)
+    await assert.rejects(chooseDisplay(root, "tui"), /live OpenCode server/)
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
 })

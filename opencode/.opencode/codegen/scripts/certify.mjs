@@ -17,7 +17,7 @@ import os from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
+import { resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { certificationSummary, checkRelease, recordCertification } from "../lib/certification.mjs"
 import { exists, isInstalledProject, loadRegistry, newRunId, parseArguments } from "../lib/cli.mjs"
 import { ROLES } from "../lib/model-selection.mjs"
@@ -53,7 +53,7 @@ const OPEN_QUESTION = {
 }
 
 function usage() {
-  return "usage: certify.mjs check | status | run --role <role> --configuration <id> [--with a,b] [--display inline|tmux] [--timeout <seconds>]"
+  return "usage: certify.mjs check | status | run --role <role> --configuration <id> [--with a,b] [--display inline|tui] [--timeout <seconds>]"
 }
 
 async function git(directory, args) {
@@ -379,16 +379,7 @@ const CERTIFICATIONS = {
         args: ["run", "--format", "json", "--model", configuration.opencode_model, "--agent", "reconciler", prompt],
         timeoutSeconds: timeout,
         display,
-        artifacts,
-        header: {
-          title: `reconciler · certification · ${configuration.family}`,
-          agent: "reconciler",
-          roles: await agentRoles("reconciler"),
-          run_id: runId,
-          model: configuration.opencode_model,
-          context_tokens: configuration.capabilities?.context_tokens ?? null,
-          lines: [`pregunta  ${OPEN_QUESTION.question}`],
-        },
+        title: `reconciler · certification · ${configuration.family}`,
       })
       await keep(directory, artifacts, [".codegen-opinions"])
       const metrics = summarizeEvents(run.stdout)
@@ -437,7 +428,7 @@ async function run(args) {
   const display = resolveDisplay({ display: args.display ?? process.env.CODEGEN_DISPLAY ?? "inline" })
   const timeout = Number(args.timeout ?? 900)
   const runId = newRunId()
-  const artifacts = path.join(systemRoot, ".opencode/codegen/runs/certification", role, configurationId.replaceAll("/", "__"), runId)
+  const artifacts = runsDirectory(systemRoot, "certification", role, configurationId.replaceAll("/", "__"), runId)
   await mkdir(artifacts, { recursive: true })
   const version = await runProcess("opencode", ["--version"], { timeoutSeconds: 30 })
 

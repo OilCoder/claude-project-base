@@ -13,9 +13,10 @@ import {
   requireGitHead,
   resolveMinimumStatus,
   resolvePinnedConfiguration,
+  runsDirectory,
 } from "../lib/cli.mjs"
 import { checkGateReadiness } from "../lib/gate.mjs"
-import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
+import { resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 import { changedFilesSince, revision } from "../lib/worktrees.mjs"
 
@@ -68,10 +69,9 @@ async function main() {
   }
 
   const runId = newRunId()
-  const artifacts = path.join(systemRoot, ".opencode/codegen/runs/gate-designer", runId)
+  const artifacts = runsDirectory(systemRoot, "gate-designer", runId)
   await mkdir(artifacts, { recursive: true })
   const display = resolveDisplay(args)
-  const roles = await agentRoles("gate-designer")
   const baseline = await revision(directory)
   const prompt = [
     `Prepare the Gate for the sealed contract at ${path.relative(directory, contractPath)}.`,
@@ -88,17 +88,7 @@ async function main() {
         args: ["run", "--format", "json", "--model", configuration.model, "--agent", "gate-designer", prompt],
         timeoutSeconds: Number(args.timeout ?? 900),
         display,
-        artifacts,
-        header: {
-          title: `gate-designer · ${contract.contract_id ?? "contrato"}`,
-          agent: "gate-designer",
-          roles,
-          run_id: runId,
-          attempt: attemptNumber,
-          model: configuration.model,
-          context_tokens: configuration.context_tokens,
-          lines: [`contrato  ${path.relative(directory, contractPath)}`, `motivo    ${before.reasons.join(", ")}`],
-        },
+        title: `gate-designer · ${contract.contract_id ?? "contrato"}`,
       })
       return {
         exitCode: result.exitCode,

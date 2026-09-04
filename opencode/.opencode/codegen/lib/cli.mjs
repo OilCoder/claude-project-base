@@ -32,6 +32,14 @@ export function newRunId() {
   return `${new Date().toISOString().replaceAll(/[-:.]/g, "").slice(0, 15)}Z-${process.pid}`
 }
 
+// Run artifacts (events, summaries) live under the system's runs directory;
+// CODEGEN_RUNS_DIR redirects them (the test suite points it at a temp dir so
+// the harness tree stays clean).
+export function runsDirectory(systemRoot, ...segments) {
+  const root = process.env.CODEGEN_RUNS_DIR ?? path.join(systemRoot, ".opencode/codegen/runs")
+  return path.join(root, ...segments)
+}
+
 export async function loadRegistry(systemRoot) {
   return JSON.parse(
     await readFile(path.join(systemRoot, ".opencode/codegen/config/model-pools.json"), "utf8"),

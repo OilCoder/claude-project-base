@@ -4,15 +4,29 @@ import { promisify } from "node:util"
 
 import { tool } from "@opencode-ai/plugin"
 
+import { resolveAttachUrl } from "../codegen/lib/agent-run.mjs"
+
 const executeFile = promisify(execFile)
 const operations = new Set(["draft", "approve", "orchestrate"])
 
 // This tool runs inside the OpenCode runtime, whose own executable path is the
 // OpenCode binary itself, so the runners are started through `node` from PATH.
 const nodeBinary = process.env.CODEGEN_NODE ?? "node"
-// Runners open tmux windows by default; from the supervisor's tool the events
-// are captured silently unless the user asked for a display.
-const display = process.env.CODEGEN_DISPLAY ?? "inline"
+
+// Where the agents are shown is decided here, once, for every runner of the
+// operation: attached to the supervisor's live server when the plugin
+// published one (the sessions appear in the user's session list), inline
+// otherwise. CODEGEN_DISPLAY=inline|tui forces a choice.
+export async function chooseDisplay(directory, requested = process.env.CODEGEN_DISPLAY) {
+  if (requested === "inline") return { display: "inline", url: null, reason: "CODEGEN_DISPLAY=inline" }
+  const url = await resolveAttachUrl(directory)
+  if (url) return { display: "tui", url, reason: `agent sessions attached to ${url}` }
+  if (requested === "tui") {
+    throw new Error("CODEGEN_DISPLAY=tui but .opencode/.codegen-server.json does not point at a live OpenCode server; start the supervisor in the OpenCode TUI or use inline")
+  }
+  const legacy = requested && requested !== "tui" ? `CODEGEN_DISPLAY=${requested} is no longer a display; ` : ""
+  return { display: "inline", url: null, reason: `${legacy}no live OpenCode server published, events captured inline` }
+}
 
 export default tool({
   description:
@@ -28,30 +42,32 @@ export default tool({
 
     const goal = args.goal ?? ".codegen-goal/goal.json"
     const codegen = path.join(context.directory, ".opencode", "codegen", "scripts")
+    const choice = await chooseDisplay(context.directory)
     let script
     let scriptArgs
     if (args.operation === "draft") {
       script = "run-goal.mjs"
-      scriptArgs = ["--intent", args.intent, "--output", goal, "--display", display]
+      scriptArgs = ["--intent", args.intent, "--output", goal, "--display", choice.display]
     } else if (args.operation === "approve") {
       script = "run-goal.mjs"
       scriptArgs = ["--approve", goal]
     } else {
       script = "orchestrate.mjs"
-      scriptArgs = ["--goal", goal, "--display", display]
+      scriptArgs = ["--goal", goal, "--display", choice.display]
     }
 
+    const env = { ...process.env, CODEGEN_DISPLAY: choice.display, ...(choice.url ? { CODEGEN_ATTACH: choice.url } : {}) }
     try {
       const result = await executeFile(nodeBinary, [path.join(codegen, script), ...scriptArgs], {
         cwd: context.directory,
-        env: process.env,
+        env,
         maxBuffer: 10 * 1024 * 1024,
         timeout: 60 * 60 * 1000,
       })
-      return result.stdout.trim() || JSON.stringify({ result: "OK", operation: args.operation })
+      return `display: ${choice.display} (${choice.reason})\n${result.stdout.trim() || JSON.stringify({ result: "OK", operation: args.operation })}`
     } catch (error) {
       const detail = [error.stdout, error.stderr, error.message].filter(Boolean).join("\n").trim()
-      throw new Error(`Controlled workflow ${args.operation} failed:\n${detail}`)
+      throw new Error(`Controlled workflow ${args.operation} failed (display: ${choice.display}):\n${detail}`)
     }
   },
 })

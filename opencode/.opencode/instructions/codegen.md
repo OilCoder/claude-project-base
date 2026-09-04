@@ -79,10 +79,10 @@ the evidence and admission methodology.
 
 ## Visibility
 
-- Every agent opens in a separate tmux window by default, showing model, roles,
-  context window, and live usage. `--display inline` is the explicit headless
-  alternative. Display changes where events are shown, never how they are
-  classified.
+- When the supervisor runs in the OpenCode TUI, every agent session is
+  attached to that same server and appears in the session list, named
+  `<agent> · <detail>`. Without a live server the events are captured inline.
+  Display changes where events are shown, never how they are classified.
 
 ## Code-generation invariant
 

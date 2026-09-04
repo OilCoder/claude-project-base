@@ -6,8 +6,8 @@ for OpenCode and the source copied into target projects.
 ## Layout
 
 - `.opencode/`: agents (supervisor, goal-manager, researcher, advisor,
-  reconciler, planner, gate-designer, builder), tools, instructions, and
-  namespaced runtime files.
+  reconciler, planner, gate-designer, builder), tools, the server-url plugin,
+  instructions, and namespaced runtime files.
 - `opencode.json`: project-level OpenCode configuration.
 - `tests/`: tests for the reusable system.
 - `CODE_GENERATION_FLOW.md`: conceptual workflow.
@@ -199,56 +199,33 @@ modified; merging `codegen/<run>` is the user's decision. State lives in
 `.codegen-run/<run>/state.json` and `events.jsonl` (event names follow
 `EVENT_FLOW.md`).
 
-### Watching agents in their own tmux window
+### Watching agents in the OpenCode session list
 
-Every agent opens in a separate tmux window by default. Every runner and the
-orchestrator also accept `--display` (or `CODEGEN_DISPLAY`) to override it:
+Every agent runs as its own `opencode run` process. Two displays exist:
 
-```bash
-npm run orchestrate -- --concurrency 2
-tmux attach -t codegen        # from another terminal, or from the phone over SSH
-```
+- `tui`: the runner attaches the agent session to the supervisor's running
+  OpenCode server (`opencode run --attach <url> --dir <worktree> --title
+  "<agent> · <detail>"`). The session appears in the session list of the
+  user's TUI, named after the agent, rendered by OpenCode itself, and can be
+  opened while it runs. The plugin `.opencode/plugins/codegen-server.js`
+  publishes the server URL in `.opencode/.codegen-server.json` when the TUI
+  starts; the `codegen_workflow` tool checks that the pid is alive and the URL
+  answers, and passes it to the runners as `CODEGEN_ATTACH`.
+- `inline`: the agent's JSON events are captured silently.
 
-- `tmux` (default): each agent runs in its own window through
-  `.opencode/codegen/scripts/agent-view.mjs`. Outside tmux, it creates or reuses
-  the detached session `codegen`; inside tmux, it adds a window to the current
-  session. `CODEGEN_TMUX_SESSION` and `CODEGEN_VIEW_HOLD=0` tune it.
-- `inline`: the agent's JSON events are captured silently without opening a
-  window.
-- `wt`: one Windows Terminal tab per agent from WSL. Written, not yet exercised.
-- `vscode`: one VS Code integrated terminal per agent. The runner spools the
-  job to `~/.local/state/codegen/vscode-jobs` (`CODEGEN_VSCODE_SPOOL`) and the
-  "Codegen Agent Terminals" extension (`vscode-extension/`, install with
-  `node opencode/vscode-extension/install.mjs` and reload the window) opens a
-  terminal named after the agent that runs `agent-view.mjs` there. Without the
-  extension the runner waits for its timeout and reports that no view finished.
+The tool chooses `tui` whenever a live server is published and `inline`
+otherwise; `CODEGEN_DISPLAY=inline` or `CODEGEN_DISPLAY=tui` forces one. The
+runners and the orchestrator accept `--display` for manual runs (`tui` then
+needs `CODEGEN_ATTACH`). The tmux, Windows Terminal, and VS Code views and the
+guided transcript were removed on 2026-09-03: they reimplemented what the
+OpenCode TUI already renders and caused most of that day's fixes. Do not resume
+with `opencode -c` after a run: the most recent session may be an agent's.
 
-From the supervisor, set the variable before starting OpenCode so the tool and
-the orchestrator pass it to every agent, for example
-`CODEGEN_DISPLAY=vscode opencode` from the VS Code terminal, or
-`CODEGEN_DISPLAY=tmux opencode` inside tmux (then `Ctrl-b n` cycles the agent
-windows). Do not resume with `opencode -c` after a run: the most recent session
-may be a runner's headless agent session, not the supervisor's.
-
-The window header shows the agent, its roles (`config/agent-roles.json`), run id
-and attempt, the selected model, the context window from `model-pools.json`,
-and per-agent lines (contract and allowed paths, objective, research question
-and budget, options under deliberation). The body is a guided transcript: one
-line per action in plain language with its result and elapsed time ("Escribió
-scripts/count-las.sh  +4", "Ejecutó gate.sh  salida 1" plus the failure cause),
-consecutive reads grouped, what was written previewed (`CODEGEN_VIEW_PREVIEW`
-lines, 40 by default), and the model's narration folded to two quoted lines.
-At the end, a numbered digest of every action, the agent's final report in
-full, and one status line with steps, actions, cost, and context used.
-`CODEGEN_VIEW_DETAIL=1` unfolds the narration and adds the tool names and the
-per-step token breakdown. Raw events still go to the run artifacts, so
-classification and metrics are identical in every display, and a finished run
-can be read again at reading speed:
-
-```bash
-node .opencode/codegen/scripts/agent-view.mjs --replay <run>/<agent>.events.jsonl --pace
-``` Verified live on 2026-09-03 with `opencode-go/minimax-m2.7` on the
-builder fixture.
+An agent that emits no event within `CODEGEN_FIRST_OUTPUT_SECONDS` (120 by
+default) is stopped and classified as `LOCAL_RUNNER_ERROR` instead of holding
+the run until its full timeout. Raw events still go to the run artifacts under
+`.opencode/codegen/runs/` (`CODEGEN_RUNS_DIR` relocates them; the test suite
+points it at a temporary directory).
 
 Operational note: `opencode run` waits for EOF on stdin when stdin is not a
 TTY. The runners close stdin; if you script it by hand, add `< /dev/null`.

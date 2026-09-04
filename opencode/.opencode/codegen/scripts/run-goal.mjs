@@ -14,10 +14,11 @@ import {
   resolveInsideProject,
   resolveMinimumStatus,
   resolvePinnedConfiguration,
+  runsDirectory,
 } from "../lib/cli.mjs"
 import { routeGoal } from "../lib/goal-routing.mjs"
 import { renderGoalMarkdown, sealApprovedGoal, validateGoal } from "../lib/goal.mjs"
-import { agentRoles, resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
+import { resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 import { validateResearchReport } from "../lib/research-report.mjs"
 
@@ -97,10 +98,9 @@ async function main() {
 
   await mkdir(path.dirname(output.absolute), { recursive: true })
   const runId = newRunId()
-  const artifacts = path.join(systemRoot, ".opencode/codegen/runs/goal", runId)
+  const artifacts = runsDirectory(systemRoot, "goal", runId)
   await mkdir(artifacts, { recursive: true })
   const display = resolveDisplay(args)
-  const roles = await agentRoles("goal-manager")
   const prompt = [
     `Convert this user intent into a Goal: ${args.intent}`,
     `Write the complete Goal to ${output.relative}.`,
@@ -120,17 +120,7 @@ async function main() {
         args: ["run", "--format", "json", "--model", configuration.model, "--agent", "goal-manager", prompt],
         timeoutSeconds: Number(args.timeout ?? 600),
         display,
-        artifacts,
-        header: {
-          title: `goal-manager · ${output.relative}`,
-          agent: "goal-manager",
-          roles,
-          run_id: runId,
-          attempt: attemptNumber,
-          model: configuration.model,
-          context_tokens: configuration.context_tokens,
-          lines: [`intención ${args.intent}`, ...(reports.length ? [`reportes  ${reports.map((r) => r.report_id).join(", ")}`] : [])],
-        },
+        title: `goal-manager · ${output.relative}`,
       })
       return {
         exitCode: result.exitCode,
