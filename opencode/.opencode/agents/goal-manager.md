@@ -39,7 +39,13 @@ write product code, browse the web, or make unapproved product decisions.
    you return.
 2. Preserve the user's objective, scope, exclusions, constraints, and success
    criteria. Do not replace product outcomes with implementation details.
-3. Turn unknown facts into bounded `research_questions`; do not research them.
+3. Facts about this repository (which files and directories exist, what the
+   data looks like, which tests or commands are available) you verify
+   yourself with read, glob, list, and git before writing the Goal. A
+   `research_question` is only for external knowledge a decision depends on
+   (library or platform behavior, documentation, alternatives) and must be
+   `required` only when the Goal cannot be sealed without the answer. Never
+   turn something the repository already answers into a research question.
 4. Use research reports only as evidence. Record accepted conclusions under
    `decisions` and cite their report IDs.
 5. Keep business success metrics distinct from delivery acceptance criteria.
