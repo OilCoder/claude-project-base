@@ -98,6 +98,41 @@ test("installer merges a hand-made .opencode/package.json instead of conflicting
   }
 })
 
+test("installer removes files the harness dropped when they are still the installed copy", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "codegen-install-orphans-"))
+  try {
+    await execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"])
+    const manifestPath = path.join(target, ".opencode", ".codegen-install.json")
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"))
+    // Simulate a previous harness that shipped two files this one no longer has.
+    const { createHash } = await import("node:crypto")
+    const orphan = path.join(target, ".opencode", "codegen", "lib", "display.mjs")
+    const modified = path.join(target, ".opencode", "codegen", "scripts", "agent-view.mjs")
+    await writeFile(orphan, "old viewer\n")
+    await writeFile(modified, "old view script\n")
+    manifest.files["codegen/lib/display.mjs"] = createHash("sha256").update("old viewer\n").digest("hex")
+    manifest.files["codegen/scripts/agent-view.mjs"] = createHash("sha256").update("old view script\n").digest("hex")
+    await writeFile(manifestPath, JSON.stringify(manifest))
+    await writeFile(modified, "locally patched\n")
+
+    await assert.rejects(
+      execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"]),
+      (error) => error.stderr.includes("agent-view.mjs (removed from the harness but modified locally)"),
+    )
+    assert.equal(await exists(orphan), true, "nothing is written when a conflict exists")
+
+    await writeFile(modified, "old view script\n")
+    const { stdout } = await execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"])
+    assert.match(stdout, /Files dropped by the harness to remove: .*display\.mjs/)
+    assert.equal(await exists(orphan), false)
+    assert.equal(await exists(modified), false)
+    const updated = JSON.parse(await readFile(manifestPath, "utf8"))
+    assert.equal("codegen/lib/display.mjs" in updated.files, false)
+  } finally {
+    await rm(target, { recursive: true, force: true })
+  }
+})
+
 test("installer refuses to overwrite a modified managed file", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "codegen-install-conflict-"))
   try {

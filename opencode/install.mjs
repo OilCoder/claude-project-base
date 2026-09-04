@@ -2,7 +2,7 @@
 
 import { spawnSync } from "node:child_process"
 import { createHash } from "node:crypto"
-import { access, chmod, copyFile, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises"
+import { access, chmod, copyFile, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -124,6 +124,7 @@ async function prepareManagedFiles(targetRoot) {
   const copies = []
   const hashes = {}
   const conflicts = []
+  const removals = []
 
   for (const relative of files) {
     const source = path.join(sourceOpenCode, relative)
@@ -140,8 +141,18 @@ async function prepareManagedFiles(targetRoot) {
     if (previous.files?.[relative] === targetHash) copies.push({ source, target })
     else conflicts.push(path.join(".opencode", relative))
   }
+  // Files the harness dropped since the previous installation are removed
+  // when they are still the installed copy; a locally modified one conflicts.
+  for (const [relative, previousHash] of Object.entries(previous.files ?? {})) {
+    if (relative in hashes) continue
+    const target = path.join(targetRoot, ".opencode", relative)
+    if (!(await exists(target))) continue
+    if (hash(await readFile(target)) === previousHash) removals.push(target)
+    else conflicts.push(`${path.join(".opencode", relative)} (removed from the harness but modified locally)`)
+  }
   return {
     copies,
+    removals,
     conflicts,
     manifestPath,
     manifest: { schema_version: 2, harness_revision: harnessRevision(), installed_at: new Date().toISOString(), files: hashes },
@@ -226,6 +237,7 @@ async function main() {
   console.log(`Release check: qualified route complete (builder family ${release.builder_family})`)
   console.log(`Harness revision: ${managed.manifest.harness_revision ?? "unknown (source is not a Git checkout)"}`)
   console.log(`Managed files to copy: ${managed.copies.length}`)
+  if (managed.removals.length) console.log(`Files dropped by the harness to remove: ${managed.removals.map((file) => path.relative(targetRoot, file)).join(", ")}`)
   if (root.preserved.length) console.log(`Project settings preserved: ${root.preserved.join(", ")}`)
   if (dryRun) return
 
@@ -234,6 +246,7 @@ async function main() {
     await copyFile(source, target)
     await chmod(target, (await stat(source)).mode)
   }
+  for (const file of managed.removals) await rm(file, { force: true })
   for (const write of root.writes) await writeIfChanged(write.path, write.contents)
   await writeIfChanged(runtimePackage.path, runtimePackage.contents)
   await writeIfChanged(managed.manifestPath, `${JSON.stringify(managed.manifest, null, 2)}\n`)
