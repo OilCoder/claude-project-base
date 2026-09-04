@@ -1,6 +1,8 @@
 ---
 description: Inspects a repository and converts one objective into a validated phased plan of sealed Builder contracts.
 mode: primary
+# Runnable through `opencode run --agent`, hidden from the TUI agent cycle (Tab).
+hidden: true
 steps: 30
 permission:
   read:

@@ -1,6 +1,8 @@
 ---
 description: Converts user intent and bounded research reports into a structured Goal without making product decisions for the user.
 mode: primary
+# Runnable through `opencode run --agent`, hidden from the TUI agent cycle (Tab).
+hidden: true
 steps: 24
 permission:
   read:
