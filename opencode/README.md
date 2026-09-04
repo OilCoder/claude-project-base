@@ -10,9 +10,12 @@ for OpenCode and the source copied into target projects.
   instructions, and namespaced runtime files.
 - `opencode.json`: project-level OpenCode configuration.
 - `tests/`: tests for the reusable system.
-- `CODE_GENERATION_FLOW.md`: conceptual workflow.
-- `EVENT_FLOW.md`: routing, parallel plan, Runner, and derived-work events.
+- `CODE_GENERATION_FLOW.md`: the design directive (flow, roles, routes, limits).
+- `ARCHITECTURE.md`: what of that directive is implemented, where, and what is
+  not; kept in step with the code.
 - `MODEL_SELECTION_SPEC.md`: model-admission methodology.
+- `docs/`: the 2026-09-03 diagnosis and, under `docs/archive/`, superseded
+  design notes kept for history.
 
 Runtime implementation stays under `.opencode/codegen/` to avoid colliding with
 a target project's `src/`, `lib/`, `config/`, tests, or package manifest.
@@ -66,8 +69,10 @@ branches.
 The interactive session opens on the `supervisor` agent with the provider and
 model selected by the user, for example an OpenAI-authenticated GPT model. The
 supervisor cannot edit files or run shell commands: a request that changes code
-goes through the `codegen_workflow` tool (`draft` a Goal, `approve` it after
-the user's explicit approval, `orchestrate`), and every model-backed step runs
+goes through the `codegen_workflow` tool (`draft` a Goal, `deliberate` it when
+it has pending research or blocking questions with options, `revise` it with
+the user's answers, `approve` it after the user's explicit approval,
+`orchestrate`), and every model-backed step runs
 in a child process with the configuration certified for that role. If Git has
 no HEAD or any controlled step fails, the supervisor reports the blocker and
 stops with zero product edits. The role agents are addressable only through
@@ -111,7 +116,7 @@ npm run planner -- \
 npm run plan:validate -- .codegen-plan/plan.json
 ```
 
-The Planner uses the configuration certified as `planner` (`opencode-go/glm-5.3`). The plan schema is
+The Planner uses the configuration certified as `planner` (`opencode-go/gpt-5.6-luna`, alternate `opencode-go/glm-5.3`). The plan schema is
 `.opencode/codegen/schema/plan.schema.json`. Independent phases form the
 same execution wave; the validator rejects cycles, unknown work classes,
 unsafe paths, and file overlap between contracts that could run concurrently.
@@ -173,6 +178,26 @@ opinion and explain every rejected position. The output under `.codegen-opinions
 `PROPOSED`: the Goal Manager records it under `decisions` (with `opinion_ids`)
 and the user seals the Goal.
 
+Deliberate a whole open Goal in one pass (the deliberative route of
+`CODE_GENERATION_FLOW.md` §8.3):
+
+```bash
+npm run deliberate                       # Researcher per pending question, opinions per blocking question, then revision
+npm run goal:run -- --revise .codegen-goal/goal.json --intent "answers to the questions without options"
+```
+
+`deliberate.mjs` reads the Goal, runs the Researcher on every `pending`
+question within `budgets.max_research_calls` (required first), runs
+`run-opinions.mjs` on every blocking open question that carries options, and
+then asks the Goal Manager (`run-goal.mjs --revise`) to fold the validated
+reports and proposed decisions into the Goal, keeping the previous version as
+`.codegen-goal/goal.before-<run>.json`. The revision is verified against the
+evidence: answered questions must be `completed`, every proposed decision must
+appear under `decisions` with its `opinion_ids`, the Goal must stay unsealed.
+A blocking question without options stops as `USER_DECISION_REQUIRED`; the
+user's answer enters through `--revise --intent`. The result `DECIDED` with
+`ready_for_approval: true` means the user can now approve.
+
 Run a sealed Goal end to end:
 
 ```bash
@@ -206,8 +231,8 @@ After the last wave the final Gate reruns every contract gate on the integrated
 tree, checks the merged diff stays inside the union of allowed paths, and runs
 the plan's optional `final_verification.commands`. The user's checkout is never
 modified; merging `codegen/<run>` is the user's decision. State lives in
-`.codegen-run/<run>/state.json` and `events.jsonl` (event names follow
-`EVENT_FLOW.md`).
+`.codegen-run/<run>/state.json` and `events.jsonl` (event names are listed in
+`.opencode/codegen/lib/orchestrator.mjs`).
 
 ### Watching agents in the OpenCode session list
 
@@ -240,10 +265,10 @@ points it at a temporary directory).
 Operational note: `opencode run` waits for EOF on stdin when stdin is not a
 TTY. The runners close stdin; if you script it by hand, add `< /dev/null`.
 
-Not automated yet: replanning after `REPLAN_REQUIRED` (the run stops with
-evidence), derived-work contracts (`.opencode/codegen/lib/derived-work.mjs`
-classifies findings but nothing feeds it yet), and Goal acceptance criteria,
-which are prose and are not executed.
+Not automated yet (see the table in `ARCHITECTURE.md`): replanning after
+`REPLAN_REQUIRED` (the run stops with evidence), derived-work contracts
+(`.opencode/codegen/lib/derived-work.mjs` classifies findings but nothing feeds
+it yet), and Goal acceptance criteria, which are prose and are not executed.
 
 ## Certification and admission
 
@@ -319,6 +344,6 @@ Basic-smoke pool (sealed Builder fixture, one attempt each):
   checks. These remain conservative candidates, not broad qualification.
 - `kimi-k3` and `qwen3.8-max` are registered as `watch` on Go without a smoke.
 
-`GO_CATALOG_ANALYSIS.md` records the full Go catalog with quota prices and the
+`docs/archive/GO_CATALOG_ANALYSIS.md` records the full Go catalog with quota prices and the
 public evidence behind these choices. Basic smokes are compatibility evidence
 for candidacy; only the certification above qualifies a role.
