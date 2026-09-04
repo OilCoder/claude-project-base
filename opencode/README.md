@@ -42,16 +42,26 @@ replacing the target's `test` script or shipping the maintenance scripts, and
 appends local runtime paths to `.gitignore`. Existing project scalar settings
 win and are reported.
 
-Install state is recorded in ignored `.opencode/.codegen-install.json`. On a
-later update, files that still match the previous installation can be replaced;
-a locally modified managed file or conflicting npm script stops installation
-before any files are written. `--skip-validation` skips the final
+Install state is recorded in ignored `.opencode/.codegen-install.json`,
+including the harness Git revision that was installed (`harness_revision`) and
+the time. On a later update, files that still match the previous installation
+can be replaced; a locally modified managed file or conflicting npm script stops
+installation before any files are written. The installer copies
+`.opencode/package.json` (merging an existing one) and runs `npm install`
+inside `.opencode/` so the tools and the plugin can load `@opencode-ai/plugin`;
+`--skip-install` skips that step and `--skip-validation` skips the final
 `opencode debug config` check when OpenCode is not available on that machine.
+Commit the `.opencode/` changes in the target right after installing, with the
+harness revision in the message, so the installed copy never drifts uncommitted.
 
 Provider credentials, `.opencode/node_modules/`, run artifacts, generated lock
-files, and the installation manifest are machine-local state and are never part
-of the payload or source commit. Tests and design documents stay in this source
-repository for maintenance but are not copied into target projects.
+files, the published server URL, and the installation manifest are machine-local
+state and are never part of the payload or source commit. Tests, design
+documents, `certify.mjs`, and the builder smoke stay in this source repository
+for maintenance and are not copied into target projects. `npm run clean` lists
+the working artifacts of a target (`.codegen-*` directories, run artifacts,
+stale worktrees) and removes them with `--yes`; it never deletes `codegen/*`
+branches.
 
 The interactive session opens on the `supervisor` agent with the provider and
 model selected by the user, for example an OpenAI-authenticated GPT model. The

@@ -11,36 +11,47 @@ import { checkRelease } from "./.opencode/codegen/lib/certification.mjs"
 const sourceRoot = path.dirname(fileURLToPath(import.meta.url))
 const sourceOpenCode = path.join(sourceRoot, ".opencode")
 const manifestRelative = ".opencode/.codegen-install.json"
+// Machine-local state, plus the maintenance-only scripts (certification and
+// smokes run inside this repository, never in a target project).
 const ignoredOpenCodePaths = new Set([
   "node_modules",
   "package.json",
   "package-lock.json",
   "bun.lock",
   "codegen/runs",
+  "codegen/scripts/certify.mjs",
+  "codegen/scripts/run-builder-smoke.sh",
   ".codegen-install.json",
+  ".codegen-server.json",
 ])
 const requiredIgnores = [
   ".opencode/node_modules/",
-  ".opencode/package.json",
   ".opencode/package-lock.json",
   ".opencode/bun.lock",
   ".opencode/codegen/runs/",
   ".opencode/.codegen-install.json",
+  ".opencode/.codegen-server.json",
+  ".codegen-goal/",
+  ".codegen-plan/",
+  ".codegen-research/",
+  ".codegen-opinions/",
+  ".codegen-run/",
 ]
 
 function usage() {
-  return "usage: node install.mjs <project-directory> [--dry-run] [--skip-validation]"
+  return "usage: node install.mjs <project-directory> [--dry-run] [--skip-validation] [--skip-install]"
 }
 
 function parseArgs(argv) {
   const flags = new Set(argv.filter((arg) => arg.startsWith("--")))
   const positional = argv.filter((arg) => !arg.startsWith("--"))
-  const unknown = [...flags].filter((flag) => !["--dry-run", "--skip-validation"].includes(flag))
+  const unknown = [...flags].filter((flag) => !["--dry-run", "--skip-validation", "--skip-install"].includes(flag))
   if (positional.length !== 1 || unknown.length) throw new Error(usage())
   return {
     targetRoot: path.resolve(positional[0]),
     dryRun: flags.has("--dry-run"),
     skipValidation: flags.has("--skip-validation"),
+    skipInstall: flags.has("--skip-install"),
   }
 }
 
@@ -99,6 +110,13 @@ function mergeDefaults(current, required, preserved, pointer = "") {
   return current
 }
 
+// The revision of this repository that is being installed; recorded in the
+// manifest so a target project can say which harness it runs.
+function harnessRevision() {
+  const result = spawnSync("git", ["-C", sourceRoot, "rev-parse", "HEAD"], { encoding: "utf8" })
+  return result.status === 0 ? result.stdout.trim() : null
+}
+
 async function prepareManagedFiles(targetRoot) {
   const manifestPath = path.join(targetRoot, manifestRelative)
   const previous = await readJson(manifestPath, { files: {} })
@@ -122,7 +140,24 @@ async function prepareManagedFiles(targetRoot) {
     if (previous.files?.[relative] === targetHash) copies.push({ source, target })
     else conflicts.push(path.join(".opencode", relative))
   }
-  return { copies, conflicts, manifestPath, manifest: { schema_version: 1, files: hashes } }
+  return {
+    copies,
+    conflicts,
+    manifestPath,
+    manifest: { schema_version: 2, harness_revision: harnessRevision(), installed_at: new Date().toISOString(), files: hashes },
+  }
+}
+
+// .opencode/package.json declares the runtime dependency of the tools and the
+// plugin. A target may already have one (created by hand): its entries are
+// kept and the required dependencies are added, so it is merged, never hashed.
+async function prepareRuntimePackage(targetRoot) {
+  const source = await readJson(path.join(sourceOpenCode, "package.json"), {})
+  const targetPath = path.join(targetRoot, ".opencode", "package.json")
+  const target = await readJson(targetPath, {})
+  const merged = { private: true, ...target, dependencies: { ...(target.dependencies ?? {}) } }
+  for (const [name, version] of Object.entries(source.dependencies ?? {})) merged.dependencies[name] ??= version
+  return { path: targetPath, contents: `${JSON.stringify(merged, null, 2)}\n` }
 }
 
 async function prepareRootFiles(targetRoot) {
@@ -168,7 +203,7 @@ async function writeIfChanged(filePath, contents) {
 }
 
 async function main() {
-  const { targetRoot, dryRun, skipValidation } = parseArgs(process.argv.slice(2))
+  const { targetRoot, dryRun, skipValidation, skipInstall } = parseArgs(process.argv.slice(2))
   if (!(await exists(targetRoot)) || !(await stat(targetRoot)).isDirectory()) throw new Error(`Target is not a directory: ${targetRoot}`)
   if (targetRoot === sourceRoot) throw new Error("Source and target directories must be different")
 
@@ -182,12 +217,14 @@ async function main() {
   }
 
   const managed = await prepareManagedFiles(targetRoot)
+  const runtimePackage = await prepareRuntimePackage(targetRoot)
   const root = await prepareRootFiles(targetRoot)
   const conflicts = [...managed.conflicts, ...root.conflicts]
   if (conflicts.length) throw new Error(`Installation conflicts:\n- ${conflicts.join("\n- ")}`)
 
   console.log(`${dryRun ? "Would install" : "Installing"} OpenCode code-generation system into ${targetRoot}`)
   console.log(`Release check: qualified route complete (builder family ${release.builder_family})`)
+  console.log(`Harness revision: ${managed.manifest.harness_revision ?? "unknown (source is not a Git checkout)"}`)
   console.log(`Managed files to copy: ${managed.copies.length}`)
   if (root.preserved.length) console.log(`Project settings preserved: ${root.preserved.join(", ")}`)
   if (dryRun) return
@@ -198,7 +235,19 @@ async function main() {
     await chmod(target, (await stat(source)).mode)
   }
   for (const write of root.writes) await writeIfChanged(write.path, write.contents)
+  await writeIfChanged(runtimePackage.path, runtimePackage.contents)
   await writeIfChanged(managed.manifestPath, `${JSON.stringify(managed.manifest, null, 2)}\n`)
+
+  // The tools and the plugin import @opencode-ai/plugin from
+  // .opencode/node_modules; without it the supervisor's tool does not load.
+  if (!skipInstall) {
+    const result = spawnSync("npm", ["install", "--omit=dev", "--no-audit", "--no-fund", "--loglevel=error"], { cwd: path.join(targetRoot, ".opencode"), encoding: "utf8" })
+    if (result.error) throw new Error(`Cannot run npm install in .opencode: ${result.error.message}`)
+    if (result.status !== 0) throw new Error(`npm install in .opencode failed:\n${result.stderr || result.stdout}`)
+    console.log("Runtime dependencies: installed in .opencode/node_modules")
+  } else {
+    console.log("Runtime dependencies: skipped (--skip-install); run npm install inside .opencode before starting OpenCode")
+  }
 
   if (!skipValidation) {
     const result = spawnSync("opencode", ["debug", "config"], { cwd: targetRoot, encoding: "utf8" })
@@ -206,7 +255,7 @@ async function main() {
     if (result.status !== 0) throw new Error(`opencode debug config failed:\n${result.stderr || result.stdout}`)
     console.log("OpenCode configuration: valid")
   }
-  console.log("Installation complete. Restart OpenCode in the target project.")
+  console.log(`Installation complete. Commit the .opencode changes (harness ${managed.manifest.harness_revision ?? "unknown"}) and restart OpenCode in the target project.`)
 }
 
 main().catch((error) => {

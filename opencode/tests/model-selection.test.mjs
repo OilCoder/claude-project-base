@@ -115,14 +115,10 @@ test("automatic routes contain Go and Zen but exclude OpenRouter", () => {
   const zen = registry.configurations.find(
     ({ configuration_id }) => configuration_id === "builder-zen-minimax-m3",
   )
-  const openrouter = registry.configurations.find(
-    ({ configuration_id }) => configuration_id === "builder-cloud-minimax-m2.5",
-  )
-
   assert.equal(zen.provider, "opencode")
   assert.match(zen.opencode_model, /^opencode\//)
-  assert.equal(openrouter.provider, "openrouter")
-  assert.match(openrouter.opencode_model, /^openrouter\//)
+  // OpenRouter configurations were removed from the registry on 2026-09-03.
+  assert.equal(registry.configurations.filter((item) => item.provider === "openrouter").length, 0)
   const routedProviders = Object.values(registry.routes).flat().map((id) =>
     registry.configurations.find((item) => item.configuration_id === id).provider,
   )

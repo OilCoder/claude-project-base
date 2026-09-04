@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { execFile as execFileCallback } from "node:child_process"
-import { access, mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import test from "node:test"
@@ -35,7 +35,7 @@ test("installer copies runtime files and safely merges project configuration", a
     await writeFile(path.join(target, "package.json"), `${JSON.stringify({ name: "target", scripts: { lint: "eslint ." } }, null, 2)}\n`)
     await writeFile(path.join(target, ".gitignore"), "dist/\n")
 
-    const first = await execFile(process.execPath, [installer, target, "--skip-validation"])
+    const first = await execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"])
     assert.match(first.stdout, /Installation complete/)
     assert.equal(await exists(path.join(target, ".opencode", "agents", "builder.md")), true)
     assert.equal(await exists(path.join(target, ".opencode", "codegen", "lib", "model-selection.mjs")), true)
@@ -58,13 +58,41 @@ test("installer copies runtime files and safely merges project configuration", a
     assert.equal(config.default_agent, "supervisor")
     assert.equal(await exists(path.join(target, ".opencode", "agents", "supervisor.md")), true)
     assert.equal(await exists(path.join(target, ".opencode", "tools", "codegen_workflow.js")), true)
-    assert.equal(await exists(path.join(target, ".opencode", "codegen", "scripts", "certify.mjs")), true)
+    assert.equal(await exists(path.join(target, ".opencode", "codegen", "scripts", "certify.mjs")), false, "certification is maintenance-only")
+    assert.equal(await exists(path.join(target, ".opencode", "codegen", "scripts", "run-builder-smoke.sh")), false)
+    assert.equal(await exists(path.join(target, ".opencode", "plugins", "codegen-server.js")), true)
+    assert.equal(packageJson.scripts.clean, "node .opencode/codegen/scripts/clean.mjs")
+    const runtimePackage = JSON.parse(await readFile(path.join(target, ".opencode", "package.json"), "utf8"))
+    assert.ok(runtimePackage.dependencies["@opencode-ai/plugin"], "runtime dependency declared for the tools and the plugin")
+    const manifest = JSON.parse(await readFile(path.join(target, ".opencode", ".codegen-install.json"), "utf8"))
+    assert.equal(manifest.schema_version, 2)
+    assert.match(manifest.harness_revision ?? "", /^[0-9a-f]{40}$/, "harness revision recorded")
+    assert.ok(manifest.installed_at)
+    assert.match(first.stdout, /Harness revision: [0-9a-f]{40}/)
     const gitignore = await readFile(path.join(target, ".gitignore"), "utf8")
     assert.match(gitignore, /^dist\/$/m)
     assert.match(gitignore, /^\.opencode\/codegen\/runs\/$/m)
+    assert.match(gitignore, /^\.codegen-run\/$/m)
+    assert.match(gitignore, /^\.opencode\/\.codegen-server\.json$/m)
 
-    const second = await execFile(process.execPath, [installer, target, "--skip-validation"])
+    const second = await execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"])
     assert.match(second.stdout, /Managed files to copy: 0/)
+  } finally {
+    await rm(target, { recursive: true, force: true })
+  }
+})
+
+test("installer merges a hand-made .opencode/package.json instead of conflicting on it", async () => {
+  const target = await mkdtemp(path.join(os.tmpdir(), "codegen-install-pkg-"))
+  try {
+    await mkdir(path.join(target, ".opencode"), { recursive: true })
+    await writeFile(path.join(target, ".opencode", "package.json"), `${JSON.stringify({ name: "mine", dependencies: { "@opencode-ai/plugin": "1.18.0", left: "1.0.0" } }, null, 2)}\n`)
+    await execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"])
+    const merged = JSON.parse(await readFile(path.join(target, ".opencode", "package.json"), "utf8"))
+    assert.equal(merged.name, "mine")
+    assert.equal(merged.dependencies.left, "1.0.0")
+    assert.equal(merged.dependencies["@opencode-ai/plugin"], "1.18.0", "an existing pin is kept")
+    await execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"])
   } finally {
     await rm(target, { recursive: true, force: true })
   }
@@ -73,12 +101,12 @@ test("installer copies runtime files and safely merges project configuration", a
 test("installer refuses to overwrite a modified managed file", async () => {
   const target = await mkdtemp(path.join(os.tmpdir(), "codegen-install-conflict-"))
   try {
-    await execFile(process.execPath, [installer, target, "--skip-validation"])
+    await execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"])
     const managedFile = path.join(target, ".opencode", "instructions", "codegen.md")
     await writeFile(managedFile, "project customization\n")
 
     await assert.rejects(
-      execFile(process.execPath, [installer, target, "--skip-validation"]),
+      execFile(process.execPath, [installer, target, "--skip-validation", "--skip-install"]),
       (error) => error.code === 1 && error.stderr.includes("Installation conflicts") && error.stderr.includes(".opencode/instructions/codegen.md"),
     )
     assert.equal(await readFile(managedFile, "utf8"), "project customization\n")

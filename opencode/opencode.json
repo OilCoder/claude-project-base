@@ -9,7 +9,6 @@
   ],
   "enabled_providers": [
     "ollama",
-    "openai",
     "opencode",
     "opencode-go",
     "openrouter"
