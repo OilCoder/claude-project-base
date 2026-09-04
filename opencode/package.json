@@ -6,6 +6,7 @@
     "orchestrate": "node .opencode/codegen/scripts/orchestrate.mjs",
     "goal:run": "node .opencode/codegen/scripts/run-goal.mjs",
     "goal": "node .opencode/codegen/scripts/goal.mjs",
+    "deliberate": "node .opencode/codegen/scripts/deliberate.mjs",
     "researcher": "node .opencode/codegen/scripts/run-researcher.mjs",
     "research": "node .opencode/codegen/scripts/research.mjs",
     "opinions": "node .opencode/codegen/scripts/run-opinions.mjs",

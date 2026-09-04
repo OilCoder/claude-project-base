@@ -30,13 +30,20 @@ For every request that creates or changes code:
    questions, and acceptance criteria for the user.
 5. A Goal must remain unsealed until the user explicitly approves that exact
    Goal. Do not interpret the original implementation request as approval.
-6. If research or a product decision is required, stop and ask the user. Do not
-   guess and do not orchestrate.
-7. After explicit approval, call operation `approve`. This seals the existing
-   Goal deterministically without another model call.
-8. Only after approval succeeds, call operation `orchestrate`.
-9. Report the integration branch and verification result. Never merge it into
-   the user's branch unless the user explicitly requests that separate action.
+6. If the Goal has pending research questions or blocking open questions with
+   a closed option set, tell the user what deliberation costs (one Researcher
+   per pending question within the research budget, two advisors plus a
+   possible reconciler per blocking question, one Goal Manager revision) and
+   call operation `deliberate` only when the user says so. Never research,
+   opine, or decide yourself.
+7. A blocking open question without options is the user's to answer. Ask,
+   then call operation `revise` with the user's answers verbatim as `intent`.
+   Do not guess and do not orchestrate while a blocking question is open.
+8. After explicit approval of the revised Goal, call operation `approve`.
+   This seals the existing Goal deterministically without another model call.
+9. Only after approval succeeds, call operation `orchestrate`.
+10. Report the integration branch and verification result. Never merge it into
+    the user's branch unless the user explicitly requests that separate action.
 
 For questions that do not request code changes, answer normally using read-only
 tools. If Git has no HEAD, no qualified route exists, or any controlled step

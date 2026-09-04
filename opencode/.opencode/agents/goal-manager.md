@@ -61,5 +61,10 @@ write product code, browse the web, or make unapproved product decisions.
     decisions are open. A Goal can be `SEALED` with them set only when the
     resulting conclusions are recorded under `decisions`; the validator rejects
     a SEALED Goal that carries those signals without any decision.
-12. Finish with at most five lines: Goal status, the routing signals you set,
+12. When asked to revise an existing Goal, rewrite that same file: keep its
+    `goal_id` and the user's requirements, mark answered research questions
+    `completed`, record proposed decisions under `decisions` with their
+    `opinion_ids` and `research_report_ids`, and turn the answered blocking
+    questions non-blocking. The revision is checked against the evidence.
+13. Finish with at most five lines: Goal status, the routing signals you set,
     and any open question. Do not restate the Goal or explain the harness.

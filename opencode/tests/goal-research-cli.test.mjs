@@ -143,7 +143,7 @@ test("run-goal stops and requests a recharge when the Zen balance is exhausted",
     assert.equal(summary.markdown, null)
     assert.equal(summary.routing, null)
     assert.deepEqual(summary.research_reports, [
-      { path: ".codegen-research/RQ-1.json", report_id: "RR-1", question_id: "RQ-1" },
+      { path: ".codegen-research/RQ-1.json", report_id: "RR-1", question_id: "RQ-1", status: "COMPLETE" },
     ])
     const calls = (await readFile(path.join(tree.directory, "fake.log"), "utf8")).trim().split("\n").map(JSON.parse)
     assert.equal(calls.length, 1)

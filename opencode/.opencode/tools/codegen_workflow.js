@@ -7,7 +7,7 @@ import { tool } from "@opencode-ai/plugin"
 import { resolveAttachUrl } from "../codegen/lib/agent-run.mjs"
 
 const executeFile = promisify(execFile)
-const operations = new Set(["draft", "approve", "orchestrate"])
+const operations = new Set(["draft", "deliberate", "revise", "approve", "orchestrate"])
 
 // This tool runs inside the OpenCode runtime, whose own executable path is the
 // OpenCode binary itself, so the runners are started through `node` from PATH.
@@ -30,15 +30,15 @@ export async function chooseDisplay(directory, requested = process.env.CODEGEN_D
 
 export default tool({
   description:
-    "Run the controlled code-generation workflow. Draft a Goal from user intent, approve the existing Goal after explicit user confirmation, or orchestrate an approved Goal.",
+    "Run the controlled code-generation workflow. Draft a Goal from user intent; deliberate an open Goal (research pending questions, obtain opinions on blocking questions with options, fold the evidence into the Goal); revise the Goal with the user's answers; approve the existing Goal after explicit user confirmation; orchestrate an approved Goal.",
   args: {
-    operation: tool.schema.string().describe("draft, approve, or orchestrate"),
-    intent: tool.schema.string().optional().describe("Complete user intent; required only for draft"),
+    operation: tool.schema.string().describe("draft, deliberate, revise, approve, or orchestrate"),
+    intent: tool.schema.string().optional().describe("Complete user intent for draft, or the user's answers to open questions for revise"),
     goal: tool.schema.string().optional().describe("Goal path; defaults to .codegen-goal/goal.json"),
   },
   async execute(args, context) {
-    if (!operations.has(args.operation)) throw new Error("operation must be draft, approve, or orchestrate")
-    if (args.operation === "draft" && !args.intent?.trim()) throw new Error("draft requires non-empty intent")
+    if (!operations.has(args.operation)) throw new Error("operation must be draft, deliberate, revise, approve, or orchestrate")
+    if (["draft", "revise"].includes(args.operation) && !args.intent?.trim()) throw new Error(`${args.operation} requires non-empty intent`)
 
     const goal = args.goal ?? ".codegen-goal/goal.json"
     const codegen = path.join(context.directory, ".opencode", "codegen", "scripts")
@@ -48,6 +48,12 @@ export default tool({
     if (args.operation === "draft") {
       script = "run-goal.mjs"
       scriptArgs = ["--intent", args.intent, "--output", goal, "--display", choice.display]
+    } else if (args.operation === "deliberate") {
+      script = "deliberate.mjs"
+      scriptArgs = ["--goal", goal, "--display", choice.display]
+    } else if (args.operation === "revise") {
+      script = "run-goal.mjs"
+      scriptArgs = ["--revise", goal, "--intent", args.intent, "--display", choice.display]
     } else if (args.operation === "approve") {
       script = "run-goal.mjs"
       scriptArgs = ["--approve", goal]

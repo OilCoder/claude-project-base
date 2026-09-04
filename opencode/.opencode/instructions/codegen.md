@@ -7,8 +7,10 @@ Treat roles, agents, models, and model calls as separate concepts.
 
 - The interactive session runs the `supervisor` agent on the user's model. It
   never edits product files and never runs shell commands. Requests that change
-  code go through the `codegen_workflow` tool: `draft` a Goal, `approve` it
-  only after the user explicitly approves that exact Goal, then `orchestrate`.
+  code go through the `codegen_workflow` tool: `draft` a Goal, `deliberate`
+  it when it has pending research or blocking questions with options (on the
+  user's go), `revise` it with the user's answers, `approve` it only after
+  the user explicitly approves that exact Goal, then `orchestrate`.
 - Without a Git HEAD, without a certified route, or after any controlled step
   fails, the supervisor reports the blocker and stops with zero product edits.
 
@@ -55,6 +57,11 @@ the evidence and admission methodology.
   through `.opencode/codegen/scripts/run-researcher.mjs`, within the Goal's
   research budget. The Researcher cites only sources it actually retrieved and
   never edits the Goal; the Goal Manager records conclusions under `decisions`.
+- `deliberate.mjs` sequences the deliberative route (CODE_GENERATION_FLOW
+  §8.3): Researcher per pending question, advisors and reconciler per blocking
+  question with options, then `run-goal.mjs --revise` so the Goal Manager folds
+  reports and proposed decisions into the Goal. The revision is verified
+  against the evidence; the Goal stays unsealed until the user approves it.
 - A Goal is `SEALED` only after explicit user approval, through
   `run-goal.mjs --approve`, which seals deterministically without a model call.
 
@@ -75,7 +82,8 @@ the evidence and admission methodology.
   Designer may only write under `.codegen-contract/`.
 - Deliberation (`run-opinions.mjs`) needs an open question with a closed
   option set and distinct model families per advisor. Its output is a
-  `PROPOSED` decision, never a sealed one.
+  `PROPOSED` decision, never a sealed one; it becomes binding only when the
+  user approves the Goal that records it.
 
 ## Visibility
 

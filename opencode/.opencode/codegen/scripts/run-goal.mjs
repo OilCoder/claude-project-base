@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -16,8 +16,10 @@ import {
   resolvePinnedConfiguration,
   runsDirectory,
 } from "../lib/cli.mjs"
+import { readyForApproval } from "../lib/deliberation.mjs"
 import { routeGoal } from "../lib/goal-routing.mjs"
 import { renderGoalMarkdown, sealApprovedGoal, validateGoal } from "../lib/goal.mjs"
+import { validateDecision } from "../lib/opinions.mjs"
 import { resolveDisplay, runAgentProcess } from "../lib/agent-run.mjs"
 import { runProcess } from "../lib/process.mjs"
 import { validateResearchReport } from "../lib/research-report.mjs"
@@ -25,7 +27,9 @@ import { validateResearchReport } from "../lib/research-report.mjs"
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const systemRoot = path.resolve(scriptDirectory, "../../..")
 
-// The Goal Manager structures intent with a configuration admitted for its own role.
+const USAGE =
+  "usage: run-goal.mjs --intent <text> [--reports a.json,b.json] [--output .codegen-goal/goal.json] [--allow-sealed true] | --revise <goal.json> [--reports ...] [--decisions ...] [--intent <user guidance>] | --approve <goal.json>"
+
 // Approval is deterministic: the user approved this exact Goal, so it is sealed
 // in place without another model call. Nothing else changes.
 async function approve(directory, goalArgument) {
@@ -50,36 +54,36 @@ async function approve(directory, goalArgument) {
   process.exitCode = routing.status === "ROUTED" ? 0 : 1
 }
 
-async function main() {
-  const args = parseArguments(process.argv.slice(2))
-  const directory = path.resolve(args.directory ?? process.cwd())
-  await requireGitHead(directory)
-  if (args.approve) return approve(directory, args.approve)
-  if (!args.intent) {
-    throw new Error(
-      "usage: run-goal.mjs --intent <text> [--reports a.json,b.json] [--output .codegen-goal/goal.json] [--allow-sealed true] | --approve <goal.json>",
-    )
-  }
-  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
-  const configurationId = await resolvePinnedConfiguration(args, systemRoot)
-  const output = resolveInsideProject(
-    directory,
-    args.output ?? ".codegen-goal/goal.json",
-    "Goal output",
-  )
-  if (await exists(output.absolute)) throw new Error(`Goal output already exists: ${output.relative}`)
-
+async function loadReports(directory, list, goal = null) {
   const reports = []
-  for (const item of (args.reports ?? "").split(",").map((value) => value.trim()).filter(Boolean)) {
+  for (const item of (list ?? "").split(",").map((value) => value.trim()).filter(Boolean)) {
     const file = resolveInsideProject(directory, item, "Research report")
     const report = JSON.parse(await readFile(file.absolute, "utf8"))
-    const validation = validateResearchReport(report)
-    if (!validation.valid) {
-      throw new Error(`Research report ${file.relative} is invalid: ${validation.errors.join("; ")}`)
-    }
-    reports.push({ path: file.relative, report_id: report.report_id, question_id: report.question_id })
+    const question = goal?.research_questions.find((entry) => entry.id === report.question_id) ?? null
+    const validation = validateResearchReport(report, question)
+    if (!validation.valid) throw new Error(`Research report ${file.relative} is invalid: ${validation.errors.join("; ")}`)
+    reports.push({ path: file.relative, report_id: report.report_id, question_id: report.question_id, status: report.status })
   }
+  return reports
+}
 
+async function loadDecisions(directory, list, goal) {
+  const decisions = []
+  for (const item of (list ?? "").split(",").map((value) => value.trim()).filter(Boolean)) {
+    const file = resolveInsideProject(directory, item, "Decision")
+    const decision = JSON.parse(await readFile(file.absolute, "utf8"))
+    const question = goal.open_questions.find((entry) => entry.id === decision.question_id) ?? null
+    const validation = validateDecision(decision, { question })
+    if (!validation.valid) throw new Error(`Decision ${file.relative} is invalid: ${validation.errors.join("; ")}`)
+    decisions.push({ path: file.relative, decision_id: decision.decision_id, question_id: decision.question_id, chosen: decision.chosen, opinion_ids: decision.opinion_ids ?? [] })
+  }
+  return decisions
+}
+
+// One Goal Manager call. `mode` is "draft" (new Goal from intent) or "revise"
+// (fold evidence into the existing Goal). Only the user seals a Goal: a model
+// that returns SEALED without that approval is rejected here.
+async function callGoalManager({ directory, args, output, prompt, title, lines, runId, artifacts, minimumStatus, configurationId }) {
   const registry = await loadRegistry(systemRoot)
   const plan = selectExecutionPlan(registry, "goal-manager", {
     workClass: "complex-engineering-plan",
@@ -93,34 +97,18 @@ async function main() {
   if (plan.status !== "READY") {
     process.stdout.write(`${JSON.stringify(plan, null, 2)}\n`)
     process.exitCode = 2
-    return
+    return null
   }
-
-  await mkdir(path.dirname(output.absolute), { recursive: true })
-  const runId = newRunId()
-  const artifacts = runsDirectory(systemRoot, "goal", runId)
-  await mkdir(artifacts, { recursive: true })
   const display = resolveDisplay(args)
-  const prompt = [
-    `Convert this user intent into a Goal: ${args.intent}`,
-    `Write the complete Goal to ${output.relative}.`,
-    reports.length > 0
-      ? `Use these validated research reports as evidence: ${reports.map((item) => `${item.path} (${item.report_id}, answers ${item.question_id})`).join("; ")}.`
-      : "No research reports are available; turn unknown facts into research_questions.",
-    args["allow-sealed"] === "true"
-      ? "The user has explicitly approved sealing this Goal if nothing blocks it."
-      : "Leave status DRAFT, RESEARCHING, or DECIDED; the user has not approved sealing. Do not plan implementation or write product code.",
-  ].join("\n")
-
   const execution = await runExecutionPlan({
     plan,
-    execute: async (configuration, attemptNumber) => {
+    execute: async (configuration) => {
       const result = await runAgentProcess({
         directory,
         args: ["run", "--format", "json", "--model", configuration.model, "--agent", "goal-manager", prompt],
         timeoutSeconds: Number(args.timeout ?? 600),
         display,
-        title: `goal-manager · ${output.relative}`,
+        title,
       })
       return {
         exitCode: result.exitCode,
@@ -136,18 +124,14 @@ async function main() {
   let validation = null
   let routing = null
   let markdown = null
+  let goal = null
   if (result === "SUCCESS" && !(await exists(output.absolute))) result = "GOAL_NOT_WRITTEN"
   if (result === "SUCCESS") {
     try {
-      const goal = JSON.parse(await readFile(output.absolute, "utf8"))
+      goal = JSON.parse(await readFile(output.absolute, "utf8"))
       validation = validateGoal(goal)
       if (validation.valid && goal.status === "SEALED" && args["allow-sealed"] !== "true") {
-        // Only the user seals a Goal. A model that returns SEALED without that
-        // approval is rejected here, before anything downstream can route it.
-        validation = {
-          valid: false,
-          errors: ["Goal returned SEALED without explicit user approval (--allow-sealed true)"],
-        }
+        validation = { valid: false, errors: ["Goal returned SEALED without explicit user approval (--allow-sealed true)"] }
         result = "SEALED_WITHOUT_APPROVAL"
       } else if (validation.valid) {
         markdown = path.join(path.dirname(output.absolute), "GOAL.md")
@@ -162,21 +146,116 @@ async function main() {
       result = "GOAL_INVALID"
     }
   }
+  return { result, validation, routing, markdown: markdown ? path.relative(directory, markdown) : null, execution, goal, lines }
+}
 
+async function draft(directory, args, minimumStatus, configurationId) {
+  const output = resolveInsideProject(directory, args.output ?? ".codegen-goal/goal.json", "Goal output")
+  if (await exists(output.absolute)) throw new Error(`Goal output already exists: ${output.relative}`)
+  const reports = await loadReports(directory, args.reports)
+  await mkdir(path.dirname(output.absolute), { recursive: true })
+  const runId = newRunId()
+  const artifacts = runsDirectory(systemRoot, "goal", runId)
+  await mkdir(artifacts, { recursive: true })
+  const prompt = [
+    `Convert this user intent into a Goal: ${args.intent}`,
+    `Write the complete Goal to ${output.relative}.`,
+    reports.length > 0
+      ? `Use these validated research reports as evidence: ${reports.map((item) => `${item.path} (${item.report_id}, answers ${item.question_id})`).join("; ")}.`
+      : "No research reports are available; turn unknown facts into research_questions.",
+    args["allow-sealed"] === "true"
+      ? "The user has explicitly approved sealing this Goal if nothing blocks it."
+      : "Leave status DRAFT, RESEARCHING, or DECIDED; the user has not approved sealing. Do not plan implementation or write product code.",
+  ].join("\n")
+  const call = await callGoalManager({ directory, args, output, prompt, title: `goal-manager · ${output.relative}`, runId, artifacts, minimumStatus, configurationId })
+  if (!call) return
   const summary = {
-    result,
+    result: call.result,
+    operation: "draft",
     output: output.relative,
-    markdown: markdown ? path.relative(directory, markdown) : null,
+    markdown: call.markdown,
     research_reports: reports,
-    user_action: execution.user_action,
-    attempts: execution.attempts,
-    validation,
-    routing,
+    user_action: call.execution.user_action,
+    attempts: call.execution.attempts,
+    validation: call.validation,
+    routing: call.routing,
+    ready_for_approval: call.goal ? readyForApproval(call.goal) : false,
     artifacts,
   }
   await writeFile(path.join(artifacts, "summary.json"), `${JSON.stringify(summary, null, 2)}\n`)
   process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
-  process.exitCode = validation?.valid ? 0 : 1
+  process.exitCode = call.validation?.valid ? 0 : 1
+}
+
+// Revision: the existing Goal is rewritten in place with research reports,
+// proposed decisions from deliberation, and optional user guidance. The
+// previous version is kept next to it.
+async function revise(directory, args, minimumStatus, configurationId) {
+  const output = resolveInsideProject(directory, args.revise, "Goal")
+  if (!(await exists(output.absolute))) throw new Error(`Goal does not exist: ${output.relative}`)
+  const before = JSON.parse(await readFile(output.absolute, "utf8"))
+  const beforeValidation = validateGoal(before)
+  if (!beforeValidation.valid) throw new Error(`Goal is invalid: ${beforeValidation.errors.join("; ")}`)
+  if (before.status === "SEALED") throw new Error("A SEALED Goal is not revised; draft a new Goal for new work")
+  const reports = await loadReports(directory, args.reports, before)
+  const decisions = await loadDecisions(directory, args.decisions, before)
+  if (reports.length === 0 && decisions.length === 0 && !args.intent) {
+    throw new Error("revise needs --reports, --decisions, or --intent with user guidance")
+  }
+  const runId = newRunId()
+  const artifacts = runsDirectory(systemRoot, "goal", runId)
+  await mkdir(artifacts, { recursive: true })
+  const backup = path.join(path.dirname(output.absolute), `goal.before-${runId}.json`)
+  await copyFile(output.absolute, backup)
+  const prompt = [
+    `Revise the existing Goal at ${output.relative}: read it first and rewrite it in place, keeping goal_id "${before.goal_id}" and every requirement the user stated.`,
+    ...(reports.length
+      ? [
+          `Research reports (validated): ${reports.map((item) => `${item.path} (${item.report_id}, answers ${item.question_id}, ${item.status})`).join("; ")}.`,
+          "Mark each answered research question completed (waived only when a BLOCKED report leaves it unanswerable and no decision depends on it) and record the accepted conclusions under decisions, citing the report ids in research_report_ids.",
+        ]
+      : []),
+    ...(decisions.length
+      ? [
+          `Proposed decisions from deliberation: ${decisions.map((item) => `${item.path} (${item.decision_id} on ${item.question_id} chose "${item.chosen}")`).join("; ")}.`,
+          "Record each one under decisions with its rationale and its opinion_ids, and set the corresponding open question to blocking false or remove it.",
+        ]
+      : []),
+    ...(args.intent ? [`User guidance for this revision: ${args.intent}`, "Record the user's answers as decisions and resolve the open questions they answer."] : []),
+    "Do not add research questions or blocking questions unless the evidence makes one unavoidable. Leave status DECIDED, or RESEARCHING if required research is still pending; never SEALED. Do not plan implementation or write product code.",
+  ].join("\n")
+  const call = await callGoalManager({ directory, args, output, prompt, title: `goal-manager · revise ${output.relative}`, runId, artifacts, minimumStatus, configurationId })
+  if (!call) return
+  const summary = {
+    result: call.result,
+    operation: "revise",
+    output: output.relative,
+    backup: path.relative(directory, backup),
+    markdown: call.markdown,
+    research_reports: reports,
+    decisions,
+    user_action: call.execution.user_action,
+    attempts: call.execution.attempts,
+    validation: call.validation,
+    routing: call.routing,
+    ready_for_approval: call.goal ? readyForApproval(call.goal) : false,
+    artifacts,
+  }
+  await writeFile(path.join(artifacts, "summary.json"), `${JSON.stringify(summary, null, 2)}\n`)
+  process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`)
+  process.exitCode = call.validation?.valid ? 0 : 1
+}
+
+async function main() {
+  const args = parseArguments(process.argv.slice(2))
+  const directory = path.resolve(args.directory ?? process.cwd())
+  await requireGitHead(directory)
+  if (args.approve) return approve(directory, args.approve)
+  if (!args.intent && !args.revise) throw new Error(USAGE)
+  const minimumStatus = await resolveMinimumStatus(args, systemRoot)
+  const configurationId = await resolvePinnedConfiguration(args, systemRoot)
+  if (args.revise) return revise(directory, args, minimumStatus, configurationId)
+  return draft(directory, args, minimumStatus, configurationId)
 }
 
 main().catch((error) => {

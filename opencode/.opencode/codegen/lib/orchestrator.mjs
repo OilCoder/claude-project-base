@@ -133,7 +133,7 @@ export async function orchestrate({
   }
   if (routing.status !== "ROUTED") return stop("ROUTE_BLOCKED", routing.status, { routing })
   if (routing.route === "deliberative") {
-    return stop("DELIBERATION_REQUIRED", "goal needs research, opinions, or decisions before planning", { routing })
+    return stop("DELIBERATION_REQUIRED", "goal needs research, opinions, or decisions before planning: run deliberate.mjs (codegen_workflow deliberate), then approve", { routing })
   }
   if (goal.status !== "SEALED") return stop("APPROVAL_REQUIRED", `goal status is ${goal.status}, not SEALED`, { routing })
   state.route = routing.route
