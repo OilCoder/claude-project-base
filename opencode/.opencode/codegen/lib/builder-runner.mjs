@@ -136,6 +136,9 @@ function attemptRecord(configuration, result, classification) {
     signal: result.signal ?? null,
     changed_files: result.changedFiles ?? [],
     metrics: summarizeEvents(result.eventsText ?? ""),
+    // The tail of stderr travels with every attempt so an unclassified
+    // failure can be diagnosed from the summary alone.
+    stderr_tail: (result.stderr ?? "").trim().slice(-1500) || null,
     ...classification,
   }
 }
