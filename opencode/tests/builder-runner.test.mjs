@@ -156,3 +156,8 @@ test("orchestrator stops for user action instead of retrying an empty Zen balanc
     { disposition: "STOP", status: "USER_ACTION_REQUIRED", reason: "ZEN_BALANCE_EXHAUSTED" },
   )
 })
+
+test("a runner without an admitted builder stops the contract as BLOCKED", async () => {
+  const { classifyBuilderOutcome } = await import("../.opencode/codegen/lib/orchestrator.mjs")
+  assert.deepEqual(classifyBuilderOutcome("NO_BUILDER_ADMITTED", { attempt: 1, maxAttempts: 2 }), { disposition: "STOP", status: "BLOCKED", reason: "NO_BUILDER_ADMITTED" })
+})

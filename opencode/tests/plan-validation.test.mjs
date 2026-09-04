@@ -141,3 +141,13 @@ test("verification commands that inspect Git state are rejected", async () => {
   const result = validatePlan(plan, { workClasses: new Set(plan.phases.flatMap((p) => p.contracts.map((c) => c.work_class))) })
   assert.ok(result.errors.some((e) => e.includes("must not inspect Git state")), result.errors.join("; "))
 })
+
+test("a contract cannot carry more risk than its Goal", async () => {
+  const { validatePlan } = await import("../.opencode/codegen/lib/plan-validation.mjs")
+  const { readFile } = await import("node:fs/promises")
+  const plan = JSON.parse(await readFile(new URL("./fixtures/orchestrator-basic/plan-template.json", import.meta.url), "utf8"))
+  plan.phases[0].contracts[0].risk = "high"
+  const classes = new Set(plan.phases.flatMap((p) => p.contracts.map((c) => c.work_class)))
+  assert.ok(validatePlan(plan, { workClasses: classes, maxRisk: "medium" }).errors.some((e) => e.includes("exceeds the Goal's risk medium")))
+  assert.equal(validatePlan(plan, { workClasses: classes, maxRisk: "high" }).errors.filter((e) => e.includes("exceeds")).length, 0)
+})

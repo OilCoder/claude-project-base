@@ -1,4 +1,5 @@
 const RISKS = new Set(["low", "medium", "high"])
+const RISK_RANK = { low: 0, medium: 1, high: 2 }
 const SAFE_PATH = /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$))[A-Za-z0-9._/@*+-]+(?:\/[A-Za-z0-9._/@*+-]+)*$/
 
 function nonEmptyString(value) {
@@ -86,7 +87,9 @@ function executionWaves(phases, phasesById) {
   return waves
 }
 
-export function validatePlan(plan, { workClasses = null, maxContracts = null } = {}) {
+// `maxRisk` is the Goal's routing.risk: a contract never carries more risk
+// than the Goal it implements, so the route's admitted Builders stay eligible.
+export function validatePlan(plan, { workClasses = null, maxContracts = null, maxRisk = null } = {}) {
   const errors = []
   if (plan?.schema_version !== 1) errors.push("schema_version must be 1")
   for (const field of ["plan_id", "objective", "base_revision"]) {
@@ -144,6 +147,9 @@ export function validatePlan(plan, { workClasses = null, maxContracts = null } =
       else contractIds.add(contractId)
       if (!nonEmptyString(contract?.objective)) errors.push(`${contractId}: objective is required`)
       if (!RISKS.has(contract?.risk)) errors.push(`${contractId}: invalid risk`)
+      else if (maxRisk && RISK_RANK[contract.risk] > RISK_RANK[maxRisk]) {
+        errors.push(`${contractId}: risk ${contract.risk} exceeds the Goal's risk ${maxRisk}; a contract cannot carry more risk than its Goal`)
+      }
       if (!nonEmptyString(contract?.work_class)) errors.push(`${contractId}: work_class is required`)
       else if (workClasses && !workClasses.has(contract.work_class)) {
         errors.push(`${contractId}: unknown work_class ${contract.work_class}`)

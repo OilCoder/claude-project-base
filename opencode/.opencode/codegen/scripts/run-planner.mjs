@@ -65,6 +65,7 @@ async function main() {
   await mkdir(artifacts, { recursive: true })
   const display = resolveDisplay(args)
   const maxContracts = args["max-contracts"] ? Number(args["max-contracts"]) : null
+  const goalRisk = args.goal ? JSON.parse(await readFile(path.resolve(directory, args.goal), "utf8")).routing?.risk ?? null : null
   const evidencePath = args.evidence ? path.resolve(directory, args.evidence) : null
   const evidence = evidencePath ? JSON.parse(await readFile(evidencePath, "utf8")) : null
   const prompt = [
@@ -73,6 +74,7 @@ async function main() {
     `Write the complete plan to ${relativeOutput}.`,
     `Use only these work_class values: ${Object.keys(registry.routes).join(", ")}.`,
     "Paths in allowed_to_modify are exact file paths or dir/**; read and forbidden also accept *.ext globs. Never use other wildcards.",
+    ...(goalRisk ? [`Every contract's risk must be ${goalRisk} or lower: the Goal was routed at risk ${goalRisk} and Builders are admitted per risk level.`] : []),
     "verification.commands judge behavior and file contents only (run the script, run tests, compare outputs). Never inspect Git state (git status, git diff, untracked files): the same gate reruns on the integration branch where the change is already committed, and scope is enforced by the orchestrator.",
     ...(evidence
       ? [
@@ -114,6 +116,7 @@ async function main() {
       validation = validatePlan(generatedPlan, {
         workClasses: new Set(Object.keys(registry.routes)),
         maxContracts,
+        maxRisk: goalRisk,
       })
       const revision = await runProcess("git", ["rev-parse", "HEAD"], {
         cwd: directory,

@@ -23,6 +23,7 @@ export const RUN_ROOT = ".codegen-run"
 const PROVIDER_STOPS = new Set(["PROVIDER_RATE_LIMIT", "PROVIDER_UNAVAILABLE"])
 const USER_ACTION_STOPS = new Set(["ZEN_BALANCE_EXHAUSTED", "GO_USAGE_LIMIT"])
 const BLOCKING_STOPS = new Set([
+  "NO_BUILDER_ADMITTED",
   "AUTH_ERROR",
   "MODEL_CONFIG_ERROR",
   "LOCAL_RUNNER_ERROR",
@@ -184,7 +185,7 @@ export async function orchestrate({
     plan = JSON.parse(await readFile(path.resolve(directory, output), "utf8"))
     state.plan_path = output
   }
-  const planValidation = validatePlan(plan, { workClasses, maxContracts })
+  const planValidation = validatePlan(plan, { workClasses, maxContracts, maxRisk: goal.routing.risk })
   await emit("PLAN_VALIDATED", planValidation)
   if (!planValidation.valid) return stop("PLAN_INVALID", planValidation.errors.join("; "))
   if (plan.base_revision !== baseRevision) {
@@ -300,8 +301,15 @@ export async function orchestrate({
           minimumStatus,
           evidence,
         })
-        record.attempts.push({ attempt, result: summary.result, evidence, summary })
-        const outcome = classifyBuilderOutcome(summary.result, { attempt, maxAttempts })
+        // A runner that could not select a configuration reports status
+        // NO_MATCH instead of a result; that is a blocking stop with the
+        // admission reasons, not an unknown result.
+        const result = summary.result ?? (summary.status === "NO_MATCH" ? "NO_BUILDER_ADMITTED" : summary.status)
+        record.attempts.push({ attempt, result, evidence, summary })
+        const outcome = classifyBuilderOutcome(result, { attempt, maxAttempts })
+        if (result === "NO_BUILDER_ADMITTED") {
+          outcome.reason = `no builder admitted for ${contract.work_class} at risk ${contract.risk}: ${(summary.rejected ?? []).slice(0, 4).map((r) => `${r.configuration_id} (${(r.reasons ?? []).join(", ")})`).join("; ")}`
+        }
         if (outcome.disposition === "ACCEPT") {
           record.result_commit = await commitPaths(
             record.worktree,
