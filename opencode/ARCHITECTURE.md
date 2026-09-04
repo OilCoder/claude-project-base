@@ -16,7 +16,7 @@ approve      run-goal.mjs --approve       sello determinista, sin modelo; solo t
 orchestrate  orchestrate.mjs              Router → Planner → readiness del Gate (Gate Designer) → Builders en worktrees → cherry-pick a codegen/<run> → Gate final
 ```
 
-Cada agente corre como `opencode run --agent <rol> --model <configuración certificada para el rol> --format json`. Si el supervisor corre en la TUI de OpenCode, el plugin `.opencode/plugins/codegen-server.js` publica la URL de ese servidor en `.opencode/.codegen-server.json` y los runners se enganchan con `--attach`: las sesiones de los agentes aparecen en la lista de sesiones de la TUI con el nombre `<agente> · <detalle>`. Sin servidor vivo, los eventos se capturan `inline`.
+Cada agente corre como `opencode run --agent <rol> --model <configuración certificada para el rol> --format json`. Si el supervisor corre en la TUI de OpenCode **arrancada con `opencode --port 4096`** (sin `--port` la TUI no escucha en ningún puerto), el plugin `.opencode/plugins/codegen-server.js` publica la URL de ese servidor en `.opencode/.codegen-server.json` y los runners se enganchan con `--attach`: las sesiones de los agentes aparecen en la lista de sesiones de la TUI con el nombre `<agente> · <detalle>`. Sin servidor vivo, los eventos se capturan `inline`.
 
 ## Tabla de implementación frente a `CODE_GENERATION_FLOW.md`
 
@@ -75,5 +75,6 @@ Cada agente corre como `opencode run --agent <rol> --model <configuración certi
 
 - 2026-09-03: `qualified` describe una combinación modelo + proveedor + rol + harness, certificada en este repositorio y publicada por el instalador; `candidate` es solo mantenimiento.
 - 2026-09-03: el visor propio (tmux, wt, VS Code, transcripción guiada, extensión) se eliminó; las sesiones de los agentes se muestran en la TUI de OpenCode vía `--attach`. Evidencia del spike en `docs/DIAGNOSTICO-2026-09-03.md` §7.F: mismo `projectID` para sesiones desde worktrees, NDJSON intacto con `--attach`, plugin con `serverUrl`. Pendiente de confirmar por el usuario: que la lista de sesiones de la TUI se refresque en vivo.
-- 2026-09-03: investigación y deliberación quedaron cableadas al supervisor; antes solo las usaban la certificación y los tests.
+- 2026-09-03: investigación y deliberación quedaron cableadas al supervisor; antes solo las usaban la certificación y los tests. Solo corre la investigación `required`; una pregunta opcional nunca gasta una llamada.
+- 2026-09-04: primera corrida real en `las-viewer-v2` con el sistema limpio: la TUI arrancada sin `--port` dejó a los agentes en `inline`, y una pregunta de investigación opcional gastó un Researcher (BLOCKED). Ambas cosas corregidas.
 - Criterio de parada vigente: una orquestación real completa en `las-viewer-v2`, observada por el usuario y sin intervención del asistente, antes de añadir funcionalidad.

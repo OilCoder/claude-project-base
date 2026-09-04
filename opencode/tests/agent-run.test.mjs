@@ -102,12 +102,15 @@ test("resolveAttachUrl trusts the published server only when its pid is alive an
   const url = `http://127.0.0.1:${server.address().port}/`
   try {
     assert.equal(await readServerFile(root), null)
-    assert.equal(await resolveAttachUrl(root), null)
+    assert.deepEqual(await resolveAttachUrl(root), { url: null, published: null })
     await mkdir(path.join(root, ".opencode"))
     await writeFile(path.join(root, SERVER_FILE), JSON.stringify({ url, pid: 2 ** 22 - 1, at: "now" }))
-    assert.equal(await resolveAttachUrl(root), null, "dead pid")
+    assert.deepEqual(await resolveAttachUrl(root), { url: null, published: url }, "dead pid")
     await writeFile(path.join(root, SERVER_FILE), JSON.stringify({ url, pid: process.pid, at: "now" }))
-    assert.equal(await resolveAttachUrl(root), url)
+    assert.equal((await resolveAttachUrl(root)).url, url)
+    const viaLocalhost = url.replace("127.0.0.1", "localhost")
+    await writeFile(path.join(root, SERVER_FILE), JSON.stringify({ url: viaLocalhost, pid: process.pid, at: "now" }))
+    assert.equal((await resolveAttachUrl(root)).url, url, "localhost is normalised to 127.0.0.1")
     assert.equal(await serverAlive({ url: "http://127.0.0.1:1/", pid: process.pid }, { timeoutMs: 500 }), false, "unreachable url")
   } finally {
     server.close()

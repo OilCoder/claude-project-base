@@ -19,13 +19,14 @@ const nodeBinary = process.env.CODEGEN_NODE ?? "node"
 // otherwise. CODEGEN_DISPLAY=inline|tui forces a choice.
 export async function chooseDisplay(directory, requested = process.env.CODEGEN_DISPLAY) {
   if (requested === "inline") return { display: "inline", url: null, reason: "CODEGEN_DISPLAY=inline" }
-  const url = await resolveAttachUrl(directory)
+  const { url, published } = await resolveAttachUrl(directory)
   if (url) return { display: "tui", url, reason: `agent sessions attached to ${url}` }
-  if (requested === "tui") {
-    throw new Error("CODEGEN_DISPLAY=tui but .opencode/.codegen-server.json does not point at a live OpenCode server; start the supervisor in the OpenCode TUI or use inline")
-  }
+  const why = published
+    ? `${published} is published but nothing answers there: start the TUI with \`opencode --port 4096\` so the agents can attach`
+    : "no OpenCode server published (.opencode/.codegen-server.json missing)"
+  if (requested === "tui") throw new Error(`CODEGEN_DISPLAY=tui but ${why}`)
   const legacy = requested && requested !== "tui" ? `CODEGEN_DISPLAY=${requested} is no longer a display; ` : ""
-  return { display: "inline", url: null, reason: `${legacy}no live OpenCode server published, events captured inline` }
+  return { display: "inline", url: null, reason: `${legacy}${why}; events captured inline` }
 }
 
 export default tool({

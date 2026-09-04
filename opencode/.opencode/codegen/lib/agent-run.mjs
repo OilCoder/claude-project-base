@@ -26,7 +26,9 @@ export function resolveDisplay(args = {}) {
 export async function readServerFile(projectRoot) {
   try {
     const server = JSON.parse(await readFile(path.join(projectRoot, SERVER_FILE), "utf8"))
-    return typeof server.url === "string" && Number.isInteger(server.pid) ? server : null
+    if (typeof server.url !== "string" || !Number.isInteger(server.pid)) return null
+    // Node and Bun may resolve localhost to ::1 while the server binds 127.0.0.1.
+    return { ...server, url: server.url.replace(/^http:\/\/localhost([:/])/, "http://127.0.0.1$1") }
   } catch {
     return null
   }
@@ -51,9 +53,11 @@ export async function serverAlive(server, { timeoutMs = 2000 } = {}) {
   }
 }
 
+// `published` tells whether a server file exists at all: a TUI started
+// without --port publishes a nominal URL nothing listens on.
 export async function resolveAttachUrl(projectRoot) {
   const server = await readServerFile(projectRoot)
-  return (await serverAlive(server)) ? server.url : null
+  return { url: (await serverAlive(server)) ? server.url : null, published: server?.url ?? null }
 }
 
 // Runs `opencode run ...` for one agent. `args` starts with "run"; the tui

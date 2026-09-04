@@ -159,9 +159,12 @@ test("the workflow tool starts runners through node and decides the display once
   const { chooseDisplay } = await import("../.opencode/tools/codegen_workflow.js")
   const root = await mkdtemp(path.join(os.tmpdir(), "codegen-tool-"))
   try {
-    assert.deepEqual((await chooseDisplay(root, undefined)).display, "inline")
+    assert.deepEqual((await chooseDisplay(root, null)).display, "inline")
     assert.match((await chooseDisplay(root, "vscode")).reason, /no longer a display/)
-    await assert.rejects(chooseDisplay(root, "tui"), /live OpenCode server/)
+    await assert.rejects(chooseDisplay(root, "tui"), /no OpenCode server published/)
+    await mkdir(path.join(root, ".opencode"))
+    await writeFile(path.join(root, ".opencode", ".codegen-server.json"), JSON.stringify({ url: "http://localhost:1/", pid: process.pid }))
+    assert.match((await chooseDisplay(root, null)).reason, /opencode --port 4096/)
   } finally {
     await rm(root, { recursive: true, force: true })
   }

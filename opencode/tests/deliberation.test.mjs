@@ -24,7 +24,9 @@ test("plan: pending required research runs first within the research budget", ()
     ],
     budgets: { ...fixture.budgets, max_research_calls: 1 },
   })
-  assert.deepEqual(deliberationPlan(optionalFirst).research, ["RQ-1"], "required before optional, capped by budget")
+  assert.deepEqual(deliberationPlan(optionalFirst).research, ["RQ-1"], "only required research runs, capped by budget")
+  const optionalOnly = goalWith({ research_questions: [{ ...fixture.research_questions[0], required: false }] })
+  assert.equal(deliberationPlan(optionalOnly).status, "NOTHING_TO_DELIBERATE", "an optional question never spends a Researcher call")
 })
 
 test("plan: evidence already on disk is folded in without re-running, and budgets block required research", () => {
@@ -69,6 +71,9 @@ test("verifyRevision checks the revision against the evidence, not the model's w
 
   const stillPending = verifyRevision(before, { ...good, research_questions: fixture.research_questions }, { reports, decisions })
   assert.ok(stillPending.errors.some((e) => e.includes("RQ-1 still pending")))
+  const blocked = verifyRevision(before, { ...good, research_questions: fixture.research_questions }, { reports: [{ ...reports[0], status: "BLOCKED" }], decisions })
+  assert.ok(!blocked.errors.some((e) => e.includes("still pending")), "a BLOCKED report may leave the question pending")
+  assert.equal(blocked.ready_for_approval, false, "required research still pending keeps the Goal open")
   const unrecorded = verifyRevision(before, { ...good, decisions: [good.decisions[0]] }, { reports, decisions })
   assert.ok(unrecorded.errors.some((e) => e.includes("DEC-OQ-1 is not recorded")))
   const sealed = verifyRevision(before, { ...good, status: "SEALED" }, { reports, decisions })

@@ -242,10 +242,12 @@ Every agent runs as its own `opencode run` process. Two displays exist:
   OpenCode server (`opencode run --attach <url> --dir <worktree> --title
   "<agent> · <detail>"`). The session appears in the session list of the
   user's TUI, named after the agent, rendered by OpenCode itself, and can be
-  opened while it runs. The plugin `.opencode/plugins/codegen-server.js`
-  publishes the server URL in `.opencode/.codegen-server.json` when the TUI
-  starts; the `codegen_workflow` tool checks that the pid is alive and the URL
-  answers, and passes it to the runners as `CODEGEN_ATTACH`.
+  opened while it runs. Start the TUI with `opencode --port 4096`: a plain
+  `opencode` publishes a nominal URL that nothing listens on. The plugin
+  `.opencode/plugins/codegen-server.js` writes the URL to
+  `.opencode/.codegen-server.json`; the `codegen_workflow` tool checks that
+  the pid is alive and the URL answers, passes it to the runners as
+  `CODEGEN_ATTACH`, and reports which display it chose and why.
 - `inline`: the agent's JSON events are captured silently.
 
 The tool chooses `tui` whenever a live server is published and `inline`

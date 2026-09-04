@@ -5,13 +5,15 @@
 import { validateGoal } from "./goal.mjs"
 
 // What one pass has to do. `reports` and `decisions` are the question ids that
-// already have artifacts on disk (a runner never repeats a question).
+// already have artifacts on disk (a runner never repeats a question). Only
+// required research runs: the Researcher works when knowledge is missing for
+// a decision (CODE_GENERATION_FLOW §3), not for questions the Goal can seal
+// without.
 export function deliberationPlan(goal, { reports = [], decisions = [] } = {}) {
   const pending = goal.research_questions.filter((item) => item.status === "pending" && !reports.includes(item.id))
   const required = pending.filter((item) => item.required)
-  const optional = pending.filter((item) => !item.required)
   const budgetLeft = Math.max(0, goal.budgets.max_research_calls - reports.length)
-  const research = [...required, ...optional].slice(0, budgetLeft).map((item) => item.id)
+  const research = required.slice(0, budgetLeft).map((item) => item.id)
   const blocking = goal.open_questions.filter((item) => item.blocking)
   const opinions = blocking.filter((item) => Array.isArray(item.options) && item.options.length >= 2 && !decisions.includes(item.id)).map((item) => item.id)
   const userDecisions = blocking.filter((item) => !Array.isArray(item.options) || item.options.length < 2).map((item) => item.id)
@@ -42,7 +44,9 @@ export function verifyRevision(before, after, { reports = [], decisions = [] } =
   for (const report of reports) {
     const question = (after?.research_questions ?? []).find((item) => item.id === report.question_id)
     if (!question) errors.push(`research question ${report.question_id} disappeared`)
-    else if (question.status === "pending") errors.push(`research question ${report.question_id} still pending although report ${report.report_id} answers it`)
+    // A BLOCKED report answers nothing: the question may stay pending (the
+    // Goal then stays open) or be waived. A COMPLETE report must be folded in.
+    else if (question.status === "pending" && report.status !== "BLOCKED") errors.push(`research question ${report.question_id} still pending although report ${report.report_id} answers it`)
   }
   for (const decision of decisions) {
     const question = (after?.open_questions ?? []).find((item) => item.id === decision.question_id)

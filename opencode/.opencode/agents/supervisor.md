@@ -30,8 +30,10 @@ For every request that creates or changes code:
    questions, and acceptance criteria for the user.
 5. A Goal must remain unsealed until the user explicitly approves that exact
    Goal. Do not interpret the original implementation request as approval.
-6. If the Goal has pending research questions or blocking open questions with
-   a closed option set, tell the user what deliberation costs (one Researcher
+6. If the draft summary says `ready_for_approval: true`, skip deliberation
+   and ask the user to approve. Otherwise, if the Goal has required pending
+   research questions or blocking open questions with a closed option set,
+   tell the user what deliberation costs (one Researcher
    per pending question within the research budget, two advisors plus a
    possible reconciler per blocking question, one Goal Manager revision) and
    call operation `deliberate` only when the user says so. Never research,
