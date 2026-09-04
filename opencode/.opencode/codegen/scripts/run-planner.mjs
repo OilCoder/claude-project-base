@@ -73,6 +73,7 @@ async function main() {
     `Write the complete plan to ${relativeOutput}.`,
     `Use only these work_class values: ${Object.keys(registry.routes).join(", ")}.`,
     "Paths in allowed_to_modify are exact file paths or dir/**; read and forbidden also accept *.ext globs. Never use other wildcards.",
+    "verification.commands judge behavior and file contents only (run the script, run tests, compare outputs). Never inspect Git state (git status, git diff, untracked files): the same gate reruns on the integration branch where the change is already committed, and scope is enforced by the orchestrator.",
     ...(evidence
       ? [
           `This is a retry. The previous plan (${path.relative(directory, evidencePath)}) was rejected by the deterministic validator with these errors: ${(evidence.errors ?? []).join("; ")}. Fix exactly those problems and keep everything else.`,

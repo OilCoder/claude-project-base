@@ -14,6 +14,11 @@ function validPathPattern(value) {
 // `read` and `forbidden` are descriptive, so they also accept extension globs
 // ("*.json", "**/*.md"); `allowed_to_modify` stays exact because it is what
 // the orchestrator enforces and commits.
+// A gate that asserts working-tree state (untracked files, diffs) passes in the
+// builder's worktree and fails once the result is committed on the integration
+// branch. Gates judge behavior and file contents only.
+const GIT_STATE_COMMAND = /\bgit\s+(status|diff|ls-files|log|show)\b/
+
 const EXTENSION_GLOB = /^(?:\*\*\/)?\*\.[A-Za-z0-9_.-]+$/
 function validDescriptivePattern(value) {
   return validPathPattern(value) || (nonEmptyString(value) && EXTENSION_GLOB.test(value))
@@ -93,6 +98,8 @@ export function validatePlan(plan, { workClasses = null, maxContracts = null } =
       plan.final_verification.commands.some((command) => !nonEmptyString(command))
     ) {
       errors.push("final_verification.commands must be an array of commands")
+    } else if (plan.final_verification.commands.some((command) => GIT_STATE_COMMAND.test(command))) {
+      errors.push("final_verification.commands must not inspect Git state")
     }
   }
   if (maxContracts !== null && Array.isArray(plan?.phases)) {
@@ -167,6 +174,10 @@ export function validatePlan(plan, { workClasses = null, maxContracts = null } =
       }
       if (!Array.isArray(contract?.verification?.commands) || contract.verification.commands.length === 0) {
         errors.push(`${contractId}: verification.commands cannot be empty`)
+      } else {
+        for (const command of contract.verification.commands) {
+          if (GIT_STATE_COMMAND.test(command)) errors.push(`${contractId}: verification.commands must not inspect Git state (${command.trim().slice(0, 40)}…): the gate reruns on the integrated branch where the change is committed; scope is enforced by the orchestrator`)
+        }
       }
       if (!Array.isArray(contract?.verification?.invariants)) {
         errors.push(`${contractId}: verification.invariants must be an array`)

@@ -48,7 +48,9 @@ repository and write a plan; you never implement product code.
 5. Keep code, tests, and documentation for one cohesive behavior in the same
    contract unless they are genuinely independent deliverables.
 6. Every contract must have bounded paths, concrete requirements, existing
-   trusted verification commands, invariants, and finite budgets. Inspect
+   trusted verification commands, invariants, and finite budgets. Commands
+   judge behavior and contents, never Git state (`git status`, `git diff`,
+   untracked files): the gate reruns on the integration branch. Inspect
    verification scripts but do not execute them while planning. Set
    `verification.expected_baseline` to `pass` only for pure refactors whose
    gate already passes; leave it unset (`fail`) when the contract adds behavior

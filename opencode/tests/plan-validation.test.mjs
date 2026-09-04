@@ -131,3 +131,13 @@ test("forbidden and read accept extension globs; allowed_to_modify stays exact; 
   assert.equal(pathPatternsOverlap("*.json", "scripts/count-las.sh"), false)
   assert.equal(pathPatternsOverlap("scripts/count-las.sh", "*.sh"), true)
 })
+
+test("verification commands that inspect Git state are rejected", async () => {
+  const { validatePlan } = await import("../.opencode/codegen/lib/plan-validation.mjs")
+  const { readFile } = await import("node:fs/promises")
+  const plan = JSON.parse(await readFile(new URL("./fixtures/orchestrator-basic/plan-template.json", import.meta.url), "utf8"))
+  const contract = plan.phases[0].contracts[0]
+  contract.verification.commands = ["bash scripts/x.sh", "test \"$(git status --short)\" = \"?? scripts/x.sh\""]
+  const result = validatePlan(plan, { workClasses: new Set(plan.phases.flatMap((p) => p.contracts.map((c) => c.work_class))) })
+  assert.ok(result.errors.some((e) => e.includes("must not inspect Git state")), result.errors.join("; "))
+})
