@@ -43,14 +43,23 @@ function pidAlive(pid) {
   }
 }
 
-export async function serverAlive(server, { timeoutMs = 2000 } = {}) {
+// The codegen_workflow tool runs inside the server process itself: when the
+// published pid is our own, the server is alive by definition and a request
+// to ourselves is not needed (it timed out once mid-turn and demoted a whole
+// orchestration to inline). Other processes probe the cheap health endpoint.
+export async function serverAlive(server, { timeoutMs = 5000 } = {}) {
   if (!server || !pidAlive(server.pid)) return false
-  try {
-    const response = await fetch(new URL("/doc", server.url), { signal: AbortSignal.timeout(timeoutMs) })
-    return response.ok
-  } catch {
-    return false
+  if (server.pid === process.pid) return true
+  for (const attempt of [1, 2]) {
+    try {
+      const response = await fetch(new URL("/global/health", server.url), { signal: AbortSignal.timeout(timeoutMs) })
+      if (response.ok) return true
+    } catch {
+      // retry once
+    }
+    if (attempt === 1) await new Promise((resolve) => setTimeout(resolve, 500))
   }
+  return false
 }
 
 // `published` tells whether a server file exists at all: a TUI started

@@ -95,7 +95,7 @@ test("an agent that stays silent is stopped at the first-output deadline with ex
 test("resolveAttachUrl trusts the published server only when its pid is alive and the URL answers", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "agent-run-server-"))
   const server = http.createServer((request, response) => {
-    response.statusCode = request.url === "/doc" ? 200 : 404
+    response.statusCode = request.url === "/global/health" ? 200 : 404
     response.end("{}")
   })
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve))
@@ -106,12 +106,15 @@ test("resolveAttachUrl trusts the published server only when its pid is alive an
     await mkdir(path.join(root, ".opencode"))
     await writeFile(path.join(root, SERVER_FILE), JSON.stringify({ url, pid: 2 ** 22 - 1, at: "now" }))
     assert.deepEqual(await resolveAttachUrl(root), { url: null, published: url }, "dead pid")
+    await writeFile(path.join(root, SERVER_FILE), JSON.stringify({ url: "http://127.0.0.1:1/", pid: process.pid, at: "now" }))
+    assert.equal((await resolveAttachUrl(root)).url, "http://127.0.0.1:1/", "our own pid is alive without probing")
+    assert.equal(await serverAlive({ url: "http://127.0.0.1:1/", pid: process.ppid }, { timeoutMs: 300 }), false, "another live pid still needs the probe")
     await writeFile(path.join(root, SERVER_FILE), JSON.stringify({ url, pid: process.pid, at: "now" }))
     assert.equal((await resolveAttachUrl(root)).url, url)
     const viaLocalhost = url.replace("127.0.0.1", "localhost")
     await writeFile(path.join(root, SERVER_FILE), JSON.stringify({ url: viaLocalhost, pid: process.pid, at: "now" }))
     assert.equal((await resolveAttachUrl(root)).url, url, "localhost is normalised to 127.0.0.1")
-    assert.equal(await serverAlive({ url: "http://127.0.0.1:1/", pid: process.pid }, { timeoutMs: 500 }), false, "unreachable url")
+    assert.equal(await serverAlive({ url: "http://127.0.0.1:1/", pid: process.ppid }, { timeoutMs: 300 }), false, "unreachable url")
   } finally {
     server.close()
     await rm(root, { recursive: true, force: true })

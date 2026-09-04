@@ -163,7 +163,7 @@ test("the workflow tool starts runners through node and decides the display once
     assert.match((await chooseDisplay(root, "vscode")).reason, /no longer a display/)
     await assert.rejects(chooseDisplay(root, "tui"), /no OpenCode server published/)
     await mkdir(path.join(root, ".opencode"))
-    await writeFile(path.join(root, ".opencode", ".codegen-server.json"), JSON.stringify({ url: "http://localhost:1/", pid: process.pid }))
+    await writeFile(path.join(root, ".opencode", ".codegen-server.json"), JSON.stringify({ url: "http://localhost:1/", pid: process.ppid }))
     assert.match((await chooseDisplay(root, null)).reason, /opencode --port 4096/)
   } finally {
     await rm(root, { recursive: true, force: true })
