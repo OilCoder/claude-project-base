@@ -1,6 +1,8 @@
 ---
 description: Implements one sealed code-generation contract using the model selected for this execution.
 mode: primary
+# Runnable through `opencode run --agent`, hidden from the TUI agent cycle (Tab).
+hidden: true
 steps: 20
 permission:
   read: allow

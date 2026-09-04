@@ -1,6 +1,8 @@
 ---
 description: Gives one independent, evidence-based opinion on a closed decision question from the Goal; reads the repository, never edits product code.
 mode: primary
+# Runnable through `opencode run --agent`, hidden from the TUI agent cycle (Tab).
+hidden: true
 steps: 20
 permission:
   read: allow

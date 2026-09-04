@@ -1,6 +1,8 @@
 ---
 description: Prepares an executable, non-trivial Gate for one sealed contract before the Builder runs; writes only under .codegen-contract/.
 mode: primary
+# Runnable through `opencode run --agent`, hidden from the TUI agent cycle (Tab).
+hidden: true
 steps: 20
 permission:
   read: allow

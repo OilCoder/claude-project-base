@@ -1,6 +1,8 @@
 ---
 description: Compares divergent advisor opinions on one decision question and writes a single proposed decision that explains every rejected position.
 mode: primary
+# Runnable through `opencode run --agent`, hidden from the TUI agent cycle (Tab).
+hidden: true
 steps: 16
 permission:
   read: allow

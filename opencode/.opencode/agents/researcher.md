@@ -1,6 +1,8 @@
 ---
 description: Answers one bounded research question from a Goal with cited, actually retrieved sources and writes a structured research report.
 mode: primary
+# Runnable through `opencode run --agent`, hidden from the TUI agent cycle (Tab).
+hidden: true
 steps: 24
 permission:
   read: allow
