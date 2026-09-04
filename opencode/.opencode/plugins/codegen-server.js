@@ -9,12 +9,14 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 
-export const CodegenServer = async ({ serverUrl, directory, worktree }) => {
+export const CodegenServer = async ({ serverUrl, directory }) => {
   // `opencode run` starts its own in-process server; only the interactive
   // server (the TUI or `opencode serve`) is worth publishing.
   if (process.argv.includes("run")) return {}
-  const root = worktree || directory
-  const file = path.join(root, ".opencode", ".codegen-server.json")
+  // `directory` is the instance directory (where this .opencode lives), which
+  // is also what the codegen_workflow tool receives as context.directory. The
+  // git root would be wrong for a project that lives inside a larger repository.
+  const file = path.join(directory, ".opencode", ".codegen-server.json")
   await mkdir(path.dirname(file), { recursive: true })
   await writeFile(file, `${JSON.stringify({ url: String(serverUrl), pid: process.pid, at: new Date().toISOString() })}\n`)
   return {}
